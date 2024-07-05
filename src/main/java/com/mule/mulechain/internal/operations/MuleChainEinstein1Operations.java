@@ -9,6 +9,7 @@ import org.mule.runtime.extension.api.annotation.param.ParameterGroup;
 import com.mule.mulechain.internal.MuleChainEinstein1Configuration;
 import com.mule.mulechain.internal.helpers.MuleChainEinstein1PayloadHelper;
 import com.mule.mulechain.internal.helpers.MuleChainEinstein1PromptTemplateHelper;
+import com.mule.mulechain.internal.models.MuleChainEinstein1ParamsEmbeddingDetails;
 import com.mule.mulechain.internal.models.MuleChainEinstein1ParamsModelDetails;
 
 import org.mule.runtime.extension.api.annotation.param.Config;
@@ -24,8 +25,8 @@ public class MuleChainEinstein1Operations {
    */
   @MediaType(value = ANY, strict = false)
   @Alias("CHAT-generate-from-messages")
-  public String generateChat(@Config MuleChainEinstein1Configuration configuration, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsModelDetails paramDetails){
-    return "";
+  public String generateChat(String messages,@Config MuleChainEinstein1Configuration configuration, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsModelDetails paramDetails){
+    return MuleChainEinstein1PayloadHelper.executeGenerateChat(messages,configuration,paramDetails);
   }
 
   /**
@@ -33,8 +34,8 @@ public class MuleChainEinstein1Operations {
    */
   @MediaType(value = ANY, strict = false)
   @Alias("EMBEDDING-generate")
-  public String generateEmbedding(@Config MuleChainEinstein1Configuration configuration, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsModelDetails paramDetails){
-    return "";
+  public String generateEmbedding(String text,@Config MuleChainEinstein1Configuration configuration, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsEmbeddingDetails paramDetails){
+    return MuleChainEinstein1PayloadHelper.executeGenerateEmbedding(text,configuration,paramDetails);
   }
 
   /**

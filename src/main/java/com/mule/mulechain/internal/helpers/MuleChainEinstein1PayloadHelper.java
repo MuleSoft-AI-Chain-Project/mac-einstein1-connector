@@ -8,6 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.mule.mulechain.internal.MuleChainEinstein1Configuration;
+import com.mule.mulechain.internal.models.MuleChainEinstein1ParamsEmbeddingDetails;
 import com.mule.mulechain.internal.models.MuleChainEinstein1ParamsModelDetails;
 
 import java.io.IOException;
@@ -88,9 +89,43 @@ public class MuleChainEinstein1PayloadHelper {
         return conn;
     }
 
-    private static String generateText(String accessToken, String prompt, MuleChainEinstein1ParamsModelDetails paramDetails) {
-        String urlString = URL_BASE + getMappedValue(paramDetails.getModelName()) + "/generations";
-        String payload = constructJsonPayload(prompt, paramDetails);
+    private static String generateText(String accessToken, String payload, MuleChainEinstein1ParamsModelDetails paramDetails, String resource) {
+        String urlString = URL_BASE + getMappedValue(paramDetails.getModelName()) + resource;
+        
+
+        try {
+            URL url = new URL(urlString);
+            HttpURLConnection conn = getConnectionObject(url, accessToken);
+
+            try (OutputStream os = conn.getOutputStream()) {
+                byte[] input = payload.getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            }
+
+            int responseCode = conn.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                try (java.io.BufferedReader br = new java.io.BufferedReader(
+                        new java.io.InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
+                    StringBuilder response = new StringBuilder();
+                    String responseLine;
+                    while ((responseLine = br.readLine()) != null) {
+                        response.append(responseLine.trim());
+                    }
+                    return response.toString();
+                }
+            } else {
+                return "Error: " + responseCode;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Exception occurred: " + e.getMessage();
+        }
+    }
+
+
+    private static String generateEmbedding(String accessToken, String payload, MuleChainEinstein1ParamsEmbeddingDetails paramDetails, String resource) {
+        String urlString = URL_BASE + getMappedValue(paramDetails.getModelName()) + resource;
+        
 
         try {
             URL url = new URL(urlString);
@@ -144,9 +179,65 @@ public class MuleChainEinstein1PayloadHelper {
         return jsonPayload.toString();
     }
 
+
+    private static String constrcutJsonMessages(String message, MuleChainEinstein1ParamsModelDetails paramsModelDetails){        
+        JSONArray messages = new JSONArray(message);
+        
+        JSONObject locale = new JSONObject();
+        locale.put("locale", paramsModelDetails.getLocale());
+        locale.put("probability", paramsModelDetails.getProbability());
+        
+        JSONArray inputLocales = new JSONArray();
+        inputLocales.put(locale);
+        
+        JSONArray expectedLocales = new JSONArray();
+        expectedLocales.put(paramsModelDetails.getLocale());
+        
+        JSONObject localization = new JSONObject();
+        localization.put("defaultLocale", paramsModelDetails.getLocale());
+        localization.put("inputLocales", inputLocales);
+        localization.put("expectedLocales", expectedLocales);
+        
+        JSONObject tags = new JSONObject();
+        
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("messages", messages);
+        jsonObject.put("localization", localization);
+        jsonObject.put("tags", tags);
+        
+        return jsonObject.toString();        
+    }
+
+    private static String constructEmbeddingJSON(String text) {
+        JSONArray input = new JSONArray();
+        input.put("Every day, once a day, give yourself a present");
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("input", input);
+
+        return jsonObject.toString();
+
+    }
+
     public static String executeGenerateText(String prompt, MuleChainEinstein1Configuration configuration, MuleChainEinstein1ParamsModelDetails paramDetails){
         String access_token = getAccessToken(configuration.getSalesforceOrg(), configuration.getClientId(), configuration.getClientSecret());
-        String response = generateText(access_token, prompt,paramDetails);
+        String payload = constructJsonPayload(prompt, paramDetails);
+        String response = generateText(access_token, payload, paramDetails, "/generations");
+        return response;
+    }
+
+    public static String executeGenerateChat(String messages, MuleChainEinstein1Configuration configuration, MuleChainEinstein1ParamsModelDetails paramDetails){
+        String access_token = getAccessToken(configuration.getSalesforceOrg(), configuration.getClientId(), configuration.getClientSecret());
+        String payload = constrcutJsonMessages(messages, paramDetails);
+        String response = generateText(access_token, payload, paramDetails, "/chat-generations");
+        return response;
+    }
+
+
+    public static String executeGenerateEmbedding(String text, MuleChainEinstein1Configuration configuration, MuleChainEinstein1ParamsEmbeddingDetails paramDetails){
+        String access_token = getAccessToken(configuration.getSalesforceOrg(), configuration.getClientId(), configuration.getClientSecret());
+        String payload = constructEmbeddingJSON(text);
+        String response = generateEmbedding(access_token, payload, paramDetails, "/embeddings");
         return response;
     }
 

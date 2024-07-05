@@ -86,6 +86,9 @@
         <operation name="CHAT-generate-from-messages">
             <description><![CDATA[Generate a response based on a list of messages representing a chat conversation.]]></description>
             <parameters>
+                <parameter name="messages">
+                    <description><![CDATA[]]></description>
+                </parameter>
                 <parameter name="outputMimeType">
                     <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
                 </parameter>
@@ -109,16 +112,13 @@
         <operation name="EMBEDDING-generate">
             <description><![CDATA[Create an embedding vector representing the input text.]]></description>
             <parameters>
+                <parameter name="text">
+                    <description><![CDATA[]]></description>
+                </parameter>
                 <parameter name="outputMimeType">
                     <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
                 </parameter>
                 <parameter name="modelName">
-                    <description><![CDATA[]]></description>
-                </parameter>
-                <parameter name="probability">
-                    <description><![CDATA[]]></description>
-                </parameter>
-                <parameter name="locale">
                     <description><![CDATA[]]></description>
                 </parameter>
                 <parameter name="target">
