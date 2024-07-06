@@ -1,5 +1,5 @@
 :toc:               left
-:toc-title:         MuleChain Einstein AI Module
+:toc-title:         Einstein AI Module
 :toclevels:         2
 :last-update-label!:
 :docinfo:
@@ -7,7 +7,7 @@
 :icons: font
 
 
-= MuleChain Einstein AI Module Documentation Reference
+= Einstein AI Module Documentation Reference
 
 +++
 This is the main class of an extension, is the entry point from which configurations, connection providers, operations and sources are going to be declared.
@@ -38,8 +38,11 @@ This class represents an extension configuration, values set in this class are c
 ==== Associated Operations
 * <<AGENT-define-prompt-template>> {nbsp}
 * <<CHAT-answer-prompt>> {nbsp}
+* <<CHAT-answer-prompt-with-memory>> {nbsp}
 * <<CHAT-generate-from-messages>> {nbsp}
-* <<EMBEDDING-generate>> {nbsp}
+* <<EMBEDDING-adhoc-file-query>> {nbsp}
+* <<EMBEDDING-generate-from-file>> {nbsp}
+* <<EMBEDDING-generate-from-text>> {nbsp}
 
 
 
@@ -113,6 +116,42 @@ Generate a response based on the prompt provided.
 
 
 
+[[CHAT-answer-prompt-with-memory]]
+=== CHAT Answer Prompt With Memory
+`<mulechain-einstein1:chat-answer-prompt-with-memory>`
+
++++
+Generate a response based on the prompt using chat memory.
++++
+
+==== Parameters
+[cols=".^20%,.^20%,.^35%,.^20%,^.^5%", options="header"]
+|======================
+| Name | Type | Description | Default Value | Required
+| Configuration | String | The name of the configuration to use. | | *x*{nbsp}
+| Prompt a| String |  |  | *x*{nbsp}
+| Memory Path a| String |  |  | *x*{nbsp}
+| Memory Name a| String |  |  | *x*{nbsp}
+| Keep Last Messages a| Number |  |  | *x*{nbsp}
+| Output Mime Type a| String |  +++The mime type of the payload that this operation outputs.+++ |  | {nbsp}
+| Model Name a| String |  |  +++OpenAI GPT 3.5 Turbo+++ | {nbsp}
+| Probability a| Number |  |  +++0.8+++ | {nbsp}
+| Locale a| String |  |  +++en_US+++ | {nbsp}
+| Target Variable a| String |  +++The name of a variable on which the operation's output will be placed+++ |  | {nbsp}
+| Target Value a| String |  +++An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable+++ |  +++#[payload]+++ | {nbsp}
+|======================
+
+==== Output
+[cols=".^50%,.^50%"]
+|======================
+| *Type* a| String
+|======================
+
+==== For Configurations.
+* <<aws-bedrock-configuration>> {nbsp}
+
+
+
 [[CHAT-generate-from-messages]]
 === CHAT Generate From Messages
 `<mulechain-einstein1:chat-generate-from-messages>`
@@ -146,9 +185,76 @@ Generate a response based on a list of messages representing a chat conversation
 
 
 
-[[EMBEDDING-generate]]
-=== EMBEDDING Generate
-`<mulechain-einstein1:embedding-generate>`
+[[EMBEDDING-adhoc-file-query]]
+=== EMBEDDING Adhoc File Query
+`<mulechain-einstein1:embedding-adhoc-file-query>`
+
++++
+Performs .
++++
+
+==== Parameters
+[cols=".^20%,.^20%,.^35%,.^20%,^.^5%", options="header"]
+|======================
+| Name | Type | Description | Default Value | Required
+| Configuration | String | The name of the configuration to use. | | *x*{nbsp}
+| Prompt a| String |  |  | *x*{nbsp}
+| File Path a| String |  |  | *x*{nbsp}
+| Output Mime Type a| String |  +++The mime type of the payload that this operation outputs.+++ |  | {nbsp}
+| Model Name a| String |  |  +++OpenAI Ada 002+++ | {nbsp}
+| File Type a| String |  |  +++PDF+++ | {nbsp}
+| Option Type a| String |  |  +++FULL+++ | {nbsp}
+| Target Variable a| String |  +++The name of a variable on which the operation's output will be placed+++ |  | {nbsp}
+| Target Value a| String |  +++An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable+++ |  +++#[payload]+++ | {nbsp}
+|======================
+
+==== Output
+[cols=".^50%,.^50%"]
+|======================
+| *Type* a| String
+|======================
+
+==== For Configurations.
+* <<aws-bedrock-configuration>> {nbsp}
+
+
+
+[[EMBEDDING-generate-from-file]]
+=== EMBEDDING Generate From File
+`<mulechain-einstein1:embedding-generate-from-file>`
+
++++
+Performs .
++++
+
+==== Parameters
+[cols=".^20%,.^20%,.^35%,.^20%,^.^5%", options="header"]
+|======================
+| Name | Type | Description | Default Value | Required
+| Configuration | String | The name of the configuration to use. | | *x*{nbsp}
+| File Path a| String |  |  | *x*{nbsp}
+| Output Mime Type a| String |  +++The mime type of the payload that this operation outputs.+++ |  | {nbsp}
+| Model Name a| String |  |  +++OpenAI Ada 002+++ | {nbsp}
+| File Type a| String |  |  +++PDF+++ | {nbsp}
+| Option Type a| String |  |  +++FULL+++ | {nbsp}
+| Target Variable a| String |  +++The name of a variable on which the operation's output will be placed+++ |  | {nbsp}
+| Target Value a| String |  +++An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable+++ |  +++#[payload]+++ | {nbsp}
+|======================
+
+==== Output
+[cols=".^50%,.^50%"]
+|======================
+| *Type* a| String
+|======================
+
+==== For Configurations.
+* <<aws-bedrock-configuration>> {nbsp}
+
+
+
+[[EMBEDDING-generate-from-text]]
+=== EMBEDDING Generate From Text
+`<mulechain-einstein1:embedding-generate-from-text>`
 
 +++
 Create an embedding vector representing the input text.

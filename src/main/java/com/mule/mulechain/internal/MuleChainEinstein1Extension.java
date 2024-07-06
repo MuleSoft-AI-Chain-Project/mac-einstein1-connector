@@ -13,7 +13,7 @@ import static org.mule.sdk.api.meta.JavaVersion.JAVA_8;
  * and sources are going to be declared.
  */
 @Xml(prefix = "mulechain-einstein1")
-@Extension(name = "MuleChain Einstein AI")
+@Extension(name = "Einstein AI")
 @Configurations(MuleChainEinstein1Configuration.class)
 @JavaVersionSupport({JAVA_8, JAVA_11, JAVA_17})
 public class MuleChainEinstein1Extension {

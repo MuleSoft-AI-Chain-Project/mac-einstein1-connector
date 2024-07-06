@@ -20,7 +20,7 @@
         </config>
     </configs>
     <connections/>
-    <extension name="MuleChain Einstein AI">
+    <extension name="Einstein AI">
         <description><![CDATA[This is the main class of an extension, is the entry point from which configurations, connection providers, operations and sources are going to be declared.]]></description>
         <parameters/>
     </extension>
@@ -83,6 +83,41 @@
                 </parameter>
             </parameters>
         </operation>
+        <operation name="CHAT-answer-prompt-with-memory">
+            <description><![CDATA[Generate a response based on the prompt using chat memory.]]></description>
+            <parameters>
+                <parameter name="prompt">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="memoryPath">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="memoryName">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="keepLastMessages">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="outputMimeType">
+                    <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="modelName">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="probability">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="locale">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="target">
+                    <description><![CDATA[The name of a variable on which the operation's output will be placed]]></description>
+                </parameter>
+                <parameter name="targetValue">
+                    <description><![CDATA[An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable]]></description>
+                </parameter>
+            </parameters>
+        </operation>
         <operation name="CHAT-generate-from-messages">
             <description><![CDATA[Generate a response based on a list of messages representing a chat conversation.]]></description>
             <parameters>
@@ -109,7 +144,62 @@
                 </parameter>
             </parameters>
         </operation>
-        <operation name="EMBEDDING-generate">
+        <operation name="EMBEDDING-adhoc-file-query">
+            <description><![CDATA[Performs .]]></description>
+            <parameters>
+                <parameter name="prompt">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="filePath">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="outputMimeType">
+                    <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="modelName">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="fileType">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="optionType">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="target">
+                    <description><![CDATA[The name of a variable on which the operation's output will be placed]]></description>
+                </parameter>
+                <parameter name="targetValue">
+                    <description><![CDATA[An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+        <operation name="EMBEDDING-generate-from-file">
+            <description><![CDATA[Performs .]]></description>
+            <parameters>
+                <parameter name="filePath">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="outputMimeType">
+                    <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="modelName">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="fileType">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="optionType">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="target">
+                    <description><![CDATA[The name of a variable on which the operation's output will be placed]]></description>
+                </parameter>
+                <parameter name="targetValue">
+                    <description><![CDATA[An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+        <operation name="EMBEDDING-generate-from-text">
             <description><![CDATA[Create an embedding vector representing the input text.]]></description>
             <parameters>
                 <parameter name="text">
