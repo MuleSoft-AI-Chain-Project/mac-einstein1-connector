@@ -8,6 +8,7 @@ import org.mule.runtime.extension.api.values.ValueResolvingException;
 public class MuleChainEinstein1ModelNameProvider implements ValueProvider {
 
 	private static final Set<Value> VALUES_FOR = ValueBuilder.getValuesFor(
+	"Anthropic Claude 3 Haiku on Amazon",
 	"Azure OpenAI GPT 3.5 Turbo",
 	"Azure OpenAI GPT 3.5 Turbo 16k",
 	"Azure OpenAI GPT 4 Turbo",

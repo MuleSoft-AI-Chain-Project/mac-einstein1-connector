@@ -3,7 +3,7 @@
     "id": "java",
     "attributes": {
       "type": "com.mule.mulechain.internal.MuleChainEinstein1Extension",
-      "version": "0.0.9"
+      "version": "0.0.13"
     }
   },
   "name": "Einstein AI",

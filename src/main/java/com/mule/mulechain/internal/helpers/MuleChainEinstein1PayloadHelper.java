@@ -24,6 +24,7 @@ import com.mule.mulechain.internal.MuleChainEinstein1Configuration;
 import com.mule.mulechain.internal.helpers.documents.MuleChainEinstein1ParametersEmbeddingDocument;
 import com.mule.mulechain.internal.models.MuleChainEinstein1ParamsEmbeddingDetails;
 import com.mule.mulechain.internal.models.MuleChainEinstein1ParamsModelDetails;
+import com.mule.mulechain.internal.models.MuleChainEinstein1RAGParamsModelDetails;
 
 import java.io.OutputStream;
 
@@ -33,6 +34,7 @@ public class MuleChainEinstein1PayloadHelper {
     private static final String URL_BASE = "https://api.salesforce.com/einstein/platform/v1/models/";
 
     static {
+        modelMapping.put("Anthropic Claude 3 Haiku on Amazon", "sfdc_ai__DefaultBedrockAnthropicClaude3Haiku");
         modelMapping.put("Azure OpenAI Ada 002", "sfdc_ai__DefaultAzureOpenAITextEmbeddingAda_002");
         modelMapping.put("Azure OpenAI GPT 3.5 Turbo", "sfdc_ai__DefaultAzureOpenAIGPT35Turbo");
         modelMapping.put("Azure OpenAI GPT 3.5 Turbo 16k", "sfdc_ai__DefaultAzureOpenAIGPT35Turbo_16k");
@@ -154,14 +156,15 @@ public class MuleChainEinstein1PayloadHelper {
     public static String EmbeddingFromFile(String filePath, MuleChainEinstein1Configuration configuration, MuleChainEinstein1ParametersEmbeddingDocument MuleChainEinsteinParameters) throws IOException, SAXException, TikaException {
 
         String access_token = getAccessToken(configuration.getSalesforceOrg(), configuration.getClientId(), configuration.getClientSecret());
-
+        /* 
         List<String> corpus;
         if (MuleChainEinsteinParameters.getOptionType().equals("FULL")) {
-            corpus = Arrays.asList(splitFullDocument(filePath,MuleChainEinsteinParameters));
+            corpus = Arrays.asList(splitFullDocument(filePath,MuleChainEinsteinParameters.getFileType()));
         } else {
-            corpus = Arrays.asList(splitByType(filePath,MuleChainEinsteinParameters));
+            corpus = Arrays.asList(splitByType(filePath,MuleChainEinsteinParameters.getFileType(), MuleChainEinsteinParameters.getOptionType()));
         }
-
+        */
+        List<String> corpus = createCorpusList(filePath, MuleChainEinsteinParameters.getFileType(), MuleChainEinsteinParameters.getOptionType());
 
         try {
 
@@ -200,19 +203,19 @@ public class MuleChainEinstein1PayloadHelper {
         }
     }
 
-    private static String constructJsonPayload(String prompt, MuleChainEinstein1ParamsModelDetails paramDetails) {
+    private static String constructJsonPayload(String prompt, String locale, Number probability) {
         JSONObject localization = new JSONObject();
-        localization.put("defaultLocale", paramDetails.getLocale());
+        localization.put("defaultLocale", locale);
 
         JSONArray inputLocales = new JSONArray();
         JSONObject inputLocale = new JSONObject();
-        inputLocale.put("locale", paramDetails.getLocale());
-        inputLocale.put("probability", paramDetails.getProbability());
+        inputLocale.put("locale", locale);
+        inputLocale.put("probability", probability);
         inputLocales.put(inputLocale);
         localization.put("inputLocales", inputLocales);
 
         JSONArray expectedLocales = new JSONArray();
-        expectedLocales.put(paramDetails.getLocale());
+        expectedLocales.put(locale);
         localization.put("expectedLocales", expectedLocales);
 
         JSONObject jsonPayload = new JSONObject();
@@ -265,7 +268,7 @@ public class MuleChainEinstein1PayloadHelper {
 
     public static String executeGenerateText(String prompt, MuleChainEinstein1Configuration configuration, MuleChainEinstein1ParamsModelDetails paramDetails){
         String access_token = getAccessToken(configuration.getSalesforceOrg(), configuration.getClientId(), configuration.getClientSecret());
-        String payload = constructJsonPayload(prompt, paramDetails);
+        String payload = constructJsonPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
         String response = generateText(access_token, payload, paramDetails.getModelName(), "/generations");
         return response;
     }
@@ -285,16 +288,39 @@ public class MuleChainEinstein1PayloadHelper {
         return response;
     }
 
-    public static String EmbeddingFileQuery(String prompt, String filePath, MuleChainEinstein1Configuration configuration, MuleChainEinstein1ParametersEmbeddingDocument MuleChainEinsteinParameters) throws IOException, SAXException, TikaException {
+    public static String executeRAG(String text, MuleChainEinstein1Configuration configuration, MuleChainEinstein1RAGParamsModelDetails paramDetails){
+        String access_token = getAccessToken(configuration.getSalesforceOrg(), configuration.getClientId(), configuration.getClientSecret());
+        String payload = constructJsonPayload(text, paramDetails.getLocale(), paramDetails.getProbability());
+        String response = generateText(access_token, payload, paramDetails.getModelName(), "/generations");
+        return response;
+    }
+
+
+
+    private static List<String> createCorpusList(String filePath, String fileType, String splitOption) throws IOException, SAXException, TikaException {
+        List<String> corpus;
+        if (fileType.equals("FULL")) {
+            corpus = Arrays.asList(splitFullDocument(filePath,fileType));
+        } else {
+            corpus = Arrays.asList(splitByType(filePath,fileType, splitOption));
+        }
+        return corpus;
+    }
+
+    public static String EmbeddingFileQuery(String prompt, String filePath, MuleChainEinstein1Configuration configuration, String modelName, String fileType, String optionType) throws IOException, SAXException, TikaException {
 
         String access_token = getAccessToken(configuration.getSalesforceOrg(), configuration.getClientId(), configuration.getClientSecret());
 
+        /* 
         List<String> corpus;
         if (MuleChainEinsteinParameters.getOptionType().equals("FULL")) {
             corpus = Arrays.asList(splitFullDocument(filePath,MuleChainEinsteinParameters));
         } else {
             corpus = Arrays.asList(splitByType(filePath,MuleChainEinsteinParameters));
         }
+        */
+
+        List<String> corpus = createCorpusList(filePath, fileType, optionType);
 
         String body = constructEmbeddingJSON(prompt);
 
@@ -303,7 +329,7 @@ public class MuleChainEinstein1PayloadHelper {
 
 
             //JSONObject queryResponse = generateEmbedding(modelId, body, configuration, region);
-            String response = generateEmbedding(access_token, body, MuleChainEinsteinParameters.getModelName(), "/embeddings");
+            String response = generateEmbedding(access_token, body, modelName, "/embeddings");
             JSONObject jsonObject = new JSONObject(response);
             //Generate embedding for query
             JSONArray embeddingsArray = jsonObject.getJSONArray("embeddings");
@@ -322,7 +348,7 @@ public class MuleChainEinstein1PayloadHelper {
                 corpusBody = constructEmbeddingJSON(text); 
                 //System.out.println(corpusBody);
                 if (text != null && !text.isEmpty()) {
-                    response = generateEmbedding(access_token, constructEmbeddingJSON(corpusBody), MuleChainEinsteinParameters.getModelName(), "/embeddings");
+                    response = generateEmbedding(access_token, constructEmbeddingJSON(corpusBody), modelName, "/embeddings");
                     jsonObject = new JSONObject(response);
                     embeddingsArray = jsonObject.getJSONArray("embeddings");
                     corpusEmbeddings.add(embeddingsArray.getJSONObject(0).getJSONArray("embedding"));
@@ -422,23 +448,23 @@ public class MuleChainEinstein1PayloadHelper {
         return handler.toString();
     }
 
-    private static String getFileTypeContextFromFile(String filePath, MuleChainEinstein1ParametersEmbeddingDocument MuleChainEinsteinParameters) throws IOException, SAXException, TikaException {
-        if (MuleChainEinsteinParameters.getFileType().equals("URL")) {
+    private static String getFileTypeContextFromFile(String filePath, String fileType) throws IOException, SAXException, TikaException {
+        if (fileType.equals("URL")) {
             return getContentFromUrl(filePath);
         } else {
             return getContentFromFile(filePath);
         }
     }
 
-    private static String splitFullDocument(String filePath, MuleChainEinstein1ParametersEmbeddingDocument MuleChainEinsteinParameters) throws IOException, SAXException, TikaException {
-        String content = getFileTypeContextFromFile(filePath, MuleChainEinsteinParameters);
+    private static String splitFullDocument(String filePath, String fileType) throws IOException, SAXException, TikaException {
+        String content = getFileTypeContextFromFile(filePath, fileType);
         return content;
     }
 
 
-    private static String[] splitByType(String filePath, MuleChainEinstein1ParametersEmbeddingDocument MuleChainEinsteinParameters) throws IOException, SAXException, TikaException {
-        String content = getFileTypeContextFromFile(filePath, MuleChainEinsteinParameters);
-        String[] parts = splitContent(content, MuleChainEinsteinParameters.getOptionType());
+    private static String[] splitByType(String filePath, String fileType, String splitOption) throws IOException, SAXException, TikaException {
+        String content = getFileTypeContextFromFile(filePath, fileType);
+        String[] parts = splitContent(content, splitOption);
         return parts;
     }
 

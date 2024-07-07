@@ -5,6 +5,7 @@ import static org.mule.runtime.extension.api.annotation.param.MediaType.ANY;
 import java.io.IOException;
 
 import org.apache.tika.exception.TikaException;
+import org.apache.xmlbeans.impl.common.SystemCache;
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.param.MediaType;
 import org.mule.runtime.extension.api.annotation.param.ParameterGroup;
@@ -17,6 +18,7 @@ import com.mule.mulechain.internal.helpers.chatmemory.MuleChainEinstein1ChatMemo
 import com.mule.mulechain.internal.helpers.documents.MuleChainEinstein1ParametersEmbeddingDocument;
 import com.mule.mulechain.internal.models.MuleChainEinstein1ParamsEmbeddingDetails;
 import com.mule.mulechain.internal.models.MuleChainEinstein1ParamsModelDetails;
+import com.mule.mulechain.internal.models.MuleChainEinstein1RAGParamsModelDetails;
 
 import org.mule.runtime.extension.api.annotation.param.Config;
 
@@ -53,11 +55,11 @@ public class MuleChainEinstein1Operations {
   @MediaType(value = ANY, strict = false)
   @Alias("EMBEDDING-adhoc-file-query")
   public String queryEmbeddingOnFiles(String prompt, String filePath,@Config MuleChainEinstein1Configuration configuration, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParametersEmbeddingDocument paramDetails) throws IOException, SAXException, TikaException{
-    return MuleChainEinstein1PayloadHelper.EmbeddingFileQuery(prompt,filePath,configuration,paramDetails);
+    return MuleChainEinstein1PayloadHelper.EmbeddingFileQuery(prompt,filePath,configuration,paramDetails.getModelName(), paramDetails.getFileType(), paramDetails.getOptionType());
   }
 
 
-    /**
+   /**
    * Performs .
    * @throws TikaException 
    * @throws SAXException 
@@ -67,6 +69,20 @@ public class MuleChainEinstein1Operations {
   @Alias("EMBEDDING-generate-from-file")
   public String EmbeddingFromFiles(String filePath,@Config MuleChainEinstein1Configuration configuration, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParametersEmbeddingDocument paramDetails) throws IOException, SAXException, TikaException{
     return MuleChainEinstein1PayloadHelper.EmbeddingFromFile(filePath,configuration,paramDetails);
+  }
+
+
+   /**
+   * Performs .
+   * @throws TikaException 
+   * @throws SAXException 
+   * @throws IOException 
+   */
+  @MediaType(value = ANY, strict = false)
+  @Alias("RAG-adhoc-load-document")
+  public String RAGgOnFiles(String prompt, String filePath,@Config MuleChainEinstein1Configuration configuration, @ParameterGroup(name= "Additional properties") MuleChainEinstein1RAGParamsModelDetails paramDetails) throws IOException, SAXException, TikaException{
+    String content = MuleChainEinstein1PayloadHelper.EmbeddingFileQuery(prompt,filePath,configuration,paramDetails.getEmbeddingName(), paramDetails.getFileType(), paramDetails.getOptionType());
+    return MuleChainEinstein1PayloadHelper.executeRAG("data: " + content + ", question: " + prompt, configuration, paramDetails);
   }
 
 

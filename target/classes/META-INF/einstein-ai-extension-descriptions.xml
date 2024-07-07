@@ -219,6 +219,44 @@
                 </parameter>
             </parameters>
         </operation>
+        <operation name="RAG-adhoc-load-document">
+            <description><![CDATA[Performs .]]></description>
+            <parameters>
+                <parameter name="prompt">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="filePath">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="outputMimeType">
+                    <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="embeddingName">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="fileType">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="optionType">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="modelName">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="probability">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="locale">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="target">
+                    <description><![CDATA[The name of a variable on which the operation's output will be placed]]></description>
+                </parameter>
+                <parameter name="targetValue">
+                    <description><![CDATA[An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable]]></description>
+                </parameter>
+            </parameters>
+        </operation>
     </operations>
     <sources/>
     <types/>
