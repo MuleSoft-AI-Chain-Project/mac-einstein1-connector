@@ -299,7 +299,8 @@ public class MuleChainEinstein1PayloadHelper {
 
     private static List<String> createCorpusList(String filePath, String fileType, String splitOption) throws IOException, SAXException, TikaException {
         List<String> corpus;
-        if (fileType.equals("FULL")) {
+        //System.out.println(splitOption);
+        if (splitOption.equals("FULL")) {
             corpus = Arrays.asList(splitFullDocument(filePath,fileType));
         } else {
             corpus = Arrays.asList(splitByType(filePath,fileType, splitOption));
