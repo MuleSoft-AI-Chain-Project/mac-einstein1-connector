@@ -10,7 +10,7 @@ import com.mule.mulechain.internal.operations.MuleChainEinstein1Operations;
  * This class represents an extension configuration, values set in this class are commonly used across multiple
  * operations since they represent something core from the extension.
  */
-@Configuration(name="aws-bedrock-configuration") 
+@Configuration(name="Configuration") 
 @Operations({
           MuleChainEinstein1Operations.class
         })

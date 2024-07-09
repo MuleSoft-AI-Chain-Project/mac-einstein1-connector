@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <extension-documentation>
     <configs>
-        <config name="aws-bedrock-configuration">
+        <config name="Configuration">
             <description><![CDATA[This class represents an extension configuration, values set in this class are commonly used across multiple operations since they represent something core from the extension.]]></description>
             <parameters>
                 <parameter name="salesforceOrg">
