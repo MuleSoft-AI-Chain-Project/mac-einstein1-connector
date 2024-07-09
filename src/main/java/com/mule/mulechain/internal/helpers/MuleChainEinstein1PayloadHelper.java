@@ -139,14 +139,15 @@ public class MuleChainEinstein1PayloadHelper {
 
     private static String generateText(String accessToken, String payload, String modelName, String resource) {
         String urlString = URL_BASE + getMappedValue(modelName) + resource;
-        
+        System.out.println(urlString);
         return executeREST(accessToken, payload, urlString);
     }
 
 
     private static String generateEmbedding(String accessToken, String payload, String modelName, String resource) {
         String urlString = URL_BASE + getMappedValue(modelName) + resource;
-        
+        System.out.println(urlString);
+
         return executeREST(accessToken, payload, urlString);
     }
 
