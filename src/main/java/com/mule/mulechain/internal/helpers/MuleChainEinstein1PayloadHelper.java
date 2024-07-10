@@ -406,9 +406,14 @@ public class MuleChainEinstein1PayloadHelper {
 
         System.out.println("Ranked results:");
         List<String> results = new ArrayList<>();
-        for (int index : indices) {
-            System.out.println("Score: " + similarityScores.get(index) + " - Text: " + corpus.get(index));
-            results.add(similarityScores.get(index) + " - " + corpus.get(index));
+        //System.out.println(indices.size());
+        //System.out.println(similarityScores.size());
+
+        if (similarityScores.size() != 0 && corpus.size() != 0) {
+            for (int index : indices) {
+                //System.out.println("Score: " + similarityScores.get(index) + " - Text: " + corpus.get(index));
+                results.add(similarityScores.get(index) + " - " + corpus.get(index));
+            }
         }
 
          

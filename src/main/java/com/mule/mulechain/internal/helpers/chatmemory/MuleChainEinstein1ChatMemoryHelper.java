@@ -1,9 +1,5 @@
 package com.mule.mulechain.internal.helpers.chatmemory;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.mule.runtime.extension.internal.MuleDsqlParser.relation_return;
-
 import com.mule.mulechain.internal.MuleChainEinstein1Configuration;
 import com.mule.mulechain.internal.helpers.MuleChainEinstein1PayloadHelper;
 import com.mule.mulechain.internal.models.MuleChainEinstein1ParamsModelDetails;
