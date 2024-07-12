@@ -5,7 +5,7 @@ import static org.mule.runtime.extension.api.annotation.param.MediaType.ANY;
 import java.io.IOException;
 
 import org.apache.tika.exception.TikaException;
-import org.apache.xmlbeans.impl.common.SystemCache;
+
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.param.MediaType;
 import org.mule.runtime.extension.api.annotation.param.ParameterGroup;
@@ -82,8 +82,24 @@ public class MuleChainEinstein1Operations {
   @Alias("RAG-adhoc-load-document")
   public String RAGgOnFiles(String prompt, String filePath,@Config MuleChainEinstein1Configuration configuration, @ParameterGroup(name= "Additional properties") MuleChainEinstein1RAGParamsModelDetails paramDetails) throws IOException, SAXException, TikaException{
     String content = MuleChainEinstein1PayloadHelper.EmbeddingFileQuery(prompt,filePath,configuration,paramDetails.getEmbeddingName(), paramDetails.getFileType(), paramDetails.getOptionType());
+    System.out.println(content);
     return MuleChainEinstein1PayloadHelper.executeRAG("data: " + content + ", question: " + prompt, configuration, paramDetails);
   }
+
+     /**
+   * Performs .
+   * @throws TikaException 
+   * @throws SAXException 
+   * @throws IOException 
+   */
+  @MediaType(value = ANY, strict = false)
+  @Alias("Tools-use-ai-service")
+  public String ExecuteTools(String prompt, String filePath, @Config MuleChainEinstein1Configuration configuration, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsModelDetails paramDetails) throws IOException, SAXException, TikaException{
+    String content = MuleChainEinstein1PayloadHelper.EmbeddingFileQuery(prompt,filePath,configuration,"OpenAI Ada 002", "text", "FULL");
+    System.out.println(content);
+    return MuleChainEinstein1PayloadHelper.executeTools(prompt, "data: " + content + ", question: " + prompt, filePath, configuration, paramDetails);
+  }
+
 
 
   /**

@@ -6,17 +6,24 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.sax.BodyContentHandler;
 import org.xml.sax.SAXException;
+
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import org.apache.tika.parser.Parser;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -25,7 +32,14 @@ import com.mule.mulechain.internal.helpers.documents.MuleChainEinstein1Parameter
 import com.mule.mulechain.internal.models.MuleChainEinstein1ParamsEmbeddingDetails;
 import com.mule.mulechain.internal.models.MuleChainEinstein1ParamsModelDetails;
 import com.mule.mulechain.internal.models.MuleChainEinstein1RAGParamsModelDetails;
+import org.apache.tika.parser.txt.TXTParser;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 public class MuleChainEinstein1PayloadHelper {
@@ -267,6 +281,66 @@ public class MuleChainEinstein1PayloadHelper {
 
     }
 
+
+    private static String getAttributes(String url, String filePath, String payload) throws IOException{
+        InputStream inputStream = new FileInputStream(filePath);
+        JSONTokener tokener = new JSONTokener(inputStream);
+        JSONArray rootArray = new JSONArray(tokener);
+        String responseString = "";
+        for (int i = 0; i < rootArray.length(); i++) {
+            JSONObject node = rootArray.getJSONObject(i);
+            if (node.getString("url").equals(url)) {
+                String method = node.getString("method");
+                String headers = node.getString("headers");
+
+                URL urlObj = new URL(url);
+                HttpURLConnection conn = (HttpURLConnection) urlObj.openConnection();
+                conn.setRequestMethod(method);
+                conn.setRequestProperty("Authorization", headers);
+                conn.setDoOutput(true);
+
+                if (method.equals("POST")) {
+                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+                    wr.writeBytes(payload);
+                    wr.flush();
+                    wr.close();
+                }
+
+                int responseCode = conn.getResponseCode();
+                System.out.println("Response Code: " + responseCode);
+
+                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                String inputLine;
+                StringBuilder response = new StringBuilder();
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+
+                responseString = response.toString();
+                break;
+            }
+        }
+        return responseString;
+    }
+
+    private static String extractPayload(String payload){
+
+        Pattern pattern = Pattern.compile("\\{.*\\}");
+        Matcher matcher = pattern.matcher(payload);
+        String response = "";
+        if (matcher.find()) {
+            response = matcher.group();
+            System.out.println("Payload: " + payload);
+        } else {
+            System.out.println("Payload not found.");
+        }
+       
+        
+        return response;
+    }
+
     public static String executeGenerateText(String prompt, MuleChainEinstein1Configuration configuration, MuleChainEinstein1ParamsModelDetails paramDetails){
         String access_token = getAccessToken(configuration.getSalesforceOrg(), configuration.getClientId(), configuration.getClientSecret());
         String payload = constructJsonPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
@@ -292,11 +366,24 @@ public class MuleChainEinstein1PayloadHelper {
     public static String executeRAG(String text, MuleChainEinstein1Configuration configuration, MuleChainEinstein1RAGParamsModelDetails paramDetails){
         String access_token = getAccessToken(configuration.getSalesforceOrg(), configuration.getClientId(), configuration.getClientSecret());
         String payload = constructJsonPayload(text, paramDetails.getLocale(), paramDetails.getProbability());
+        System.out.println(payload);
         String response = generateText(access_token, payload, paramDetails.getModelName(), "/generations");
         return response;
     }
 
+    public static String executeTools(String originalPrompt, String prompt, String filePath, MuleChainEinstein1Configuration configuration, MuleChainEinstein1ParamsModelDetails paramDetails) throws IOException{
+        String access_token = getAccessToken(configuration.getSalesforceOrg(), configuration.getClientId(), configuration.getClientSecret());
+        String payload = constructJsonPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
+        System.out.println(payload);
+        String intermediateAnswer = generateText(access_token, payload, paramDetails.getModelName(), "/generations");
+        String response = generateText(access_token, originalPrompt, paramDetails.getModelName(), "/generations");
+        List<String> findURL = extractUrls(intermediateAnswer);
+        if (findURL!=null){
+            response = getAttributes(findURL.get(0),filePath, extractPayload(intermediateAnswer));
+        }
 
+        return response;
+    }
 
     private static List<String> createCorpusList(String filePath, String fileType, String splitOption) throws IOException, SAXException, TikaException {
         List<String> corpus;
@@ -452,15 +539,40 @@ public class MuleChainEinstein1PayloadHelper {
     
         AutoDetectParser parser = new AutoDetectParser();
         parser.parse(inputstream, handler, metadata, pcontext);
+        System.out.println(handler.toString());
         return handler.toString();
     }
 
+    private static String getContentFromTxtFile(String filePath) throws IOException, SAXException, TikaException {
+        BodyContentHandler handler = new BodyContentHandler();
+        Metadata metadata = new Metadata();
+        FileInputStream inputstream = new FileInputStream(new File(filePath));
+        ParseContext pcontext = new ParseContext();
+
+        TXTParser parser = new TXTParser();
+        parser.parse(inputstream, handler, metadata, pcontext);
+        System.out.println(handler.toString());
+        return handler.toString();
+    }
+
+
+
+
     private static String getFileTypeContextFromFile(String filePath, String fileType) throws IOException, SAXException, TikaException {
-        if (fileType.equals("URL")) {
+/*         if (fileType.equals("URL")) {
             return getContentFromUrl(filePath);
         } else {
             return getContentFromFile(filePath);
+        } */
+        switch (fileType) {
+            case "URL":
+                return getContentFromUrl(filePath);
+            case "PDF":
+                return getContentFromFile(filePath);
+            default:
+                return getContentFromTxtFile(filePath);
         }
+
     }
 
     private static String splitFullDocument(String filePath, String fileType) throws IOException, SAXException, TikaException {
@@ -511,6 +623,27 @@ public class MuleChainEinstein1PayloadHelper {
         return list.toArray(new String[0]);
     }
      
+
+    private static List<String> extractUrls(String input) {
+        // Define the URL pattern
+        String urlPattern = "(https?://\\S+\\b)";
+        
+        // Compile the pattern
+        Pattern pattern = Pattern.compile(urlPattern);
+        
+        // Create a matcher from the input string
+        Matcher matcher = pattern.matcher(input);
+        
+        // Find and collect all matches
+        List<String> urls = new ArrayList<>();
+        while (matcher.find()) {
+            urls.add(matcher.group());
+        }
+        
+        // Return null if no URLs are found
+        return urls.isEmpty() ? null : urls;
+    }
+
       
 
 }
