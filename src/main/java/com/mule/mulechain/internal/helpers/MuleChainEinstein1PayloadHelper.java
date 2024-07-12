@@ -1,5 +1,14 @@
 package com.mule.mulechain.internal.helpers;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,34 +22,19 @@ import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
-import org.apache.tika.sax.BodyContentHandler;
-import org.xml.sax.SAXException;
-
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import org.apache.tika.parser.Parser;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
+import org.apache.tika.parser.txt.TXTParser;
+import org.apache.tika.sax.BodyContentHandler;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONTokener;
+import org.xml.sax.SAXException;
+
 import com.mule.mulechain.internal.MuleChainEinstein1Configuration;
 import com.mule.mulechain.internal.helpers.documents.MuleChainEinstein1ParametersEmbeddingDocument;
 import com.mule.mulechain.internal.models.MuleChainEinstein1ParamsEmbeddingDetails;
 import com.mule.mulechain.internal.models.MuleChainEinstein1ParamsModelDetails;
 import com.mule.mulechain.internal.models.MuleChainEinstein1RAGParamsModelDetails;
-import org.apache.tika.parser.txt.TXTParser;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.json.JSONTokener;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 public class MuleChainEinstein1PayloadHelper {
 
@@ -153,14 +147,14 @@ public class MuleChainEinstein1PayloadHelper {
 
     private static String generateText(String accessToken, String payload, String modelName, String resource) {
         String urlString = URL_BASE + getMappedValue(modelName) + resource;
-        System.out.println(urlString);
+        //System.out.println(urlString);
         return executeREST(accessToken, payload, urlString);
     }
 
 
     private static String generateEmbedding(String accessToken, String payload, String modelName, String resource) {
         String urlString = URL_BASE + getMappedValue(modelName) + resource;
-        System.out.println(urlString);
+        //System.out.println(urlString);
 
         return executeREST(accessToken, payload, urlString);
     }
@@ -292,8 +286,8 @@ public class MuleChainEinstein1PayloadHelper {
         for (int i = 0; i < rootArray.length(); i++) {
 
             JSONObject node = rootArray.getJSONObject(i);
-            System.out.println("url Out '" + node.getString("url")+ "', In '" + url + "'");
-            System.out.println(node.getString("url").trim().equals(url));
+            //System.out.println("url Out '" + node.getString("url")+ "', In '" + url + "'");
+            //System.out.println(node.getString("url").trim().equals(url));
 
             if (node.getString("url").trim().equals(url)) {
                 String method = node.getString("method");
@@ -302,28 +296,42 @@ public class MuleChainEinstein1PayloadHelper {
                 URL urlObj = new URL(url);
                 HttpURLConnection conn = (HttpURLConnection) urlObj.openConnection();
                 System.out.println("urlObj: " + urlObj.toString());
+                System.out.println("method: " + method.toString());
+                System.out.println("headers: " + headers.toString());
+                System.out.println("payload: " + payload);
 
                 conn.setRequestMethod(method);
-                conn.setRequestProperty("Authorization", headers);
+                if (headers != null && !headers.isEmpty()) {
+                    conn.setRequestProperty("Authorization", headers);
+                }
+                conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
                 conn.setDoOutput(true);
+
                 System.out.println("conn" + conn.toString());
 
                 if (method.equals("POST")) {
-                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
-                    wr.writeBytes(payload);
-                    wr.flush();
-                    wr.close();
+                    try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream())) {
+                        wr.writeBytes(payload);
+                        wr.flush();
+                    }
+                }
                     /*try (OutputStream os = conn.getOutputStream()) {
                         byte[] input = payload.getBytes(StandardCharsets.UTF_8);
                         os.write(input, 0, input.length);
                     }*/
         
-                }
+                
 
                 int responseCode = conn.getResponseCode();
                 System.out.println("Response Code: " + responseCode);
 
-                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                BufferedReader in;
+                if (responseCode >= 200 && responseCode < 300) {
+                    in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                } else {
+                    in = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+                }
+
                 String inputLine;
                 StringBuilder response = new StringBuilder();
 
@@ -392,19 +400,22 @@ public class MuleChainEinstein1PayloadHelper {
         //String response = generateText(access_token, originalPrompt, paramDetails.getModelName(), "/generations");
         //System.out.println("Response: " + response);
         String response = intermediateAnswer;
-        List<String> findURL = extractUrls(intermediateAnswer);
-        String example = "";
+        List<String> findURL = extractUrls(intermediateAnswer.toString());
+        //System.out.println(findURL.toString());
+        String ePayload = "";
         if (findURL!=null){
             JSONObject jsonObject = new JSONObject(intermediateAnswer);
             String generatedText = jsonObject.getJSONObject("generation").getString("generatedText");
 
-            example = extractPayload(generatedText);
-            example = extractPayload(example);
-            
-            System.out.println("URL -2: " + findURL.get(0).substring(0, findURL.get(0).length() - 2));
-            System.out.println("URL: " + findURL.get(0));
+            ePayload = extractPayload(generatedText);
+            ePayload = extractPayload(ePayload);
 
-            response = getAttributes(findURL.get(0).substring(0, findURL.get(0).length() - 2),filePath, extractPayload(example));
+            //System.out.println("intermediate: " + intermediateAnswer);
+            
+            //System.out.println("URL: " + findURL.get(0));
+            //System.out.println("extractUrls-URL: " + extractUrls(findURL.get(0).toString()));
+
+            response = getAttributes(findURL.get(0),filePath, extractPayload(ePayload));
         }
 
         return response;
@@ -651,9 +662,37 @@ public class MuleChainEinstein1PayloadHelper {
     }
      
 
+
+
     private static List<String> extractUrls(String input) {
         // Define the URL pattern
-        String urlPattern = "(https?://\\S+\\b)";
+        //String urlPattern = "(https?://\\S+?)(\\s|$)";
+        String urlPattern = "(https?://[\\w\\-\\.]+(?:\\.[\\w\\-]+)+(?:[\\w\\-.,@?^=%&:/~+#]*[\\w\\-@?^=%&/~+#])?)";
+
+        // Compile the pattern
+        Pattern pattern = Pattern.compile(urlPattern);
+        
+        // Create a matcher from the input string
+        Matcher matcher = pattern.matcher(input);
+        
+        // Find and collect all matches
+        List<String> urls = new ArrayList<>();
+        while (matcher.find()) {
+            // Group 1 contains the URL without trailing whitespace
+            urls.add(matcher.group(1));
+        }
+        
+        // Return null if no URLs are found
+        return urls.isEmpty() ? null : urls;
+    }
+
+
+    /*private static List<String> extractUrls(String input) {
+        // Define the URL pattern
+        //String urlPattern = "(https?://\\S+\\b)";
+        String urlPattern = "(https?://\\S+)";
+        //String urlPattern = "http[s]?://\\S+";
+
         
         // Compile the pattern
         Pattern pattern = Pattern.compile(urlPattern);
@@ -664,13 +703,15 @@ public class MuleChainEinstein1PayloadHelper {
         // Find and collect all matches
         List<String> urls = new ArrayList<>();
         while (matcher.find()) {
+            String url = matcher.group();
+            url = url.replace("\n", ""); // Remove trailing newline character
             urls.add(matcher.group());
         }
         
         // Return null if no URLs are found
         return urls.isEmpty() ? null : urls;
     }
-
+*/
       
 
 }
