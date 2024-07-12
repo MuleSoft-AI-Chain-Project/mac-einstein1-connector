@@ -287,23 +287,37 @@ public class MuleChainEinstein1PayloadHelper {
         JSONTokener tokener = new JSONTokener(inputStream);
         JSONArray rootArray = new JSONArray(tokener);
         String responseString = "";
+
+
         for (int i = 0; i < rootArray.length(); i++) {
+
             JSONObject node = rootArray.getJSONObject(i);
-            if (node.getString("url").equals(url)) {
+            System.out.println("url Out '" + node.getString("url")+ "', In '" + url + "'");
+            System.out.println(node.getString("url").trim().equals(url));
+
+            if (node.getString("url").trim().equals(url)) {
                 String method = node.getString("method");
                 String headers = node.getString("headers");
 
                 URL urlObj = new URL(url);
                 HttpURLConnection conn = (HttpURLConnection) urlObj.openConnection();
+                System.out.println("urlObj: " + urlObj.toString());
+
                 conn.setRequestMethod(method);
                 conn.setRequestProperty("Authorization", headers);
                 conn.setDoOutput(true);
+                System.out.println("conn" + conn.toString());
 
                 if (method.equals("POST")) {
                     DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
                     wr.writeBytes(payload);
                     wr.flush();
                     wr.close();
+                    /*try (OutputStream os = conn.getOutputStream()) {
+                        byte[] input = payload.getBytes(StandardCharsets.UTF_8);
+                        os.write(input, 0, input.length);
+                    }*/
+        
                 }
 
                 int responseCode = conn.getResponseCode();
@@ -332,7 +346,6 @@ public class MuleChainEinstein1PayloadHelper {
         String response = "";
         if (matcher.find()) {
             response = matcher.group();
-            System.out.println("Payload: " + payload);
         } else {
             System.out.println("Payload not found.");
         }
@@ -376,10 +389,22 @@ public class MuleChainEinstein1PayloadHelper {
         String payload = constructJsonPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
         System.out.println(payload);
         String intermediateAnswer = generateText(access_token, payload, paramDetails.getModelName(), "/generations");
-        String response = generateText(access_token, originalPrompt, paramDetails.getModelName(), "/generations");
+        //String response = generateText(access_token, originalPrompt, paramDetails.getModelName(), "/generations");
+        //System.out.println("Response: " + response);
+        String response = intermediateAnswer;
         List<String> findURL = extractUrls(intermediateAnswer);
+        String example = "";
         if (findURL!=null){
-            response = getAttributes(findURL.get(0),filePath, extractPayload(intermediateAnswer));
+            JSONObject jsonObject = new JSONObject(intermediateAnswer);
+            String generatedText = jsonObject.getJSONObject("generation").getString("generatedText");
+
+            example = extractPayload(generatedText);
+            example = extractPayload(example);
+            
+            System.out.println("URL -2: " + findURL.get(0).substring(0, findURL.get(0).length() - 2));
+            System.out.println("URL: " + findURL.get(0));
+
+            response = getAttributes(findURL.get(0).substring(0, findURL.get(0).length() - 2),filePath, extractPayload(example));
         }
 
         return response;
@@ -438,6 +463,8 @@ public class MuleChainEinstein1PayloadHelper {
                 //System.out.println(corpusBody);
                 if (text != null && !text.isEmpty()) {
                     response = generateEmbedding(access_token, constructEmbeddingJSON(corpusBody), modelName, "/embeddings");
+                    //System.out.println(response);
+
                     jsonObject = new JSONObject(response);
                     embeddingsArray = jsonObject.getJSONArray("embeddings");
                     corpusEmbeddings.add(embeddingsArray.getJSONObject(0).getJSONArray("embedding"));
@@ -521,7 +548,7 @@ public class MuleChainEinstein1PayloadHelper {
     */
 
     private static String getContentFromUrl(String urlString) throws IOException, SAXException, TikaException {
-        BodyContentHandler handler = new BodyContentHandler();
+        BodyContentHandler handler = new BodyContentHandler(-1);
         Metadata metadata = new Metadata();
         InputStream inputstream = new URL(urlString).openStream();
         ParseContext pcontext = new ParseContext();
@@ -532,7 +559,7 @@ public class MuleChainEinstein1PayloadHelper {
     }
 
     private static String getContentFromFile(String filePath) throws IOException, SAXException, TikaException {
-        BodyContentHandler handler = new BodyContentHandler();
+        BodyContentHandler handler = new BodyContentHandler(-1);
         Metadata metadata = new Metadata();
         FileInputStream inputstream = new FileInputStream(new File(filePath));
         ParseContext pcontext = new ParseContext();
@@ -544,7 +571,7 @@ public class MuleChainEinstein1PayloadHelper {
     }
 
     private static String getContentFromTxtFile(String filePath) throws IOException, SAXException, TikaException {
-        BodyContentHandler handler = new BodyContentHandler();
+        BodyContentHandler handler = new BodyContentHandler(-1);
         Metadata metadata = new Metadata();
         FileInputStream inputstream = new FileInputStream(new File(filePath));
         ParseContext pcontext = new ParseContext();

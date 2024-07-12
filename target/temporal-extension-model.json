@@ -1,14 +1,14 @@
 {
   "name": "Einstein AI",
   "description": "This is the main class of an extension, is the entry point from which configurations, connection providers, operations and sources are going to be declared.",
-  "version": "0.0.33",
+  "version": "0.0.63",
   "vendor": "Mulesoft",
   "category": "COMMUNITY",
   "xmlDsl": {
     "prefix": "mulechain-einstein1",
     "namespace": "http://www.mulesoft.org/schema/mule/mulechain-einstein1",
     "schemaLocation": "http://www.mulesoft.org/schema/mule/mulechain-einstein1/current/mule-mulechain-einstein1.xsd",
-    "schemaVersion": "0.0.33",
+    "schemaVersion": "0.0.63",
     "xsdFileName": "mule-mulechain-einstein1.xsd"
   },
   "resources": [],
