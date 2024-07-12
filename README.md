@@ -1,6 +1,6 @@
 # MuleChain Einstein AI Extension
 
-### <img src="images/mulechain-einsteinai-logo.png" width="6%" alt="banner"> [MuleChain Einstein AI Connector](/mulechain-einsteinai/mulechain-einsteinai-getting-started.md)
+### <img src="icon/icon.svg" width="6%" alt="banner"> [MuleChain Einstein AI Connector](/mulechain-einsteinai/mulechain-einsteinai-getting-started.md)
 
 MuleChain Connector for Salesforce Einstein AI to interact with the models API of the Salesforce platform and benefit from its trust layer and automation capabilities. It allows you to:
 - **Leverage the Salesforce Trustlayer**
