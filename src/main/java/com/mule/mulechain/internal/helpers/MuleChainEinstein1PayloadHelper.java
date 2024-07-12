@@ -307,7 +307,6 @@ public class MuleChainEinstein1PayloadHelper {
                 conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
                 conn.setDoOutput(true);
 
-                System.out.println("conn" + conn.toString());
 
                 if (method.equals("POST")) {
                     try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream())) {
@@ -387,7 +386,7 @@ public class MuleChainEinstein1PayloadHelper {
     public static String executeRAG(String text, MuleChainEinstein1Configuration configuration, MuleChainEinstein1RAGParamsModelDetails paramDetails){
         String access_token = getAccessToken(configuration.getSalesforceOrg(), configuration.getClientId(), configuration.getClientSecret());
         String payload = constructJsonPayload(text, paramDetails.getLocale(), paramDetails.getProbability());
-        System.out.println(payload);
+        //System.out.println(payload);
         String response = generateText(access_token, payload, paramDetails.getModelName(), "/generations");
         return response;
     }
@@ -395,11 +394,15 @@ public class MuleChainEinstein1PayloadHelper {
     public static String executeTools(String originalPrompt, String prompt, String filePath, MuleChainEinstein1Configuration configuration, MuleChainEinstein1ParamsModelDetails paramDetails) throws IOException{
         String access_token = getAccessToken(configuration.getSalesforceOrg(), configuration.getClientId(), configuration.getClientSecret());
         String payload = constructJsonPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
+        String payloadOptional = constructJsonPayload(originalPrompt, paramDetails.getLocale(), paramDetails.getProbability());
+
         System.out.println(payload);
         String intermediateAnswer = generateText(access_token, payload, paramDetails.getModelName(), "/generations");
-        //String response = generateText(access_token, originalPrompt, paramDetails.getModelName(), "/generations");
+        //System.out.println("intermediateAnswer: " + intermediateAnswer);
+
+        String response = generateText(access_token, payloadOptional, paramDetails.getModelName(), "/generations");
         //System.out.println("Response: " + response);
-        String response = intermediateAnswer;
+        //response = intermediateAnswer;
         List<String> findURL = extractUrls(intermediateAnswer.toString());
         //System.out.println(findURL.toString());
         String ePayload = "";
@@ -416,6 +419,9 @@ public class MuleChainEinstein1PayloadHelper {
             //System.out.println("extractUrls-URL: " + extractUrls(findURL.get(0).toString()));
 
             response = getAttributes(findURL.get(0),filePath, extractPayload(ePayload));
+            String finalPayload = constructJsonPayload("data: " + response + ", question: " + originalPrompt, paramDetails.getLocale(), paramDetails.getProbability());
+            response = generateText(access_token, finalPayload, paramDetails.getModelName(), "/generations");
+
         }
 
         return response;
@@ -522,14 +528,14 @@ public class MuleChainEinstein1PayloadHelper {
 
     private static List<String> rankAndPrintResults(List<String> corpus, List<Double> similarityScores) {
         List<Integer> indices = new ArrayList<>();
-        System.out.println(corpus.size());
+        //System.out.println(corpus.size());
         for (int i = 0; i < corpus.size(); i++) {
             indices.add(i);
         }
 
         indices.sort((i, j) -> Double.compare(similarityScores.get(j), similarityScores.get(i)));
 
-        System.out.println("Ranked results:");
+        //System.out.println("Ranked results:");
         List<String> results = new ArrayList<>();
         //System.out.println(indices.size());
         //System.out.println(similarityScores.size());
@@ -577,7 +583,7 @@ public class MuleChainEinstein1PayloadHelper {
     
         AutoDetectParser parser = new AutoDetectParser();
         parser.parse(inputstream, handler, metadata, pcontext);
-        System.out.println(handler.toString());
+        //System.out.println(handler.toString());
         return handler.toString();
     }
 
@@ -589,7 +595,7 @@ public class MuleChainEinstein1PayloadHelper {
 
         TXTParser parser = new TXTParser();
         parser.parse(inputstream, handler, metadata, pcontext);
-        System.out.println(handler.toString());
+        //System.out.println(handler.toString());
         return handler.toString();
     }
 
@@ -687,31 +693,5 @@ public class MuleChainEinstein1PayloadHelper {
     }
 
 
-    /*private static List<String> extractUrls(String input) {
-        // Define the URL pattern
-        //String urlPattern = "(https?://\\S+\\b)";
-        String urlPattern = "(https?://\\S+)";
-        //String urlPattern = "http[s]?://\\S+";
-
-        
-        // Compile the pattern
-        Pattern pattern = Pattern.compile(urlPattern);
-        
-        // Create a matcher from the input string
-        Matcher matcher = pattern.matcher(input);
-        
-        // Find and collect all matches
-        List<String> urls = new ArrayList<>();
-        while (matcher.find()) {
-            String url = matcher.group();
-            url = url.replace("\n", ""); // Remove trailing newline character
-            urls.add(matcher.group());
-        }
-        
-        // Return null if no URLs are found
-        return urls.isEmpty() ? null : urls;
-    }
-*/
-      
 
 }
