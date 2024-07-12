@@ -94,10 +94,10 @@ public class MuleChainEinstein1Operations {
    */
   @MediaType(value = ANY, strict = false)
   @Alias("Tools-use-ai-service")
-  public String ExecuteTools(String prompt, String filePath, @Config MuleChainEinstein1Configuration configuration, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsModelDetails paramDetails) throws IOException, SAXException, TikaException{
-    String content = MuleChainEinstein1PayloadHelper.EmbeddingFileQuery(prompt,filePath,configuration,"OpenAI Ada 002", "text", "FULL");
+  public String ExecuteTools(String prompt, String toolsConfig, @Config MuleChainEinstein1Configuration configuration, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsModelDetails paramDetails) throws IOException, SAXException, TikaException{
+    String content = MuleChainEinstein1PayloadHelper.EmbeddingFileQuery(prompt,toolsConfig,configuration,"OpenAI Ada 002", "text", "FULL");
     System.out.println(content);
-    return MuleChainEinstein1PayloadHelper.executeTools(prompt, "data: " + content + ", question: " + prompt, filePath, configuration, paramDetails);
+    return MuleChainEinstein1PayloadHelper.executeTools(prompt, "data: " + content + ", question: " + prompt, toolsConfig, configuration, paramDetails);
   }
 
 
