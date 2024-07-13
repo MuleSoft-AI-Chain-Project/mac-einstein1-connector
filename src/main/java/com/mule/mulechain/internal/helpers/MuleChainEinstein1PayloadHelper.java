@@ -25,6 +25,7 @@ import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.txt.TXTParser;
 import org.apache.tika.sax.BodyContentHandler;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.SignatureSpi.ecPlainDSARP160;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -354,11 +355,22 @@ public class MuleChainEinstein1PayloadHelper {
         if (matcher.find()) {
             response = matcher.group();
         } else {
-            System.out.println("Payload not found.");
+            response = "Payload not found!";
         }
        
         
         return response;
+    }
+
+    private static String buildPayload(String payload){
+
+        String findPayload = extractPayload(payload);
+        if (findPayload.equals("Payload not found!")){
+            String secondTry = extractPayload(payload);
+            return secondTry;
+        }
+
+        return findPayload;
     }
 
     public static String executeGenerateText(String prompt, MuleChainEinstein1Configuration configuration, MuleChainEinstein1ParamsModelDetails paramDetails){
@@ -410,8 +422,9 @@ public class MuleChainEinstein1PayloadHelper {
             JSONObject jsonObject = new JSONObject(intermediateAnswer);
             String generatedText = jsonObject.getJSONObject("generation").getString("generatedText");
 
-            ePayload = extractPayload(generatedText);
-            ePayload = extractPayload(ePayload);
+            /*ePayload = extractPayload(generatedText);
+            ePayload = extractPayload(ePayload);*/
+            ePayload = buildPayload(generatedText);
 
             //System.out.println("intermediate: " + intermediateAnswer);
             
