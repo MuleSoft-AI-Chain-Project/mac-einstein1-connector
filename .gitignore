@@ -42,4 +42,5 @@ generated-test-sources/
 # Miscellaneous
 *.bak
 *.tmp
+target/
 
