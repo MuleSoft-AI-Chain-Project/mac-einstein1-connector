@@ -1,6 +1,6 @@
 package com.mule.mulechain.internal.helpers.chatmemory;
 
-import com.mule.mulechain.internal.MuleChainEinstein1Configuration;
+import com.mule.mulechain.internal.MuleChainEinstein1Connection;
 import com.mule.mulechain.internal.helpers.MuleChainEinstein1PayloadHelper;
 import com.mule.mulechain.internal.models.MuleChainEinstein1ParamsModelDetails;
 
@@ -58,7 +58,7 @@ public class MuleChainEinstein1ChatMemoryHelper {
 }
 
 
-  public static String chatWithMemory(String prompt, String memoryPath, String memoryName, Integer keepLastMessages, MuleChainEinstein1Configuration configuration, MuleChainEinstein1ParamsModelDetails MuleChainParameters) {
+  public static String chatWithMemory(String prompt, String memoryPath, String memoryName, Integer keepLastMessages, MuleChainEinstein1Connection connection, MuleChainEinstein1ParamsModelDetails MuleChainParameters) {
 
     //Chatmemory initialization
     MuleChainEinstein1ChatMemory chatMemory = intializeChatMemory(memoryPath, memoryName);
@@ -69,7 +69,7 @@ public class MuleChainEinstein1ChatMemoryHelper {
     //String memoryPrompt = keepLastMessagesList.toString();
     String memoryPrompt = formatMemoryPrompt(keepLastMessagesList);
     
-    String response = MuleChainEinstein1PayloadHelper.executeGenerateText(memoryPrompt, configuration, MuleChainParameters);
+    String response = MuleChainEinstein1PayloadHelper.executeGenerateText(memoryPrompt, connection, MuleChainParameters);
     
     addMessageToMemory(chatMemory, prompt);
 
