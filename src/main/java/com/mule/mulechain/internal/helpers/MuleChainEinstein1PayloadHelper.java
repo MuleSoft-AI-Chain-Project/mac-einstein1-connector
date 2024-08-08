@@ -31,7 +31,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.xml.sax.SAXException;
 
-import com.mule.mulechain.internal.MuleChainEinstein1Configuration;
+import com.mule.mulechain.internal.MuleChainEinstein1Connection;
 import com.mule.mulechain.internal.helpers.documents.MuleChainEinstein1ParametersEmbeddingDocument;
 import com.mule.mulechain.internal.models.MuleChainEinstein1ParamsEmbeddingDetails;
 import com.mule.mulechain.internal.models.MuleChainEinstein1ParamsModelDetails;
@@ -163,9 +163,9 @@ public class MuleChainEinstein1PayloadHelper {
 
 
 
-    public static String EmbeddingFromFile(String filePath, MuleChainEinstein1Configuration configuration, MuleChainEinstein1ParametersEmbeddingDocument MuleChainEinsteinParameters) throws IOException, SAXException, TikaException {
+    public static String EmbeddingFromFile(String filePath, MuleChainEinstein1Connection connection, MuleChainEinstein1ParametersEmbeddingDocument MuleChainEinsteinParameters) throws IOException, SAXException, TikaException {
 
-        String access_token = getAccessToken(configuration.getSalesforceOrg(), configuration.getClientId(), configuration.getClientSecret());
+        String access_token = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
         /* 
         List<String> corpus;
         if (MuleChainEinsteinParameters.getOptionType().equals("FULL")) {
@@ -373,38 +373,38 @@ public class MuleChainEinstein1PayloadHelper {
         return findPayload;
     }
 
-    public static String executeGenerateText(String prompt, MuleChainEinstein1Configuration configuration, MuleChainEinstein1ParamsModelDetails paramDetails){
-        String access_token = getAccessToken(configuration.getSalesforceOrg(), configuration.getClientId(), configuration.getClientSecret());
+    public static String executeGenerateText(String prompt, MuleChainEinstein1Connection connection, MuleChainEinstein1ParamsModelDetails paramDetails){
+        String access_token = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
         String payload = constructJsonPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
         String response = generateText(access_token, payload, paramDetails.getModelName(), "/generations");
         return response;
     }
 
-    public static String executeGenerateChat(String messages, MuleChainEinstein1Configuration configuration, MuleChainEinstein1ParamsModelDetails paramDetails){
-        String access_token = getAccessToken(configuration.getSalesforceOrg(), configuration.getClientId(), configuration.getClientSecret());
+    public static String executeGenerateChat(String messages, MuleChainEinstein1Connection connection, MuleChainEinstein1ParamsModelDetails paramDetails){
+        String access_token = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
         String payload = constrcutJsonMessages(messages, paramDetails);
         String response = generateText(access_token, payload, paramDetails.getModelName(), "/chat-generations");
         return response;
     }
 
 
-    public static String executeGenerateEmbedding(String text, MuleChainEinstein1Configuration configuration, MuleChainEinstein1ParamsEmbeddingDetails paramDetails){
-        String access_token = getAccessToken(configuration.getSalesforceOrg(), configuration.getClientId(), configuration.getClientSecret());
+    public static String executeGenerateEmbedding(String text, MuleChainEinstein1Connection connection, MuleChainEinstein1ParamsEmbeddingDetails paramDetails){
+        String access_token = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
         String payload = constructEmbeddingJSON(text);
         String response = generateEmbedding(access_token, payload, paramDetails.getModelName(), "/embeddings");
         return response;
     }
 
-    public static String executeRAG(String text, MuleChainEinstein1Configuration configuration, MuleChainEinstein1RAGParamsModelDetails paramDetails){
-        String access_token = getAccessToken(configuration.getSalesforceOrg(), configuration.getClientId(), configuration.getClientSecret());
+    public static String executeRAG(String text, MuleChainEinstein1Connection connection, MuleChainEinstein1RAGParamsModelDetails paramDetails){
+        String access_token = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
         String payload = constructJsonPayload(text, paramDetails.getLocale(), paramDetails.getProbability());
         //System.out.println(payload);
         String response = generateText(access_token, payload, paramDetails.getModelName(), "/generations");
         return response;
     }
 
-    public static String executeTools(String originalPrompt, String prompt, String filePath, MuleChainEinstein1Configuration configuration, MuleChainEinstein1ParamsModelDetails paramDetails) throws IOException{
-        String access_token = getAccessToken(configuration.getSalesforceOrg(), configuration.getClientId(), configuration.getClientSecret());
+    public static String executeTools(String originalPrompt, String prompt, String filePath, MuleChainEinstein1Connection connection, MuleChainEinstein1ParamsModelDetails paramDetails) throws IOException{
+        String access_token = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
         String payload = constructJsonPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
         String payloadOptional = constructJsonPayload(originalPrompt, paramDetails.getLocale(), paramDetails.getProbability());
 
@@ -451,9 +451,9 @@ public class MuleChainEinstein1PayloadHelper {
         return corpus;
     }
 
-    public static String EmbeddingFileQuery(String prompt, String filePath, MuleChainEinstein1Configuration configuration, String modelName, String fileType, String optionType) throws IOException, SAXException, TikaException {
+    public static String EmbeddingFileQuery(String prompt, String filePath, MuleChainEinstein1Connection connection, String modelName, String fileType, String optionType) throws IOException, SAXException, TikaException {
 
-        String access_token = getAccessToken(configuration.getSalesforceOrg(), configuration.getClientId(), configuration.getClientSecret());
+        String access_token = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
 
         /* 
         List<String> corpus;
