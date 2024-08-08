@@ -11,7 +11,7 @@ import org.mule.runtime.extension.api.annotation.param.MediaType;
 import org.mule.runtime.extension.api.annotation.param.ParameterGroup;
 import org.xml.sax.SAXException;
 
-import com.mule.mulechain.internal.MuleChainEinstein1Configuration;
+import com.mule.mulechain.internal.MuleChainEinstein1Connection;
 import com.mule.mulechain.internal.helpers.MuleChainEinstein1PayloadHelper;
 import com.mule.mulechain.internal.helpers.MuleChainEinstein1PromptTemplateHelper;
 import com.mule.mulechain.internal.helpers.chatmemory.MuleChainEinstein1ChatMemoryHelper;
@@ -20,7 +20,7 @@ import com.mule.mulechain.internal.models.MuleChainEinstein1ParamsEmbeddingDetai
 import com.mule.mulechain.internal.models.MuleChainEinstein1ParamsModelDetails;
 import com.mule.mulechain.internal.models.MuleChainEinstein1RAGParamsModelDetails;
 
-import org.mule.runtime.extension.api.annotation.param.Config;
+import org.mule.runtime.extension.api.annotation.param.Connection;
 
 
 /**
@@ -33,8 +33,8 @@ public class MuleChainEinstein1Operations {
    */
   @MediaType(value = ANY, strict = false)
   @Alias("CHAT-generate-from-messages")
-  public String generateChat(String messages,@Config MuleChainEinstein1Configuration configuration, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsModelDetails paramDetails){
-    return MuleChainEinstein1PayloadHelper.executeGenerateChat(messages,configuration,paramDetails);
+  public String generateChat(String messages,@Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsModelDetails paramDetails){
+    return MuleChainEinstein1PayloadHelper.executeGenerateChat(messages,connection,paramDetails);
   }
 
   /**
@@ -42,8 +42,8 @@ public class MuleChainEinstein1Operations {
    */
   @MediaType(value = ANY, strict = false)
   @Alias("EMBEDDING-generate-from-text")
-  public String generateEmbedding(String text,@Config MuleChainEinstein1Configuration configuration, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsEmbeddingDetails paramDetails){
-    return MuleChainEinstein1PayloadHelper.executeGenerateEmbedding(text,configuration,paramDetails);
+  public String generateEmbedding(String text,@Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsEmbeddingDetails paramDetails){
+    return MuleChainEinstein1PayloadHelper.executeGenerateEmbedding(text,connection,paramDetails);
   }
 
   /**
@@ -54,8 +54,8 @@ public class MuleChainEinstein1Operations {
    */
   @MediaType(value = ANY, strict = false)
   @Alias("EMBEDDING-adhoc-file-query")
-  public String queryEmbeddingOnFiles(String prompt, String filePath,@Config MuleChainEinstein1Configuration configuration, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParametersEmbeddingDocument paramDetails) throws IOException, SAXException, TikaException{
-    return MuleChainEinstein1PayloadHelper.EmbeddingFileQuery(prompt,filePath,configuration,paramDetails.getModelName(), paramDetails.getFileType(), paramDetails.getOptionType());
+  public String queryEmbeddingOnFiles(String prompt, String filePath,@Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParametersEmbeddingDocument paramDetails) throws IOException, SAXException, TikaException{
+    return MuleChainEinstein1PayloadHelper.EmbeddingFileQuery(prompt,filePath,connection,paramDetails.getModelName(), paramDetails.getFileType(), paramDetails.getOptionType());
   }
 
 
@@ -67,8 +67,8 @@ public class MuleChainEinstein1Operations {
    */
   @MediaType(value = ANY, strict = false)
   @Alias("EMBEDDING-generate-from-file")
-  public String EmbeddingFromFiles(String filePath,@Config MuleChainEinstein1Configuration configuration, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParametersEmbeddingDocument paramDetails) throws IOException, SAXException, TikaException{
-    return MuleChainEinstein1PayloadHelper.EmbeddingFromFile(filePath,configuration,paramDetails);
+  public String EmbeddingFromFiles(String filePath,@Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParametersEmbeddingDocument paramDetails) throws IOException, SAXException, TikaException{
+    return MuleChainEinstein1PayloadHelper.EmbeddingFromFile(filePath,connection,paramDetails);
   }
 
 
@@ -80,10 +80,10 @@ public class MuleChainEinstein1Operations {
    */
   @MediaType(value = ANY, strict = false)
   @Alias("RAG-adhoc-load-document")
-  public String RAGgOnFiles(String prompt, String filePath,@Config MuleChainEinstein1Configuration configuration, @ParameterGroup(name= "Additional properties") MuleChainEinstein1RAGParamsModelDetails paramDetails) throws IOException, SAXException, TikaException{
-    String content = MuleChainEinstein1PayloadHelper.EmbeddingFileQuery(prompt,filePath,configuration,paramDetails.getEmbeddingName(), paramDetails.getFileType(), paramDetails.getOptionType());
+  public String RAGgOnFiles(String prompt, String filePath,@Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1RAGParamsModelDetails paramDetails) throws IOException, SAXException, TikaException{
+    String content = MuleChainEinstein1PayloadHelper.EmbeddingFileQuery(prompt,filePath,connection,paramDetails.getEmbeddingName(), paramDetails.getFileType(), paramDetails.getOptionType());
     System.out.println(content);
-    return MuleChainEinstein1PayloadHelper.executeRAG("data: " + content + ", question: " + prompt, configuration, paramDetails);
+    return MuleChainEinstein1PayloadHelper.executeRAG("data: " + content + ", question: " + prompt, connection, paramDetails);
   }
 
      /**
@@ -94,10 +94,10 @@ public class MuleChainEinstein1Operations {
    */
   @MediaType(value = ANY, strict = false)
   @Alias("Tools-use-ai-service")
-  public String ExecuteTools(String prompt, String toolsConfig, @Config MuleChainEinstein1Configuration configuration, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsModelDetails paramDetails) throws IOException, SAXException, TikaException{
-    String content = MuleChainEinstein1PayloadHelper.EmbeddingFileQuery(prompt,toolsConfig,configuration,"OpenAI Ada 002", "text", "FULL");
+  public String ExecuteTools(String prompt, String toolsConfig, @Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsModelDetails paramDetails) throws IOException, SAXException, TikaException{
+    String content = MuleChainEinstein1PayloadHelper.EmbeddingFileQuery(prompt,toolsConfig,connection,"OpenAI Ada 002", "text", "FULL");
     System.out.println(content);
-    return MuleChainEinstein1PayloadHelper.executeTools(prompt, "data: " + content + ", question: " + prompt, toolsConfig, configuration, paramDetails);
+    return MuleChainEinstein1PayloadHelper.executeTools(prompt, "data: " + content + ", question: " + prompt, toolsConfig, connection, paramDetails);
   }
 
 
@@ -107,8 +107,8 @@ public class MuleChainEinstein1Operations {
    */
   @MediaType(value = ANY, strict = false)
   @Alias("CHAT-answer-prompt")
-  public String generateText(String prompt, @Config MuleChainEinstein1Configuration configuration, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsModelDetails paramDetails){
-    return MuleChainEinstein1PayloadHelper.executeGenerateText(prompt,configuration,paramDetails);
+  public String generateText(String prompt, @Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsModelDetails paramDetails){
+    return MuleChainEinstein1PayloadHelper.executeGenerateText(prompt,connection,paramDetails);
   }
 
   /**
@@ -116,8 +116,8 @@ public class MuleChainEinstein1Operations {
    */
   @MediaType(value = ANY, strict = false)
   @Alias("CHAT-answer-prompt-with-memory")
-  public String generateTextMemeory(String prompt, String memoryPath, String memoryName, Integer keepLastMessages, @Config MuleChainEinstein1Configuration configuration, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsModelDetails paramDetails){
-    return MuleChainEinstein1ChatMemoryHelper.chatWithMemory(prompt,memoryPath,memoryName,keepLastMessages,configuration,paramDetails);
+  public String generateTextMemeory(String prompt, String memoryPath, String memoryName, Integer keepLastMessages, @Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsModelDetails paramDetails){
+    return MuleChainEinstein1ChatMemoryHelper.chatWithMemory(prompt,memoryPath,memoryName,keepLastMessages,connection,paramDetails);
   }
 
 
@@ -126,13 +126,13 @@ public class MuleChainEinstein1Operations {
    */
   @MediaType(value = ANY, strict = false)
   @Alias("AGENT-define-prompt-template")  
-  public String definePromptTemplate(String template, String instructions, String dataset, @Config MuleChainEinstein1Configuration configuration, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsModelDetails paramDetails) {
+  public String definePromptTemplate(String template, String instructions, String dataset, @Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsModelDetails paramDetails) {
 
 
           String finalPromptTemplate = MuleChainEinstein1PromptTemplateHelper.definePromptTemplate(template, instructions, dataset);
           System.out.println(finalPromptTemplate);
 
-          String response = MuleChainEinstein1PayloadHelper.executeGenerateText(finalPromptTemplate, configuration, paramDetails);
+          String response = MuleChainEinstein1PayloadHelper.executeGenerateText(finalPromptTemplate, connection, paramDetails);
 
           System.out.println(response);
       	return response;
