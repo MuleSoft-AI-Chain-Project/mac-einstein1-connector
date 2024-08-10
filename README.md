@@ -20,7 +20,7 @@ Add this dependency to your application pom.xml
 	<dependency>
 		<groupId>com.mule.mulechain</groupId>
 		<artifactId>mulechain-einstein1-connector</artifactId>
-		<version>0.1.0</version>
+		<version>0.2.0</version>
 		<classifier>mule-plugin</classifier>		
 	</dependency>
 ```
