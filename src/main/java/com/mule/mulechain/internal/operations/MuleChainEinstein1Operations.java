@@ -1,8 +1,12 @@
 package com.mule.mulechain.internal.operations;
 
 import static org.mule.runtime.extension.api.annotation.param.MediaType.ANY;
+import static org.apache.commons.io.IOUtils.toInputStream;
+import static org.mule.runtime.extension.api.annotation.param.MediaType.APPLICATION_JSON;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.tika.exception.TikaException;
 
@@ -31,19 +35,19 @@ public class MuleChainEinstein1Operations {
   /**
    * Generate a response based on a list of messages representing a chat conversation.
    */
-  @MediaType(value = ANY, strict = false)
+  @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("CHAT-generate-from-messages")
-  public String generateChat(String messages,@Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsModelDetails paramDetails){
-    return MuleChainEinstein1PayloadHelper.executeGenerateChat(messages,connection,paramDetails);
+  public InputStream generateChat(String messages,@Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsModelDetails paramDetails){
+    return toInputStream(MuleChainEinstein1PayloadHelper.executeGenerateChat(messages,connection,paramDetails).toString(), StandardCharsets.UTF_8);
   }
 
   /**
    * Create an embedding vector representing the input text.
    */
-  @MediaType(value = ANY, strict = false)
+  @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("EMBEDDING-generate-from-text")
-  public String generateEmbedding(String text,@Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsEmbeddingDetails paramDetails){
-    return MuleChainEinstein1PayloadHelper.executeGenerateEmbedding(text,connection,paramDetails);
+  public InputStream generateEmbedding(String text,@Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsEmbeddingDetails paramDetails){
+    return toInputStream(MuleChainEinstein1PayloadHelper.executeGenerateEmbedding(text,connection,paramDetails), StandardCharsets.UTF_8);
   }
 
   /**
@@ -52,10 +56,10 @@ public class MuleChainEinstein1Operations {
    * @throws SAXException 
    * @throws IOException 
    */
-  @MediaType(value = ANY, strict = false)
+  @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("EMBEDDING-adhoc-file-query")
-  public String queryEmbeddingOnFiles(String prompt, String filePath,@Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParametersEmbeddingDocument paramDetails) throws IOException, SAXException, TikaException{
-    return MuleChainEinstein1PayloadHelper.EmbeddingFileQuery(prompt,filePath,connection,paramDetails.getModelName(), paramDetails.getFileType(), paramDetails.getOptionType());
+  public InputStream queryEmbeddingOnFiles(String prompt, String filePath,@Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParametersEmbeddingDocument paramDetails) throws IOException, SAXException, TikaException{
+    return toInputStream(MuleChainEinstein1PayloadHelper.EmbeddingFileQuery(prompt,filePath,connection,paramDetails.getModelName(), paramDetails.getFileType(), paramDetails.getOptionType()), StandardCharsets.UTF_8);
   }
 
 
@@ -65,10 +69,10 @@ public class MuleChainEinstein1Operations {
    * @throws SAXException 
    * @throws IOException 
    */
-  @MediaType(value = ANY, strict = false)
+  @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("EMBEDDING-generate-from-file")
-  public String EmbeddingFromFiles(String filePath,@Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParametersEmbeddingDocument paramDetails) throws IOException, SAXException, TikaException{
-    return MuleChainEinstein1PayloadHelper.EmbeddingFromFile(filePath,connection,paramDetails);
+  public InputStream EmbeddingFromFiles(String filePath,@Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParametersEmbeddingDocument paramDetails) throws IOException, SAXException, TikaException{
+    return toInputStream(MuleChainEinstein1PayloadHelper.EmbeddingFromFile(filePath,connection,paramDetails), StandardCharsets.UTF_8);
   }
 
 
@@ -78,12 +82,12 @@ public class MuleChainEinstein1Operations {
    * @throws SAXException 
    * @throws IOException 
    */
-  @MediaType(value = ANY, strict = false)
+  @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("RAG-adhoc-load-document")
-  public String RAGgOnFiles(String prompt, String filePath,@Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1RAGParamsModelDetails paramDetails) throws IOException, SAXException, TikaException{
+  public InputStream RAGgOnFiles(String prompt, String filePath,@Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1RAGParamsModelDetails paramDetails) throws IOException, SAXException, TikaException{
     String content = MuleChainEinstein1PayloadHelper.EmbeddingFileQuery(prompt,filePath,connection,paramDetails.getEmbeddingName(), paramDetails.getFileType(), paramDetails.getOptionType());
     System.out.println(content);
-    return MuleChainEinstein1PayloadHelper.executeRAG("data: " + content + ", question: " + prompt, connection, paramDetails);
+    return toInputStream(MuleChainEinstein1PayloadHelper.executeRAG("data: " + content + ", question: " + prompt, connection, paramDetails), StandardCharsets.UTF_8);
   }
 
      /**
@@ -92,12 +96,12 @@ public class MuleChainEinstein1Operations {
    * @throws SAXException 
    * @throws IOException 
    */
-  @MediaType(value = ANY, strict = false)
+  @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("Tools-use-ai-service")
-  public String ExecuteTools(String prompt, String toolsConfig, @Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsModelDetails paramDetails) throws IOException, SAXException, TikaException{
+  public InputStream ExecuteTools(String prompt, String toolsConfig, @Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsModelDetails paramDetails) throws IOException, SAXException, TikaException{
     String content = MuleChainEinstein1PayloadHelper.EmbeddingFileQuery(prompt,toolsConfig,connection,"OpenAI Ada 002", "text", "FULL");
     System.out.println(content);
-    return MuleChainEinstein1PayloadHelper.executeTools(prompt, "data: " + content + ", question: " + prompt, toolsConfig, connection, paramDetails);
+    return toInputStream(MuleChainEinstein1PayloadHelper.executeTools(prompt, "data: " + content + ", question: " + prompt, toolsConfig, connection, paramDetails), StandardCharsets.UTF_8);
   }
 
 
@@ -105,28 +109,28 @@ public class MuleChainEinstein1Operations {
   /**
    * Generate a response based on the prompt provided.
    */
-  @MediaType(value = ANY, strict = false)
+  @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("CHAT-answer-prompt")
-  public String generateText(String prompt, @Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsModelDetails paramDetails){
-    return MuleChainEinstein1PayloadHelper.executeGenerateText(prompt,connection,paramDetails);
+  public InputStream generateText(String prompt, @Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsModelDetails paramDetails){
+    return toInputStream(MuleChainEinstein1PayloadHelper.executeGenerateText(prompt,connection,paramDetails), StandardCharsets.UTF_8);
   }
 
   /**
    * Generate a response based on the prompt using chat memory.
    */
-  @MediaType(value = ANY, strict = false)
+  @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("CHAT-answer-prompt-with-memory")
-  public String generateTextMemeory(String prompt, String memoryPath, String memoryName, Integer keepLastMessages, @Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsModelDetails paramDetails){
-    return MuleChainEinstein1ChatMemoryHelper.chatWithMemory(prompt,memoryPath,memoryName,keepLastMessages,connection,paramDetails);
+  public InputStream generateTextMemeory(String prompt, String memoryPath, String memoryName, Integer keepLastMessages, @Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsModelDetails paramDetails){
+    return toInputStream(MuleChainEinstein1ChatMemoryHelper.chatWithMemory(prompt,memoryPath,memoryName,keepLastMessages,connection,paramDetails), StandardCharsets.UTF_8);
   }
 
 
   /**
    * Helps defining an AI Agent with a prompt template
    */
-  @MediaType(value = ANY, strict = false)
+  @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("AGENT-define-prompt-template")  
-  public String definePromptTemplate(String template, String instructions, String dataset, @Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsModelDetails paramDetails) {
+  public InputStream definePromptTemplate(String template, String instructions, String dataset, @Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsModelDetails paramDetails) {
 
 
           String finalPromptTemplate = MuleChainEinstein1PromptTemplateHelper.definePromptTemplate(template, instructions, dataset);
@@ -135,7 +139,7 @@ public class MuleChainEinstein1Operations {
           String response = MuleChainEinstein1PayloadHelper.executeGenerateText(finalPromptTemplate, connection, paramDetails);
 
           System.out.println(response);
-      	return response;
+      	return toInputStream(response, StandardCharsets.UTF_8);
       }
 
 
