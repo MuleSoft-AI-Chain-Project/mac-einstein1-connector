@@ -6,9 +6,9 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.mule.mulechain</groupId>
     <artifactId>mulechain-einstein1-connector</artifactId>
-    <version>0.2.20</version>
+    <version>0.2.21-SNAPSHOT</version>
     <packaging>mule-extension</packaging>
-    <name>MuleChain Einstein AI Connector</name>
+    <name>Einstein AI Connector</name>
 
     <parent>
         <groupId>org.mule.extensions</groupId>

@@ -17,7 +17,7 @@ import static org.mule.sdk.api.meta.JavaVersion.JAVA_8;
  * and sources are going to be declared.
  */
 @Xml(prefix = "mac-einstein")
-@Extension(name = "MAC Einstein")
+@Extension(name = "Einstein AI")
 @ConnectionProviders(MuleChainEinstein1ConnectionProvider.class)
 @Operations(MuleChainEinstein1Operations.class)
 @JavaVersionSupport({JAVA_8, JAVA_11, JAVA_17})
