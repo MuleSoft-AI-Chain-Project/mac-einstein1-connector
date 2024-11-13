@@ -1,8 +1,8 @@
-# MuleChain Einstein AI Extension
+# MAC Einstein AI Extension
 
-### <img src="icon/icon.svg" width="6%" alt="banner"> [MuleChain Einstein AI Connector](/mulechain-einsteinai/mulechain-einsteinai-getting-started.md)
+## <img src="icon/icon.svg" width="6%" alt="banner"> [MuleSoft AI Chain - Einstein AI Connector](https://mac-project.ai/docs/einstein-ai)
 
-MuleChain Connector for Salesforce Einstein AI to interact with the models API of the Salesforce platform and benefit from its trust layer and automation capabilities. It allows you to:
+MuleSoft AI Chain Connector for Salesforce Einstein AI to interact with the models API of the Salesforce platform and benefit from its trust layer and automation capabilities. It allows you to:
 - **Leverage the Salesforce Trustlayer**
 - **Ingest files into the Vector Database**
 - **Build Prompt Templates in your workflow**
@@ -10,11 +10,15 @@ MuleChain Connector for Salesforce Einstein AI to interact with the models API o
 - **Build Chat Memory capabilities**
 - **Optimized usage in MuleSoft applications**
 
-### Get started!
-- Check out MuleChain Einstein AI Connector Documentation: https://mulechain.ai/docs/einstein-ai
-- Learn from the Getting Started playlist on YouTube: https://www.youtube.com/watch?v=M0VtTSCLFps&list=PLnuJGpEBF6ZAKZe_wtljGsBE9aTzPARmk
 
-Add this dependency to your application pom.xml
+### Requirements
+
+- The maximum supported version for Java SDK is JDK 17. You can use JDK 17 only for running your application.
+- Compilation with Java SDK must be done with JDK 8.
+
+
+### Installation
+To use this connector, add the following dependency to your application's `pom.xml`:
 
 ```
 	<dependency>
@@ -24,3 +28,18 @@ Add this dependency to your application pom.xml
 		<classifier>mule-plugin</classifier>		
 	</dependency>
 ```
+
+### Documentation
+- Check out MuleChain Einstein AI Connector Documentation on [mac-project.ai](https://mac-project.ai/docs/einstein-ai)
+- Learn from the [Getting Started Playlist on YouTube](https://www.youtube.com/playlist?list=PLnuJGpEBF6ZAV1JfID1SRKN6OmGORvgv6)
+
+---
+
+#### Stay tuned!
+
+- 🌐 **Website**: [mac-project.ai](https://mac-project.ai)
+- 📺 **YouTube**: [@MuleSoft-MAC-Project](https://www.youtube.com/@MuleSoft-MAC-Project)
+- 💼 **LinkedIn**: [MAC Project Group](https://lnkd.in/gW3eZrbF)
+
+
+

@@ -16,7 +16,7 @@ import static org.mule.sdk.api.meta.JavaVersion.JAVA_8;
  * This is the main class of an extension, is the entry point from which configurations, connection providers, operations
  * and sources are going to be declared.
  */
-@Xml(prefix = "mulechain-einstein1")
+@Xml(prefix = "mac-einstein")
 @Extension(name = "Einstein AI")
 @ConnectionProviders(MuleChainEinstein1ConnectionProvider.class)
 @Operations(MuleChainEinstein1Operations.class)
