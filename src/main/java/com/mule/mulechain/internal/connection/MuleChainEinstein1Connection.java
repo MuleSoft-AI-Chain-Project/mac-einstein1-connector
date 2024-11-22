@@ -1,4 +1,4 @@
-package com.mule.mulechain.internal;
+package com.mule.mulechain.internal.connection;
 
 /**
  * This class represents a connection to the external system.

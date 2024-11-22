@@ -1,6 +1,6 @@
 package com.mule.mulechain.internal.helpers.chatmemory;
 
-import com.mule.mulechain.internal.MuleChainEinstein1Connection;
+import com.mule.mulechain.internal.connection.MuleChainEinstein1Connection;
 import com.mule.mulechain.internal.helpers.MuleChainEinstein1PayloadHelper;
 import com.mule.mulechain.internal.models.MuleChainEinstein1ParamsModelDetails;
 

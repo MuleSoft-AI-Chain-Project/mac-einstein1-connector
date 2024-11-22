@@ -1,6 +1,5 @@
 package com.mule.mulechain.internal.operations;
 
-import static org.mule.runtime.extension.api.annotation.param.MediaType.ANY;
 import static org.apache.commons.io.IOUtils.toInputStream;
 import static org.mule.runtime.extension.api.annotation.param.MediaType.APPLICATION_JSON;
 
@@ -15,7 +14,7 @@ import org.mule.runtime.extension.api.annotation.param.MediaType;
 import org.mule.runtime.extension.api.annotation.param.ParameterGroup;
 import org.xml.sax.SAXException;
 
-import com.mule.mulechain.internal.MuleChainEinstein1Connection;
+import com.mule.mulechain.internal.connection.MuleChainEinstein1Connection;
 import com.mule.mulechain.internal.helpers.MuleChainEinstein1PayloadHelper;
 import com.mule.mulechain.internal.helpers.MuleChainEinstein1PromptTemplateHelper;
 import com.mule.mulechain.internal.helpers.chatmemory.MuleChainEinstein1ChatMemoryHelper;

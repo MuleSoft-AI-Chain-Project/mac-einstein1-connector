@@ -1,4 +1,4 @@
-package com.mule.mulechain.internal;
+package com.mule.mulechain.internal.connection;
 
 import org.mule.runtime.api.connection.ConnectionException;
 import org.mule.runtime.api.connection.ConnectionValidationResult;

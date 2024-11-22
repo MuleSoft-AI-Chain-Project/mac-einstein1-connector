@@ -25,13 +25,12 @@ import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.txt.TXTParser;
 import org.apache.tika.sax.BodyContentHandler;
-import org.bouncycastle.jcajce.provider.asymmetric.ec.SignatureSpi.ecPlainDSARP160;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.xml.sax.SAXException;
 
-import com.mule.mulechain.internal.MuleChainEinstein1Connection;
+import com.mule.mulechain.internal.connection.MuleChainEinstein1Connection;
 import com.mule.mulechain.internal.helpers.documents.MuleChainEinstein1ParametersEmbeddingDocument;
 import com.mule.mulechain.internal.models.MuleChainEinstein1ParamsEmbeddingDetails;
 import com.mule.mulechain.internal.models.MuleChainEinstein1ParamsModelDetails;

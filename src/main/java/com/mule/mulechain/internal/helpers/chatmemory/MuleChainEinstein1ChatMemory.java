@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 public class MuleChainEinstein1ChatMemory {
-    private DB db;
-    private Map<Long, String> chatMap;
+    private final DB db;
+    private final Map<Long, String> chatMap;
 
     public MuleChainEinstein1ChatMemory(String dbFile, String memoryName) {
         // Open or create the DB file
