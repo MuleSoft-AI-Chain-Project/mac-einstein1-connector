@@ -85,7 +85,6 @@ public class MuleChainEinstein1Operations {
   @Alias("RAG-adhoc-load-document")
   public InputStream RAGgOnFiles(String prompt, String filePath,@Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1RAGParamsModelDetails paramDetails) throws IOException, SAXException, TikaException{
     String content = MuleChainEinstein1PayloadHelper.EmbeddingFileQuery(prompt,filePath,connection,paramDetails.getEmbeddingName(), paramDetails.getFileType(), paramDetails.getOptionType());
-    System.out.println(content);
     return toInputStream(MuleChainEinstein1PayloadHelper.executeRAG("data: " + content + ", question: " + prompt, connection, paramDetails), StandardCharsets.UTF_8);
   }
 
@@ -99,7 +98,6 @@ public class MuleChainEinstein1Operations {
   @Alias("Tools-use-ai-service")
   public InputStream ExecuteTools(String prompt, String toolsConfig, @Connection MuleChainEinstein1Connection connection, @ParameterGroup(name= "Additional properties") MuleChainEinstein1ParamsModelDetails paramDetails) throws IOException, SAXException, TikaException{
     String content = MuleChainEinstein1PayloadHelper.EmbeddingFileQuery(prompt,toolsConfig,connection,"OpenAI Ada 002", "text", "FULL");
-    System.out.println(content);
     return toInputStream(MuleChainEinstein1PayloadHelper.executeTools(prompt, "data: " + content + ", question: " + prompt, toolsConfig, connection, paramDetails), StandardCharsets.UTF_8);
   }
 
@@ -133,11 +131,8 @@ public class MuleChainEinstein1Operations {
 
 
           String finalPromptTemplate = MuleChainEinstein1PromptTemplateHelper.definePromptTemplate(template, instructions, dataset);
-          System.out.println(finalPromptTemplate);
-
           String response = MuleChainEinstein1PayloadHelper.executeGenerateText(finalPromptTemplate, connection, paramDetails);
 
-          System.out.println(response);
       	return toInputStream(response, StandardCharsets.UTF_8);
       }
 
