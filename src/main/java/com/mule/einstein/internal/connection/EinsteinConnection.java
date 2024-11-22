@@ -1,15 +1,15 @@
-package com.mule.mulechain.internal.connection;
+package com.mule.einstein.internal.connection;
 
 /**
  * This class represents a connection to the external system.
  */
-public class MuleChainEinstein1Connection {
+public class EinsteinConnection {
 
   private final String salesforceOrg;
   private final String clientId;
   private final String clientSecret;
 
-  public MuleChainEinstein1Connection(String salesforceOrg, String clientId, String clientSecret) {
+  public EinsteinConnection(String salesforceOrg, String clientId, String clientSecret) {
     this.salesforceOrg = salesforceOrg;
     this.clientId = clientId;
     this.clientSecret = clientSecret;

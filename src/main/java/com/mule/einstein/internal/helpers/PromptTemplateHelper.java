@@ -1,8 +1,8 @@
-package com.mule.mulechain.internal.helpers;
+package com.mule.einstein.internal.helpers;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MuleChainEinstein1PromptTemplateHelper {
+public class PromptTemplateHelper {
 
     public static String definePromptTemplate(String template, String instruction, String dataSet){
         // Create the final template by concatenating strings with line separators

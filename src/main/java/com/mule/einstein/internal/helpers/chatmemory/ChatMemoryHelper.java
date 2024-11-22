@@ -1,19 +1,19 @@
-package com.mule.mulechain.internal.helpers.chatmemory;
+package com.mule.einstein.internal.helpers.chatmemory;
 
-import com.mule.mulechain.internal.connection.MuleChainEinstein1Connection;
-import com.mule.mulechain.internal.helpers.MuleChainEinstein1PayloadHelper;
-import com.mule.mulechain.internal.models.MuleChainEinstein1ParamsModelDetails;
+import com.mule.einstein.internal.connection.EinsteinConnection;
+import com.mule.einstein.internal.helpers.PayloadHelper;
+import com.mule.einstein.internal.models.ParamsModelDetails;
 
 import java.util.List;
 
-public class MuleChainEinstein1ChatMemoryHelper {
+public class ChatMemoryHelper {
 
 
-  private static MuleChainEinstein1ChatMemory intializeChatMemory(String memoryPath, String memoryName) {
-    return new MuleChainEinstein1ChatMemory(memoryPath, memoryName);
+  private static ChatMemory intializeChatMemory(String memoryPath, String memoryName) {
+    return new ChatMemory(memoryPath, memoryName);
   }
 
-  private static List<String> getKeepLastMessage(MuleChainEinstein1ChatMemory chatMemory, Integer keepLastMessages){
+  private static List<String> getKeepLastMessage(ChatMemory chatMemory, Integer keepLastMessages){
 
     // Retrieve all messages in ascending order of messageId
     List<String> messagesAsc = chatMemory.getAllMessagesByMessageIdAsc();
@@ -27,7 +27,7 @@ public class MuleChainEinstein1ChatMemoryHelper {
     
   }
 
-  private static void addMessageToMemory(MuleChainEinstein1ChatMemory chatMemory, String prompt){
+  private static void addMessageToMemory(ChatMemory chatMemory, String prompt){
     if (!isQuestion(prompt)) {
         chatMemory.addMessage(chatMemory.getMessageCount() + 1, prompt);
     }
@@ -58,10 +58,10 @@ public class MuleChainEinstein1ChatMemoryHelper {
 }
 
 
-  public static String chatWithMemory(String prompt, String memoryPath, String memoryName, Integer keepLastMessages, MuleChainEinstein1Connection connection, MuleChainEinstein1ParamsModelDetails MuleChainParameters) {
+  public static String chatWithMemory(String prompt, String memoryPath, String memoryName, Integer keepLastMessages, EinsteinConnection connection, ParamsModelDetails MuleChainParameters) {
 
     //Chatmemory initialization
-    MuleChainEinstein1ChatMemory chatMemory = intializeChatMemory(memoryPath, memoryName);
+    ChatMemory chatMemory = intializeChatMemory(memoryPath, memoryName);
 
     //Get keepLastMessages
     List<String> keepLastMessagesList = getKeepLastMessage(chatMemory, keepLastMessages);
@@ -69,7 +69,7 @@ public class MuleChainEinstein1ChatMemoryHelper {
     //String memoryPrompt = keepLastMessagesList.toString();
     String memoryPrompt = formatMemoryPrompt(keepLastMessagesList);
     
-    String response = MuleChainEinstein1PayloadHelper.executeGenerateText(memoryPrompt, connection, MuleChainParameters);
+    String response = PayloadHelper.executeGenerateText(memoryPrompt, connection, MuleChainParameters);
     
     addMessageToMemory(chatMemory, prompt);
 

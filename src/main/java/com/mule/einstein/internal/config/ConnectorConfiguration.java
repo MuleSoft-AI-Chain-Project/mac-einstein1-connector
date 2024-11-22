@@ -1,6 +1,6 @@
-package com.mule.mulechain.internal.config;
+package com.mule.einstein.internal.config;
 
-import com.mule.mulechain.internal.connection.MuleChainEinstein1ConnectionProvider;
+import com.mule.einstein.internal.connection.ConnectionProvider;
 import org.mule.runtime.api.lifecycle.Disposable;
 import org.mule.runtime.api.lifecycle.Initialisable;
 import org.mule.runtime.api.lifecycle.InitialisationException;
@@ -8,7 +8,7 @@ import org.mule.runtime.extension.api.annotation.Configuration;
 import org.mule.runtime.extension.api.annotation.Operations;
 import org.mule.runtime.extension.api.annotation.connectivity.ConnectionProviders;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
-import com.mule.mulechain.internal.operations.MuleChainEinstein1Operations;
+import com.mule.einstein.internal.operations.EinsteinOperations;
 import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
 import org.mule.runtime.extension.api.annotation.param.display.Placement;
 
@@ -17,9 +17,9 @@ import org.mule.runtime.extension.api.annotation.param.display.Placement;
  * operations since they represent something core from the extension.
  */
 @Configuration(name = "config")
-@Operations(MuleChainEinstein1Operations.class)
-@ConnectionProviders(MuleChainEinstein1ConnectionProvider.class)
-public class MuleChainEinstein1Configuration implements Initialisable, Disposable {
+@Operations(EinsteinOperations.class)
+@ConnectionProviders(ConnectionProvider.class)
+public class ConnectorConfiguration implements Initialisable, Disposable {
 
   @Parameter
   @Placement(order = 1, tab = Placement.DEFAULT_TAB)
