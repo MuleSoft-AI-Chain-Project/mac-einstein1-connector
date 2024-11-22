@@ -1,19 +1,19 @@
-package com.mule.mulechain.internal.models;
+package com.mule.einstein.internal.models;
 import org.mule.runtime.api.meta.ExpressionSupport;
 import org.mule.runtime.extension.api.annotation.Expression;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
 import org.mule.runtime.extension.api.annotation.values.OfValues;
 
-import com.mule.mulechain.internal.helpers.documents.MuleChainEinstein1DocumentFileType;
-import com.mule.mulechain.internal.helpers.documents.MuleChainEinstein1DocumentSplitOptions;
+import com.mule.einstein.internal.helpers.documents.DocumentFileType;
+import com.mule.einstein.internal.helpers.documents.DocumentSplitOptions;
 
-public class MuleChainEinstein1RAGParamsModelDetails {
+public class RAGParamsModelDetails {
 
 
 	@Parameter
 	@Expression(ExpressionSupport.SUPPORTED)
-	@OfValues(MuleChainEinstein1EmbeddingNameProvider.class)
+	@OfValues(EmbeddingNameProvider.class)
 	@Optional(defaultValue = "OpenAI Ada 002")
 	private String embeddingName;
 
@@ -23,7 +23,7 @@ public class MuleChainEinstein1RAGParamsModelDetails {
 
 	@Parameter
 	@Expression(ExpressionSupport.SUPPORTED)
-	@OfValues(MuleChainEinstein1DocumentFileType.class)
+	@OfValues(DocumentFileType.class)
 	@Optional(defaultValue = "PDF")
 	private String fileType;
 
@@ -33,7 +33,7 @@ public class MuleChainEinstein1RAGParamsModelDetails {
 
 	@Parameter
 	@Expression(ExpressionSupport.SUPPORTED)
-	@OfValues(MuleChainEinstein1DocumentSplitOptions.class)
+	@OfValues(DocumentSplitOptions.class)
 	@Optional(defaultValue = "FULL")
 	private String optionType;
 
@@ -44,7 +44,7 @@ public class MuleChainEinstein1RAGParamsModelDetails {
 
 	@Parameter
 	@Expression(ExpressionSupport.SUPPORTED)
-	@OfValues(MuleChainEinstein1ModelNameProvider.class)
+	@OfValues(ModelNameProvider.class)
 	@Optional(defaultValue = "OpenAI GPT 3.5 Turbo")
 	private String modelName;
 

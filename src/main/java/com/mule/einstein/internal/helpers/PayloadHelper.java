@@ -1,4 +1,4 @@
-package com.mule.mulechain.internal.helpers;
+package com.mule.einstein.internal.helpers;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -25,19 +25,18 @@ import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.txt.TXTParser;
 import org.apache.tika.sax.BodyContentHandler;
-import org.bouncycastle.jcajce.provider.asymmetric.ec.SignatureSpi.ecPlainDSARP160;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.xml.sax.SAXException;
 
-import com.mule.mulechain.internal.MuleChainEinstein1Connection;
-import com.mule.mulechain.internal.helpers.documents.MuleChainEinstein1ParametersEmbeddingDocument;
-import com.mule.mulechain.internal.models.MuleChainEinstein1ParamsEmbeddingDetails;
-import com.mule.mulechain.internal.models.MuleChainEinstein1ParamsModelDetails;
-import com.mule.mulechain.internal.models.MuleChainEinstein1RAGParamsModelDetails;
+import com.mule.einstein.internal.connection.EinsteinConnection;
+import com.mule.einstein.internal.helpers.documents.ParametersEmbeddingDocument;
+import com.mule.einstein.internal.models.ParamsEmbeddingDetails;
+import com.mule.einstein.internal.models.ParamsModelDetails;
+import com.mule.einstein.internal.models.RAGParamsModelDetails;
 
-public class MuleChainEinstein1PayloadHelper {
+public class PayloadHelper {
 
     private static final Map<String, String> modelMapping = new HashMap<>();
     private static final String URL_BASE = "https://api.salesforce.com/einstein/platform/v1/models/";
@@ -148,22 +147,19 @@ public class MuleChainEinstein1PayloadHelper {
 
     private static String generateText(String accessToken, String payload, String modelName, String resource) {
         String urlString = URL_BASE + getMappedValue(modelName) + resource;
-        //System.out.println(urlString);
         return executeREST(accessToken, payload, urlString);
     }
 
 
     private static String generateEmbedding(String accessToken, String payload, String modelName, String resource) {
         String urlString = URL_BASE + getMappedValue(modelName) + resource;
-        //System.out.println(urlString);
-
         return executeREST(accessToken, payload, urlString);
     }
 
 
 
 
-    public static String EmbeddingFromFile(String filePath, MuleChainEinstein1Connection connection, MuleChainEinstein1ParametersEmbeddingDocument MuleChainEinsteinParameters) throws IOException, SAXException, TikaException {
+    public static String EmbeddingFromFile(String filePath, EinsteinConnection connection, ParametersEmbeddingDocument MuleChainEinsteinParameters) throws IOException, SAXException, TikaException {
 
         String access_token = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
         /* 
@@ -191,7 +187,6 @@ public class MuleChainEinstein1PayloadHelper {
 
             for (String text : corpus) {
                 corpusBody = constructEmbeddingJSON(text); 
-                //System.out.println(corpusBody);
                 if (text != null && !text.isEmpty()) {
                     response = generateEmbedding(access_token, constructEmbeddingJSON(corpusBody), MuleChainEinsteinParameters.getModelName(), "/embeddings");
                     jsonObject = new JSONObject(response);
@@ -237,7 +232,7 @@ public class MuleChainEinstein1PayloadHelper {
     }
 
 
-    private static String constrcutJsonMessages(String message, MuleChainEinstein1ParamsModelDetails paramsModelDetails){        
+    private static String constrcutJsonMessages(String message, ParamsModelDetails paramsModelDetails){
         JSONArray messages = new JSONArray(message);
         
         JSONObject locale = new JSONObject();
@@ -287,8 +282,6 @@ public class MuleChainEinstein1PayloadHelper {
         for (int i = 0; i < rootArray.length(); i++) {
 
             JSONObject node = rootArray.getJSONObject(i);
-            //System.out.println("url Out '" + node.getString("url")+ "', In '" + url + "'");
-            //System.out.println(node.getString("url").trim().equals(url));
 
             if (node.getString("url").trim().equals(url)) {
                 String method = node.getString("method");
@@ -296,10 +289,6 @@ public class MuleChainEinstein1PayloadHelper {
 
                 URL urlObj = new URL(url);
                 HttpURLConnection conn = (HttpURLConnection) urlObj.openConnection();
-                System.out.println("urlObj: " + urlObj.toString());
-                System.out.println("method: " + method.toString());
-                System.out.println("headers: " + headers.toString());
-                System.out.println("payload: " + payload);
 
                 conn.setRequestMethod(method);
                 if (headers != null && !headers.isEmpty()) {
@@ -319,11 +308,8 @@ public class MuleChainEinstein1PayloadHelper {
                         byte[] input = payload.getBytes(StandardCharsets.UTF_8);
                         os.write(input, 0, input.length);
                     }*/
-        
-                
 
                 int responseCode = conn.getResponseCode();
-                System.out.println("Response Code: " + responseCode);
 
                 BufferedReader in;
                 if (responseCode >= 200 && responseCode < 300) {
@@ -373,14 +359,14 @@ public class MuleChainEinstein1PayloadHelper {
         return findPayload;
     }
 
-    public static String executeGenerateText(String prompt, MuleChainEinstein1Connection connection, MuleChainEinstein1ParamsModelDetails paramDetails){
+    public static String executeGenerateText(String prompt, EinsteinConnection connection, ParamsModelDetails paramDetails){
         String access_token = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
         String payload = constructJsonPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
         String response = generateText(access_token, payload, paramDetails.getModelName(), "/generations");
         return response;
     }
 
-    public static String executeGenerateChat(String messages, MuleChainEinstein1Connection connection, MuleChainEinstein1ParamsModelDetails paramDetails){
+    public static String executeGenerateChat(String messages, EinsteinConnection connection, ParamsModelDetails paramDetails){
         String access_token = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
         String payload = constrcutJsonMessages(messages, paramDetails);
         String response = generateText(access_token, payload, paramDetails.getModelName(), "/chat-generations");
@@ -388,35 +374,30 @@ public class MuleChainEinstein1PayloadHelper {
     }
 
 
-    public static String executeGenerateEmbedding(String text, MuleChainEinstein1Connection connection, MuleChainEinstein1ParamsEmbeddingDetails paramDetails){
+    public static String executeGenerateEmbedding(String text, EinsteinConnection connection, ParamsEmbeddingDetails paramDetails){
         String access_token = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
         String payload = constructEmbeddingJSON(text);
         String response = generateEmbedding(access_token, payload, paramDetails.getModelName(), "/embeddings");
         return response;
     }
 
-    public static String executeRAG(String text, MuleChainEinstein1Connection connection, MuleChainEinstein1RAGParamsModelDetails paramDetails){
+    public static String executeRAG(String text, EinsteinConnection connection, RAGParamsModelDetails paramDetails){
         String access_token = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
         String payload = constructJsonPayload(text, paramDetails.getLocale(), paramDetails.getProbability());
-        //System.out.println(payload);
         String response = generateText(access_token, payload, paramDetails.getModelName(), "/generations");
         return response;
     }
 
-    public static String executeTools(String originalPrompt, String prompt, String filePath, MuleChainEinstein1Connection connection, MuleChainEinstein1ParamsModelDetails paramDetails) throws IOException{
+    public static String executeTools(String originalPrompt, String prompt, String filePath, EinsteinConnection connection, ParamsModelDetails paramDetails) throws IOException{
         String access_token = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
         String payload = constructJsonPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
         String payloadOptional = constructJsonPayload(originalPrompt, paramDetails.getLocale(), paramDetails.getProbability());
 
-        System.out.println(payload);
         String intermediateAnswer = generateText(access_token, payload, paramDetails.getModelName(), "/generations");
-        //System.out.println("intermediateAnswer: " + intermediateAnswer);
 
         String response = generateText(access_token, payloadOptional, paramDetails.getModelName(), "/generations");
-        //System.out.println("Response: " + response);
         //response = intermediateAnswer;
         List<String> findURL = extractUrls(intermediateAnswer.toString());
-        //System.out.println(findURL.toString());
         String ePayload = "";
         if (findURL!=null){
             JSONObject jsonObject = new JSONObject(intermediateAnswer);
@@ -425,11 +406,6 @@ public class MuleChainEinstein1PayloadHelper {
             /*ePayload = extractPayload(generatedText);
             ePayload = extractPayload(ePayload);*/
             ePayload = buildPayload(generatedText);
-
-            //System.out.println("intermediate: " + intermediateAnswer);
-            
-            //System.out.println("URL: " + findURL.get(0));
-            //System.out.println("extractUrls-URL: " + extractUrls(findURL.get(0).toString()));
 
             response = getAttributes(findURL.get(0),filePath, extractPayload(ePayload));
             String finalPayload = constructJsonPayload("data: " + response + ", question: " + originalPrompt, paramDetails.getLocale(), paramDetails.getProbability());
@@ -442,7 +418,6 @@ public class MuleChainEinstein1PayloadHelper {
 
     private static List<String> createCorpusList(String filePath, String fileType, String splitOption) throws IOException, SAXException, TikaException {
         List<String> corpus;
-        //System.out.println(splitOption);
         if (splitOption.equals("FULL")) {
             corpus = Arrays.asList(splitFullDocument(filePath,fileType));
         } else {
@@ -451,7 +426,7 @@ public class MuleChainEinstein1PayloadHelper {
         return corpus;
     }
 
-    public static String EmbeddingFileQuery(String prompt, String filePath, MuleChainEinstein1Connection connection, String modelName, String fileType, String optionType) throws IOException, SAXException, TikaException {
+    public static String EmbeddingFileQuery(String prompt, String filePath, EinsteinConnection connection, String modelName, String fileType, String optionType) throws IOException, SAXException, TikaException {
 
         String access_token = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
 
@@ -490,10 +465,8 @@ public class MuleChainEinstein1PayloadHelper {
 
             for (String text : corpus) {
                 corpusBody = constructEmbeddingJSON(text); 
-                //System.out.println(corpusBody);
                 if (text != null && !text.isEmpty()) {
                     response = generateEmbedding(access_token, constructEmbeddingJSON(corpusBody), modelName, "/embeddings");
-                    //System.out.println(response);
 
                     jsonObject = new JSONObject(response);
                     embeddingsArray = jsonObject.getJSONArray("embeddings");
@@ -541,21 +514,16 @@ public class MuleChainEinstein1PayloadHelper {
 
     private static List<String> rankAndPrintResults(List<String> corpus, List<Double> similarityScores) {
         List<Integer> indices = new ArrayList<>();
-        //System.out.println(corpus.size());
         for (int i = 0; i < corpus.size(); i++) {
             indices.add(i);
         }
 
         indices.sort((i, j) -> Double.compare(similarityScores.get(j), similarityScores.get(i)));
 
-        //System.out.println("Ranked results:");
         List<String> results = new ArrayList<>();
-        //System.out.println(indices.size());
-        //System.out.println(similarityScores.size());
 
         if (similarityScores.size() != 0 && corpus.size() != 0) {
             for (int index : indices) {
-                //System.out.println("Score: " + similarityScores.get(index) + " - Text: " + corpus.get(index));
                 results.add(similarityScores.get(index) + " - " + corpus.get(index));
             }
         }
@@ -596,7 +564,6 @@ public class MuleChainEinstein1PayloadHelper {
     
         AutoDetectParser parser = new AutoDetectParser();
         parser.parse(inputstream, handler, metadata, pcontext);
-        //System.out.println(handler.toString());
         return handler.toString();
     }
 
@@ -608,7 +575,6 @@ public class MuleChainEinstein1PayloadHelper {
 
         TXTParser parser = new TXTParser();
         parser.parse(inputstream, handler, metadata, pcontext);
-        //System.out.println(handler.toString());
         return handler.toString();
     }
 

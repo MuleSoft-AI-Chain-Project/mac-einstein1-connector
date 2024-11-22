@@ -1,4 +1,4 @@
-package com.mule.mulechain.internal.helpers.documents;
+package com.mule.einstein.internal.helpers.documents;
 
 import org.mule.runtime.api.meta.ExpressionSupport;
 import org.mule.runtime.extension.api.annotation.Expression;
@@ -6,12 +6,12 @@ import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
 import org.mule.runtime.extension.api.annotation.values.OfValues;
 
-import com.mule.mulechain.internal.models.MuleChainEinstein1EmbeddingNameProvider;
+import com.mule.einstein.internal.models.EmbeddingNameProvider;
 
-public class MuleChainEinstein1ParametersEmbeddingDocument {
+public class ParametersEmbeddingDocument {
 	@Parameter
 	@Expression(ExpressionSupport.SUPPORTED)
-	@OfValues(MuleChainEinstein1EmbeddingNameProvider.class)
+	@OfValues(EmbeddingNameProvider.class)
 	@Optional(defaultValue = "OpenAI Ada 002")
 	private String modelName;
 
@@ -21,7 +21,7 @@ public class MuleChainEinstein1ParametersEmbeddingDocument {
 
 	@Parameter
 	@Expression(ExpressionSupport.SUPPORTED)
-	@OfValues(MuleChainEinstein1DocumentFileType.class)
+	@OfValues(DocumentFileType.class)
 	@Optional(defaultValue = "PDF")
 	private String fileType;
 
@@ -31,7 +31,7 @@ public class MuleChainEinstein1ParametersEmbeddingDocument {
 
 	@Parameter
 	@Expression(ExpressionSupport.SUPPORTED)
-	@OfValues(MuleChainEinstein1DocumentSplitOptions.class)
+	@OfValues(DocumentSplitOptions.class)
 	@Optional(defaultValue = "FULL")
 	private String optionType;
 

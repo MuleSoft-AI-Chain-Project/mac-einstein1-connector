@@ -1,4 +1,4 @@
-package com.mule.mulechain.internal.helpers.chatmemory;
+package com.mule.einstein.internal.helpers.chatmemory;
 
 import org.mapdb.*;
 
@@ -8,11 +8,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-public class MuleChainEinstein1ChatMemory {
-    private DB db;
-    private Map<Long, String> chatMap;
+public class ChatMemory {
+    private final DB db;
+    private final Map<Long, String> chatMap;
 
-    public MuleChainEinstein1ChatMemory(String dbFile, String memoryName) {
+    public ChatMemory(String dbFile, String memoryName) {
         // Open or create the DB file
         db = DBMaker.fileDB(new File(dbFile))
                 .transactionEnable()

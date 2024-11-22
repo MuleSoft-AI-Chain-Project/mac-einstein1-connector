@@ -1,4 +1,4 @@
-package com.mule.mulechain.internal;
+package com.mule.einstein.internal.connection;
 
 import org.mule.runtime.api.connection.ConnectionException;
 import org.mule.runtime.api.connection.ConnectionValidationResult;
@@ -12,9 +12,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-public class MuleChainEinstein1ConnectionProvider implements PoolingConnectionProvider<MuleChainEinstein1Connection> {
+public class ConnectionProvider implements PoolingConnectionProvider<EinsteinConnection> {
 
-  private final Logger LOGGER = LoggerFactory.getLogger(MuleChainEinstein1ConnectionProvider.class);
+  private final Logger LOGGER = LoggerFactory.getLogger(ConnectionProvider.class);
 
   @Parameter
   private String clientId;
@@ -26,7 +26,7 @@ public class MuleChainEinstein1ConnectionProvider implements PoolingConnectionPr
   private String salesforceOrg;
 
   @Override
-  public MuleChainEinstein1Connection connect() throws ConnectionException {
+  public EinsteinConnection connect() throws ConnectionException {
     try {
       String urlStr = "https://" + salesforceOrg + ".my.salesforce.com/services/oauth2/token";
       String urlParameters = "grant_type=client_credentials&client_id=" + clientId + "&client_secret=" + clientSecret;
@@ -40,7 +40,7 @@ public class MuleChainEinstein1ConnectionProvider implements PoolingConnectionPr
 
       int responseCode = conn.getResponseCode();
       if (responseCode == 200) {
-        return new MuleChainEinstein1Connection(salesforceOrg, clientId, clientSecret);
+        return new EinsteinConnection(salesforceOrg, clientId, clientSecret);
       } else {
         throw new ConnectionException("Failed to connect to Salesforce: HTTP " + responseCode);
       }
@@ -50,7 +50,7 @@ public class MuleChainEinstein1ConnectionProvider implements PoolingConnectionPr
   }
 
   @Override
-  public void disconnect(MuleChainEinstein1Connection connection) {
+  public void disconnect(EinsteinConnection connection) {
     try {
       connection.invalidate();
     } catch (Exception e) {
@@ -59,7 +59,7 @@ public class MuleChainEinstein1ConnectionProvider implements PoolingConnectionPr
   }
 
   @Override
-  public ConnectionValidationResult validate(MuleChainEinstein1Connection connection) {
+  public ConnectionValidationResult validate(EinsteinConnection connection) {
     try {
       String urlStr = "https://" + connection.getSalesforceOrg() + ".my.salesforce.com/services/oauth2/token";
       String urlParameters = "grant_type=client_credentials&client_id=" + connection.getClientId() + "&client_secret=" + connection.getClientSecret();

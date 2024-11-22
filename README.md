@@ -1,4 +1,4 @@
-# MAC Einstein AI Extension
+# Mule4 Einstein AI Connector
 
 ## <img src="icon/icon.svg" width="6%" alt="banner"> [MuleSoft AI Chain - Einstein AI Connector](https://mac-project.ai/docs/einstein-ai)
 
@@ -22,9 +22,9 @@ To use this connector, add the following dependency to your application's `pom.x
 
 ```
 	<dependency>
-		<groupId>com.mule.mulechain</groupId>
-		<artifactId>mulechain-einstein1-connector</artifactId>
-		<version>0.2.0</version>
+		<groupId>com.mulesoft.connectors</groupId>
+		<artifactId>mule4-einstein-connector</artifactId>
+		<version>0.20.0</version>
 		<classifier>mule-plugin</classifier>		
 	</dependency>
 ```
