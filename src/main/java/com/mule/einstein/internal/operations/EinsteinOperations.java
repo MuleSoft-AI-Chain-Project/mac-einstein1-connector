@@ -1,29 +1,25 @@
 package com.mule.einstein.internal.operations;
 
-import static org.apache.commons.io.IOUtils.toInputStream;
-import static org.mule.runtime.extension.api.annotation.param.MediaType.APPLICATION_JSON;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-
-import org.apache.tika.exception.TikaException;
-
-import org.mule.runtime.extension.api.annotation.Alias;
-import org.mule.runtime.extension.api.annotation.param.MediaType;
-import org.mule.runtime.extension.api.annotation.param.ParameterGroup;
-import org.xml.sax.SAXException;
-
 import com.mule.einstein.internal.connection.EinsteinConnection;
 import com.mule.einstein.internal.helpers.PayloadHelper;
 import com.mule.einstein.internal.helpers.PromptTemplateHelper;
 import com.mule.einstein.internal.helpers.chatmemory.ChatMemoryHelper;
 import com.mule.einstein.internal.helpers.documents.ParametersEmbeddingDocument;
-import com.mule.einstein.internal.models.ParamsEmbeddingDetails;
 import com.mule.einstein.internal.models.ParamsModelDetails;
 import com.mule.einstein.internal.models.RAGParamsModelDetails;
-
+import org.apache.tika.exception.TikaException;
+import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.param.Connection;
+import org.mule.runtime.extension.api.annotation.param.MediaType;
+import org.mule.runtime.extension.api.annotation.param.ParameterGroup;
+import org.xml.sax.SAXException;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+
+import static org.apache.commons.io.IOUtils.toInputStream;
+import static org.mule.runtime.extension.api.annotation.param.MediaType.APPLICATION_JSON;
 
 
 /**
@@ -41,15 +37,6 @@ public class EinsteinOperations {
   }
 
   /**
-   * Create an embedding vector representing the input text.
-   */
-  @MediaType(value = APPLICATION_JSON, strict = false)
-  @Alias("EMBEDDING-generate-from-text")
-  public InputStream generateEmbedding(String text, @Connection EinsteinConnection connection, @ParameterGroup(name= "Additional properties") ParamsEmbeddingDetails paramDetails){
-    return toInputStream(PayloadHelper.executeGenerateEmbedding(text,connection,paramDetails), StandardCharsets.UTF_8);
-  }
-
-  /**
    * Performs .
    * @throws TikaException 
    * @throws SAXException 
@@ -60,20 +47,6 @@ public class EinsteinOperations {
   public InputStream queryEmbeddingOnFiles(String prompt, String filePath, @Connection EinsteinConnection connection, @ParameterGroup(name= "Additional properties") ParametersEmbeddingDocument paramDetails) throws IOException, SAXException, TikaException{
     return toInputStream(PayloadHelper.embeddingFileQuery(prompt,filePath,connection,paramDetails.getModelName(), paramDetails.getFileType(), paramDetails.getOptionType()), StandardCharsets.UTF_8);
   }
-
-
-   /**
-   * Performs .
-   * @throws TikaException 
-   * @throws SAXException 
-   * @throws IOException 
-   */
-  @MediaType(value = APPLICATION_JSON, strict = false)
-  @Alias("EMBEDDING-generate-from-file")
-  public InputStream embeddingFromFiles(String filePath, @Connection EinsteinConnection connection, @ParameterGroup(name= "Additional properties") ParametersEmbeddingDocument paramDetails) throws IOException, SAXException, TikaException{
-    return toInputStream(PayloadHelper.embeddingFromFile(filePath,connection,paramDetails), StandardCharsets.UTF_8);
-  }
-
 
    /**
    * Performs .
@@ -100,8 +73,6 @@ public class EinsteinOperations {
     String content = PayloadHelper.embeddingFileQuery(prompt,toolsConfig,connection,"OpenAI Ada 002", "text", "FULL");
     return toInputStream(PayloadHelper.executeTools(prompt, "data: " + content + ", question: " + prompt, toolsConfig, connection, paramDetails), StandardCharsets.UTF_8);
   }
-
-
 
   /**
    * Generate a response based on the prompt provided.
@@ -135,6 +106,4 @@ public class EinsteinOperations {
 
       	return toInputStream(response, StandardCharsets.UTF_8);
       }
-
-
 }
