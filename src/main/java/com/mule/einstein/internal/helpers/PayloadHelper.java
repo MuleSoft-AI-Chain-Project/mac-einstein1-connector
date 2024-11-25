@@ -489,8 +489,7 @@ public class PayloadHelper {
 
         String findPayload = extractPayload(payload);
         if (findPayload.equals("Payload not found!")){
-            String secondTry = extractPayload(payload);
-            return secondTry;
+            return extractPayload(payload);
         }
 
         return findPayload;

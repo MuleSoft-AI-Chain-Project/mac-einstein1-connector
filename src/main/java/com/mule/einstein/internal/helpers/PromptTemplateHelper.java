@@ -16,9 +16,7 @@ public class PromptTemplateHelper {
         variables.put("dataset", dataSet);
 
         // Replace the placeholders with actual values
-        String processedTemplate = processTemplate(finalTemplate, variables);
-        return processedTemplate;
-
+        return processTemplate(finalTemplate, variables);
     }
 
     private static String processTemplate(String template, Map<String, String> variables) {
@@ -27,5 +25,4 @@ public class PromptTemplateHelper {
         }
         return template;
     }
-
 }
