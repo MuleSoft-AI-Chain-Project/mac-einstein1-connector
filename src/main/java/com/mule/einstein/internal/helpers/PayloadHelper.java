@@ -1,8 +1,6 @@
 package com.mule.einstein.internal.helpers;
 
 import com.mule.einstein.internal.connection.EinsteinConnection;
-import com.mule.einstein.internal.helpers.documents.ParametersEmbeddingDocument;
-import com.mule.einstein.internal.models.ParamsEmbeddingDetails;
 import com.mule.einstein.internal.models.ParamsModelDetails;
 import com.mule.einstein.internal.models.RAGParamsModelDetails;
 import org.apache.tika.exception.TikaException;
@@ -19,12 +17,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -61,40 +68,6 @@ public class PayloadHelper {
         return executeREST(accessToken, payload, urlString);
     }
 
-    public static String embeddingFromFile(String filePath, EinsteinConnection connection, ParametersEmbeddingDocument einsteinParameters) throws IOException, SAXException, TikaException {
-
-        String accessToken = RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
-        List<String> corpus = createCorpusList(filePath, einsteinParameters.getFileType(), einsteinParameters.getOptionType());
-
-        try {
-            String response;
-            JSONObject jsonObject;
-            //Generate embedding for query
-            JSONArray embeddingsArray;
-
-            String corpusBody;
-            // Generate embeddings for the corpus
-            List<JSONArray> corpusEmbeddings = new ArrayList<>();
-
-            for (String text : corpus) {
-                corpusBody = constructEmbeddingJSON(text);
-                if (text != null && !text.isEmpty()) {
-                    response = executeEinsteinRequest(accessToken, constructEmbeddingJSON(corpusBody), einsteinParameters.getModelName(), URI_MODELS_API_EMBEDDINGS);
-                    jsonObject = new JSONObject(response);
-                    embeddingsArray = jsonObject.getJSONArray("embeddings");
-                    corpusEmbeddings.add(embeddingsArray.getJSONObject(0).getJSONArray("embedding"));
-                }
-            }
-            // Convert results list to a JSONArray
-            JSONArray jsonArray = new JSONArray(corpusEmbeddings);
-
-            return jsonArray.toString();
-        } catch (Exception e) {
-            log.error("Exception during embedding from file",e);
-            return null;
-        }
-    }
-
     public static String executeGenerateText(String prompt, EinsteinConnection connection, ParamsModelDetails paramDetails){
         String accessToken = RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
         String payload = constructJsonPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
@@ -105,13 +78,6 @@ public class PayloadHelper {
         String accessToken = RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
         String payload = constrcutJsonMessages(messages, paramDetails);
         return executeEinsteinRequest(accessToken, payload, paramDetails.getModelName(), URI_MODELS_API_CHAT_GENERATIONS);
-    }
-
-
-    public static String executeGenerateEmbedding(String text, EinsteinConnection connection, ParamsEmbeddingDetails paramDetails){
-        String accessToken = RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
-        String payload = constructEmbeddingJSON(text);
-        return executeEinsteinRequest(accessToken, payload, paramDetails.getModelName(), URI_MODELS_API_EMBEDDINGS);
     }
 
     public static String executeRAG(String text, EinsteinConnection connection, RAGParamsModelDetails paramDetails){
