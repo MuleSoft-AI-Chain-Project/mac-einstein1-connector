@@ -4,6 +4,8 @@ import org.mule.runtime.api.connection.ConnectionException;
 import org.mule.runtime.api.connection.ConnectionValidationResult;
 import org.mule.runtime.api.connection.PoolingConnectionProvider;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
+import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
+import org.mule.runtime.extension.api.annotation.param.display.Placement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,16 +16,22 @@ import java.nio.charset.StandardCharsets;
 
 public class ConnectionProvider implements PoolingConnectionProvider<EinsteinConnection> {
 
-  private final Logger LOGGER = LoggerFactory.getLogger(ConnectionProvider.class);
+  private final Logger log = LoggerFactory.getLogger(ConnectionProvider.class);
 
   @Parameter
+  @Placement(order = 1, tab = Placement.CONNECTION_TAB)
+  @DisplayName("Salesforce Org URL")
+  private String salesforceOrg;
+
+  @Parameter
+  @Placement(order = 2,tab = Placement.CONNECTION_TAB)
+  @DisplayName("Client ID")
   private String clientId;
 
   @Parameter
+  @Placement(order = 3,tab = Placement.CONNECTION_TAB)
+  @DisplayName("Client Secret")
   private String clientSecret;
-
-  @Parameter
-  private String salesforceOrg;
 
   @Override
   public EinsteinConnection connect() throws ConnectionException {
@@ -54,7 +62,7 @@ public class ConnectionProvider implements PoolingConnectionProvider<EinsteinCon
     try {
       connection.invalidate();
     } catch (Exception e) {
-      LOGGER.error("Error while disconnecting [" + connection.getClientId() + "]: " + e.getMessage(), e);
+      log.error("Error while disconnecting [" + connection.getClientId() + "]: " + e.getMessage(), e);
     }
   }
 
