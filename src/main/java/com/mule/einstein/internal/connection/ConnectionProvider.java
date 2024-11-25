@@ -7,6 +7,7 @@ import org.mule.runtime.api.connection.ConnectionValidationResult;
 import org.mule.runtime.api.connection.PoolingConnectionProvider;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
 import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
+import org.mule.runtime.extension.api.annotation.param.display.Example;
 import org.mule.runtime.extension.api.annotation.param.display.Placement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,7 @@ public class ConnectionProvider implements PoolingConnectionProvider<EinsteinCon
   @Parameter
   @Placement(order = 1, tab = Placement.CONNECTION_TAB)
   @DisplayName("Salesforce Org URL")
+  @Example("mydomain.my.salesforce.com")
   private String salesforceOrg;
 
   @Parameter
