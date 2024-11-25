@@ -62,7 +62,6 @@ public class PayloadHelper {
         return modelMapping.getOrDefault(input, "Mapping not found");
     }
 
-
     private static String executeEinsteinRequest(String accessToken, String payload, String modelName, String resource) {
         String urlString = URL_BASE + getMappedValue(modelName) + resource;
         return executeREST(accessToken, payload, urlString);
@@ -130,7 +129,7 @@ public class PayloadHelper {
 
         try {
 
-            String response = executeEinsteinRequest(accessToken, body, modelName, "/embeddings");
+            String response = executeEinsteinRequest(accessToken, body, modelName, URI_MODELS_API_EMBEDDINGS);
             JSONObject jsonObject = new JSONObject(response);
             //Generate embedding for query
             JSONArray embeddingsArray = jsonObject.getJSONArray("embeddings");
@@ -148,7 +147,7 @@ public class PayloadHelper {
             for (String text : corpus) {
                 corpusBody = constructEmbeddingJSON(text);
                 if (text != null && !text.isEmpty()) {
-                    response = executeEinsteinRequest(accessToken, constructEmbeddingJSON(corpusBody), modelName, "/embeddings");
+                    response = executeEinsteinRequest(accessToken, constructEmbeddingJSON(corpusBody), modelName, URI_MODELS_API_EMBEDDINGS);
 
                     jsonObject = new JSONObject(response);
                     embeddingsArray = jsonObject.getJSONArray("embeddings");

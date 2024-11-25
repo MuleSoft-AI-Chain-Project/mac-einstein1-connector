@@ -21,9 +21,7 @@ public class ChatMemoryHelper {
     if (messagesAsc.size() > keepLastMessages) {
         messagesAsc = messagesAsc.subList(messagesAsc.size() - keepLastMessages, messagesAsc.size());
     }
-
     return messagesAsc;
-    
   }
 
   private static void addMessageToMemory(ChatMemory chatMemory, String prompt){
@@ -59,7 +57,7 @@ public class ChatMemoryHelper {
 
   public static String chatWithMemory(String prompt, String memoryPath, String memoryName, Integer keepLastMessages, EinsteinConnection connection, ParamsModelDetails parameters) {
 
-    //Chatmemory initialization
+    //Chat memory initialization
     ChatMemory chatMemory = intializeChatMemory(memoryPath, memoryName);
 
     //Get keepLastMessages
