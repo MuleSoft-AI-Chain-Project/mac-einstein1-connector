@@ -1,23 +1,10 @@
 package com.mule.einstein.internal.helpers;
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import com.mule.einstein.internal.connection.EinsteinConnection;
+import com.mule.einstein.internal.helpers.documents.ParametersEmbeddingDocument;
+import com.mule.einstein.internal.models.ParamsEmbeddingDetails;
+import com.mule.einstein.internal.models.ParamsModelDetails;
+import com.mule.einstein.internal.models.RAGParamsModelDetails;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
@@ -28,18 +15,25 @@ import org.apache.tika.sax.BodyContentHandler;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
-import com.mule.einstein.internal.connection.EinsteinConnection;
-import com.mule.einstein.internal.helpers.documents.ParametersEmbeddingDocument;
-import com.mule.einstein.internal.models.ParamsEmbeddingDetails;
-import com.mule.einstein.internal.models.ParamsModelDetails;
-import com.mule.einstein.internal.models.RAGParamsModelDetails;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static com.mule.einstein.internal.helpers.ConstantUtil.URL_BASE;
+import static com.mule.einstein.internal.helpers.RequestHelper.getOAuthURL;
 
 public class PayloadHelper {
 
+    private static final Logger log = LoggerFactory.getLogger(PayloadHelper.class);
     private static final Map<String, String> modelMapping = new HashMap<>();
-    private static final String URL_BASE = "https://api.salesforce.com/einstein/platform/v1/models/";
 
     static {
         modelMapping.put("Anthropic Claude 3 Haiku on Amazon", "sfdc_ai__DefaultBedrockAnthropicClaude3Haiku");
@@ -62,15 +56,16 @@ public class PayloadHelper {
 
 
     public static String getAccessToken(String org, String consumerKey, String consumerSecret) {
-    String urlString = "https://" + org + ".my.salesforce.com/services/oauth2/token";
-    String params = "grant_type=client_credentials&client_id=" + consumerKey + "&client_secret=" + consumerSecret;
+
+    String urlString = getOAuthURL(org);
+    String params = RequestHelper.getOAuthParams(consumerKey,consumerSecret);
 
     try {
         URL url = new URL(urlString);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setDoOutput(true);
-        conn.setRequestMethod("POST");
-        conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+        conn.setRequestMethod(ConstantUtil.HTTP_METHOD_POST);
+        conn.setRequestProperty(ConstantUtil.CONTENT_TYPE_STRING, "application/x-www-form-urlencoded");
 
         try (OutputStream os = conn.getOutputStream()) {
             byte[] input = params.getBytes(StandardCharsets.UTF_8);
@@ -94,7 +89,7 @@ public class PayloadHelper {
             return "Error: " + responseCode;
         }
     } catch (Exception e) {
-        e.printStackTrace();
+        log.error("Exception while getting access token",e);
         return "Exception occurred: " + e.getMessage();
     }
     }
@@ -107,7 +102,7 @@ public class PayloadHelper {
         conn.setRequestProperty("Authorization", "Bearer " + accessToken);
         conn.setRequestProperty("x-sfdc-app-context", "EinsteinGPT");
         conn.setRequestProperty("x-client-feature-id", "ai-platform-models-connected-app");
-        conn.setRequestProperty("Content-Type", "application/json;charset=utf-8");
+        conn.setRequestProperty(ConstantUtil.CONTENT_TYPE_STRING, "application/json;charset=utf-8");
         return conn;
     }
 
@@ -138,7 +133,7 @@ public class PayloadHelper {
                 return "Error: " + responseCode;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Exception during REST request ",e);
             return "Exception occurred: " + e.getMessage();
         }
 
@@ -201,8 +196,7 @@ public class PayloadHelper {
 
             return jsonArray.toString();
        } catch (Exception e) {
-            System.err.println("Error: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Exception during embedding from file",e);
             return null;
 
         }
@@ -294,7 +288,7 @@ public class PayloadHelper {
                 if (headers != null && !headers.isEmpty()) {
                     conn.setRequestProperty("Authorization", headers);
                 }
-                conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                conn.setRequestProperty(ConstantUtil.CONTENT_TYPE_STRING, "application/json; charset=UTF-8");
                 conn.setDoOutput(true);
 
 
@@ -443,9 +437,7 @@ public class PayloadHelper {
 
         String body = constructEmbeddingJSON(prompt);
 
-
         try {
-
 
             //JSONObject queryResponse = generateEmbedding(modelId, body, configuration, region);
             String response = generateEmbedding(access_token, body, modelName, "/embeddings");
@@ -489,14 +481,11 @@ public class PayloadHelper {
             return jsonArray.toString();
 
         } catch (Exception e) {
-            System.err.println("Error: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Exception during embedding file query ",e);
             return null;
 
         }
     }
-
-
 
     private static double calculateCosineSimilarity(JSONArray vec1, JSONArray vec2) {
         double dotProduct = 0.0;

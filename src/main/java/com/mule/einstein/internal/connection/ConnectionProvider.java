@@ -1,5 +1,7 @@
 package com.mule.einstein.internal.connection;
 
+import com.mule.einstein.internal.helpers.ConstantUtil;
+import com.mule.einstein.internal.helpers.RequestHelper;
 import org.mule.runtime.api.connection.ConnectionException;
 import org.mule.runtime.api.connection.ConnectionValidationResult;
 import org.mule.runtime.api.connection.PoolingConnectionProvider;
@@ -36,17 +38,8 @@ public class ConnectionProvider implements PoolingConnectionProvider<EinsteinCon
   @Override
   public EinsteinConnection connect() throws ConnectionException {
     try {
-      String urlStr = "https://" + salesforceOrg + ".my.salesforce.com/services/oauth2/token";
-      String urlParameters = "grant_type=client_credentials&client_id=" + clientId + "&client_secret=" + clientSecret;
-      byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
+      int responseCode = getConnectionResponseCode(salesforceOrg,clientId,clientSecret);
 
-      URL url = new URL(urlStr);
-      HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-      conn.setDoOutput(true);
-      conn.setRequestMethod("POST");
-      conn.getOutputStream().write(postData);
-
-      int responseCode = conn.getResponseCode();
       if (responseCode == 200) {
         return new EinsteinConnection(salesforceOrg, clientId, clientSecret);
       } else {
@@ -62,24 +55,15 @@ public class ConnectionProvider implements PoolingConnectionProvider<EinsteinCon
     try {
       connection.invalidate();
     } catch (Exception e) {
-      log.error("Error while disconnecting [" + connection.getClientId() + "]: " + e.getMessage(), e);
+      log.error("Error while disconnecting [{}]: {}", connection.getClientId(), e.getMessage(), e);
     }
   }
 
   @Override
   public ConnectionValidationResult validate(EinsteinConnection connection) {
     try {
-      String urlStr = "https://" + connection.getSalesforceOrg() + ".my.salesforce.com/services/oauth2/token";
-      String urlParameters = "grant_type=client_credentials&client_id=" + connection.getClientId() + "&client_secret=" + connection.getClientSecret();
-      byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
+      int responseCode = getConnectionResponseCode(connection.getSalesforceOrg(),connection.getClientId(),connection.getClientSecret());
 
-      URL url = new URL(urlStr);
-      HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-      conn.setDoOutput(true);
-      conn.setRequestMethod("POST");
-      conn.getOutputStream().write(postData);
-
-      int responseCode = conn.getResponseCode();
       if (responseCode == 200) {
         return ConnectionValidationResult.success();
       } else {
@@ -88,5 +72,25 @@ public class ConnectionProvider implements PoolingConnectionProvider<EinsteinCon
     } catch (IOException e) {
       return ConnectionValidationResult.failure("Failed to validate connection", e);
     }
+  }
+
+  private int getConnectionResponseCode(String salesforceOrg, String clientId, String clientSecret) throws IOException {
+
+    log.debug("Preparing request for connection for salesforce org:{}",salesforceOrg);
+
+    String urlStr = RequestHelper.getOAuthURL(salesforceOrg);
+    String urlParameters = RequestHelper.getOAuthParams(clientId,clientSecret);
+
+    byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
+
+    URL url = new URL(urlStr);
+    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    conn.setDoOutput(true);
+    conn.setRequestMethod(ConstantUtil.HTTP_METHOD_POST);
+    conn.getOutputStream().write(postData);
+    int respCode = conn.getResponseCode();
+
+    log.debug("Response code for connection request:{}",respCode);
+    return respCode;
   }
 }
