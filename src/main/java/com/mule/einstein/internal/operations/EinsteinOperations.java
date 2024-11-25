@@ -37,7 +37,7 @@ public class EinsteinOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("CHAT-generate-from-messages")
   public InputStream generateChat(String messages, @Connection EinsteinConnection connection, @ParameterGroup(name= "Additional properties") ParamsModelDetails paramDetails){
-    return toInputStream(PayloadHelper.executeGenerateChat(messages,connection,paramDetails).toString(), StandardCharsets.UTF_8);
+    return toInputStream(PayloadHelper.executeGenerateChat(messages,connection,paramDetails), StandardCharsets.UTF_8);
   }
 
   /**
@@ -58,7 +58,7 @@ public class EinsteinOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("EMBEDDING-adhoc-file-query")
   public InputStream queryEmbeddingOnFiles(String prompt, String filePath, @Connection EinsteinConnection connection, @ParameterGroup(name= "Additional properties") ParametersEmbeddingDocument paramDetails) throws IOException, SAXException, TikaException{
-    return toInputStream(PayloadHelper.EmbeddingFileQuery(prompt,filePath,connection,paramDetails.getModelName(), paramDetails.getFileType(), paramDetails.getOptionType()), StandardCharsets.UTF_8);
+    return toInputStream(PayloadHelper.embeddingFileQuery(prompt,filePath,connection,paramDetails.getModelName(), paramDetails.getFileType(), paramDetails.getOptionType()), StandardCharsets.UTF_8);
   }
 
 
@@ -70,8 +70,8 @@ public class EinsteinOperations {
    */
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("EMBEDDING-generate-from-file")
-  public InputStream EmbeddingFromFiles(String filePath, @Connection EinsteinConnection connection, @ParameterGroup(name= "Additional properties") ParametersEmbeddingDocument paramDetails) throws IOException, SAXException, TikaException{
-    return toInputStream(PayloadHelper.EmbeddingFromFile(filePath,connection,paramDetails), StandardCharsets.UTF_8);
+  public InputStream embeddingFromFiles(String filePath, @Connection EinsteinConnection connection, @ParameterGroup(name= "Additional properties") ParametersEmbeddingDocument paramDetails) throws IOException, SAXException, TikaException{
+    return toInputStream(PayloadHelper.embeddingFromFile(filePath,connection,paramDetails), StandardCharsets.UTF_8);
   }
 
 
@@ -83,8 +83,8 @@ public class EinsteinOperations {
    */
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("RAG-adhoc-load-document")
-  public InputStream RAGgOnFiles(String prompt, String filePath, @Connection EinsteinConnection connection, @ParameterGroup(name= "Additional properties") RAGParamsModelDetails paramDetails) throws IOException, SAXException, TikaException{
-    String content = PayloadHelper.EmbeddingFileQuery(prompt,filePath,connection,paramDetails.getEmbeddingName(), paramDetails.getFileType(), paramDetails.getOptionType());
+  public InputStream ragOnFiles(String prompt, String filePath, @Connection EinsteinConnection connection, @ParameterGroup(name= "Additional properties") RAGParamsModelDetails paramDetails) throws IOException, SAXException, TikaException{
+    String content = PayloadHelper.embeddingFileQuery(prompt,filePath,connection,paramDetails.getEmbeddingName(), paramDetails.getFileType(), paramDetails.getOptionType());
     return toInputStream(PayloadHelper.executeRAG("data: " + content + ", question: " + prompt, connection, paramDetails), StandardCharsets.UTF_8);
   }
 
@@ -96,8 +96,8 @@ public class EinsteinOperations {
    */
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("Tools-use-ai-service")
-  public InputStream ExecuteTools(String prompt, String toolsConfig, @Connection EinsteinConnection connection, @ParameterGroup(name= "Additional properties") ParamsModelDetails paramDetails) throws IOException, SAXException, TikaException{
-    String content = PayloadHelper.EmbeddingFileQuery(prompt,toolsConfig,connection,"OpenAI Ada 002", "text", "FULL");
+  public InputStream executeTools(String prompt, String toolsConfig, @Connection EinsteinConnection connection, @ParameterGroup(name= "Additional properties") ParamsModelDetails paramDetails) throws IOException, SAXException, TikaException{
+    String content = PayloadHelper.embeddingFileQuery(prompt,toolsConfig,connection,"OpenAI Ada 002", "text", "FULL");
     return toInputStream(PayloadHelper.executeTools(prompt, "data: " + content + ", question: " + prompt, toolsConfig, connection, paramDetails), StandardCharsets.UTF_8);
   }
 

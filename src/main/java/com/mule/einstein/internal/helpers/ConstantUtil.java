@@ -6,6 +6,9 @@ public class ConstantUtil {
 
     public static final String URI_HTTPS_PREFIX = "https://";
     public static final String URI_OAUTH_TOKEN = "/services/oauth2/token";
+    public static final String URI_MODELS_API_EMBEDDINGS ="/embeddings";
+    public static final String URI_MODELS_API_GENERATIONS ="/generations";
+    public static final String URI_MODELS_API_CHAT_GENERATIONS ="/chat-generations";
 
     public static final String HTTP_METHOD_POST = "POST";
     public static final String CONTENT_TYPE_STRING = "Content-Type";
@@ -15,4 +18,6 @@ public class ConstantUtil {
     public static final String QUERY_PARAM_CLIENT_SECRET = "client_secret";
 
     public static final String GRANT_TYPE_CLIENT_CREDENTIALS ="client_credentials";
+
+
 }

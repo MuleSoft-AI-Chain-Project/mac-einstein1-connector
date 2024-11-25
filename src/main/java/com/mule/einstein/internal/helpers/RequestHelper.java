@@ -1,5 +1,6 @@
 package com.mule.einstein.internal.helpers;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +60,45 @@ public class RequestHelper {
             }
         } catch (Exception e) {
             log.error("Exception during REST request ",e);
+            return "Exception occurred: " + e.getMessage();
+        }
+    }
+
+    public static String getAccessToken(String org, String consumerKey, String consumerSecret) {
+
+        String urlString = RequestHelper.getOAuthURL(org);
+        String params = RequestHelper.getOAuthParams(consumerKey,consumerSecret);
+
+        try {
+            URL url = new URL(urlString);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setDoOutput(true);
+            conn.setRequestMethod(ConstantUtil.HTTP_METHOD_POST);
+            conn.setRequestProperty(ConstantUtil.CONTENT_TYPE_STRING, "application/x-www-form-urlencoded");
+
+            try (OutputStream os = conn.getOutputStream()) {
+                byte[] input = params.getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            }
+
+            int responseCode = conn.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                try (java.io.BufferedReader br = new java.io.BufferedReader(
+                        new java.io.InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
+                    StringBuilder response = new StringBuilder();
+                    String responseLine;
+                    while ((responseLine = br.readLine()) != null) {
+                        response.append(responseLine.trim());
+                    }
+                    // Parse JSON response and extract access_token
+                    JSONObject jsonResponse = new JSONObject(response.toString());
+                    return jsonResponse.getString("access_token");
+                }
+            } else {
+                return "Error: " + responseCode;
+            }
+        } catch (Exception e) {
+            log.error("Exception while getting access token",e);
             return "Exception occurred: " + e.getMessage();
         }
     }
