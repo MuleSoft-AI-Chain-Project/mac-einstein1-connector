@@ -8,7 +8,6 @@ import java.util.List;
 
 public class ChatMemoryHelper {
 
-
   private static ChatMemory intializeChatMemory(String memoryPath, String memoryName) {
     return new ChatMemory(memoryPath, memoryName);
   }
@@ -29,7 +28,7 @@ public class ChatMemoryHelper {
 
   private static void addMessageToMemory(ChatMemory chatMemory, String prompt){
     if (!isQuestion(prompt)) {
-        chatMemory.addMessage(chatMemory.getMessageCount() + 1, prompt);
+        chatMemory.addMessage(chatMemory.getMessageCount() + 1L, prompt);
     }
   }
 
@@ -58,7 +57,7 @@ public class ChatMemoryHelper {
 }
 
 
-  public static String chatWithMemory(String prompt, String memoryPath, String memoryName, Integer keepLastMessages, EinsteinConnection connection, ParamsModelDetails MuleChainParameters) {
+  public static String chatWithMemory(String prompt, String memoryPath, String memoryName, Integer keepLastMessages, EinsteinConnection connection, ParamsModelDetails parameters) {
 
     //Chatmemory initialization
     ChatMemory chatMemory = intializeChatMemory(memoryPath, memoryName);
@@ -66,10 +65,9 @@ public class ChatMemoryHelper {
     //Get keepLastMessages
     List<String> keepLastMessagesList = getKeepLastMessage(chatMemory, keepLastMessages);
     keepLastMessagesList.add(prompt);
-    //String memoryPrompt = keepLastMessagesList.toString();
     String memoryPrompt = formatMemoryPrompt(keepLastMessagesList);
     
-    String response = PayloadHelper.executeGenerateText(memoryPrompt, connection, MuleChainParameters);
+    String response = PayloadHelper.executeGenerateText(memoryPrompt, connection, parameters);
     
     addMessageToMemory(chatMemory, prompt);
 

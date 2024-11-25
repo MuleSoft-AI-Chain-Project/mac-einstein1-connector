@@ -1,8 +1,10 @@
 package com.mule.einstein.internal;
 
-import com.mule.einstein.internal.config.ConnectorConfiguration;
-import org.mule.runtime.extension.api.annotation.Configurations;
+import com.mule.einstein.internal.connection.ConnectionProvider;
+import com.mule.einstein.internal.operations.EinsteinOperations;
 import org.mule.runtime.extension.api.annotation.Extension;
+import org.mule.runtime.extension.api.annotation.Operations;
+import org.mule.runtime.extension.api.annotation.connectivity.ConnectionProviders;
 import org.mule.runtime.extension.api.annotation.dsl.xml.Xml;
 import org.mule.sdk.api.annotation.JavaVersionSupport;
 
@@ -14,7 +16,8 @@ import static org.mule.sdk.api.meta.JavaVersion.*;
  */
 @Xml(prefix = "ms-einstein")
 @Extension(name = "Einstein AI")
-@Configurations({ConnectorConfiguration.class})
+@Operations(EinsteinOperations.class)
+@ConnectionProviders(ConnectionProvider.class)
 @JavaVersionSupport({JAVA_8, JAVA_11, JAVA_17})
 public class EinsteinConnector {
 

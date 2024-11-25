@@ -1,9 +1,14 @@
 package com.mule.einstein.internal.connection;
 
+import com.mule.einstein.internal.helpers.ConstantUtil;
+import com.mule.einstein.internal.helpers.RequestHelper;
 import org.mule.runtime.api.connection.ConnectionException;
 import org.mule.runtime.api.connection.ConnectionValidationResult;
 import org.mule.runtime.api.connection.PoolingConnectionProvider;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
+import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
+import org.mule.runtime.extension.api.annotation.param.display.Example;
+import org.mule.runtime.extension.api.annotation.param.display.Placement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,31 +19,29 @@ import java.nio.charset.StandardCharsets;
 
 public class ConnectionProvider implements PoolingConnectionProvider<EinsteinConnection> {
 
-  private final Logger LOGGER = LoggerFactory.getLogger(ConnectionProvider.class);
+  private final Logger log = LoggerFactory.getLogger(ConnectionProvider.class);
 
   @Parameter
+  @Placement(order = 1, tab = Placement.CONNECTION_TAB)
+  @DisplayName("Salesforce Org URL")
+  @Example("mydomain.my.salesforce.com")
+  private String salesforceOrg;
+
+  @Parameter
+  @Placement(order = 2,tab = Placement.CONNECTION_TAB)
+  @DisplayName("Client ID")
   private String clientId;
 
   @Parameter
+  @Placement(order = 3,tab = Placement.CONNECTION_TAB)
+  @DisplayName("Client Secret")
   private String clientSecret;
-
-  @Parameter
-  private String salesforceOrg;
 
   @Override
   public EinsteinConnection connect() throws ConnectionException {
     try {
-      String urlStr = "https://" + salesforceOrg + ".my.salesforce.com/services/oauth2/token";
-      String urlParameters = "grant_type=client_credentials&client_id=" + clientId + "&client_secret=" + clientSecret;
-      byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
+      int responseCode = getConnectionResponseCode(salesforceOrg,clientId,clientSecret);
 
-      URL url = new URL(urlStr);
-      HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-      conn.setDoOutput(true);
-      conn.setRequestMethod("POST");
-      conn.getOutputStream().write(postData);
-
-      int responseCode = conn.getResponseCode();
       if (responseCode == 200) {
         return new EinsteinConnection(salesforceOrg, clientId, clientSecret);
       } else {
@@ -54,24 +57,15 @@ public class ConnectionProvider implements PoolingConnectionProvider<EinsteinCon
     try {
       connection.invalidate();
     } catch (Exception e) {
-      LOGGER.error("Error while disconnecting [" + connection.getClientId() + "]: " + e.getMessage(), e);
+      log.error("Error while disconnecting [{}]: {}", connection.getClientId(), e.getMessage(), e);
     }
   }
 
   @Override
   public ConnectionValidationResult validate(EinsteinConnection connection) {
     try {
-      String urlStr = "https://" + connection.getSalesforceOrg() + ".my.salesforce.com/services/oauth2/token";
-      String urlParameters = "grant_type=client_credentials&client_id=" + connection.getClientId() + "&client_secret=" + connection.getClientSecret();
-      byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
+      int responseCode = getConnectionResponseCode(connection.getSalesforceOrg(),connection.getClientId(),connection.getClientSecret());
 
-      URL url = new URL(urlStr);
-      HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-      conn.setDoOutput(true);
-      conn.setRequestMethod("POST");
-      conn.getOutputStream().write(postData);
-
-      int responseCode = conn.getResponseCode();
       if (responseCode == 200) {
         return ConnectionValidationResult.success();
       } else {
@@ -80,5 +74,25 @@ public class ConnectionProvider implements PoolingConnectionProvider<EinsteinCon
     } catch (IOException e) {
       return ConnectionValidationResult.failure("Failed to validate connection", e);
     }
+  }
+
+  private int getConnectionResponseCode(String salesforceOrg, String clientId, String clientSecret) throws IOException {
+
+    log.debug("Preparing request for connection for salesforce org:{}",salesforceOrg);
+
+    String urlStr = RequestHelper.getOAuthURL(salesforceOrg);
+    String urlParameters = RequestHelper.getOAuthParams(clientId,clientSecret);
+
+    byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
+
+    URL url = new URL(urlStr);
+    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    conn.setDoOutput(true);
+    conn.setRequestMethod(ConstantUtil.HTTP_METHOD_POST);
+    conn.getOutputStream().write(postData);
+    int respCode = conn.getResponseCode();
+
+    log.debug("Response code for connection request:{}",respCode);
+    return respCode;
   }
 }
