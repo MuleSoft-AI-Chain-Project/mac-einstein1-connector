@@ -4,8 +4,8 @@ public class ConstantUtil {
 
     public static final String URL_BASE = "https://api.salesforce.com/einstein/platform/v1/models/";
 
-    public static final String URI_OAUTH_TOKEN = "/services/oauth2/token";
     public static final String URI_HTTPS_PREFIX = "https://";
+    public static final String URI_OAUTH_TOKEN = "/services/oauth2/token";
 
     public static final String HTTP_METHOD_POST = "POST";
     public static final String CONTENT_TYPE_STRING = "Content-Type";

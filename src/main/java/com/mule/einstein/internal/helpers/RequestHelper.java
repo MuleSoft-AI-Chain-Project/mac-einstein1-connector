@@ -9,8 +9,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-import static com.mule.einstein.internal.helpers.ConstantUtil.*;
+import static com.mule.einstein.internal.helpers.ConstantUtil.GRANT_TYPE_CLIENT_CREDENTIALS;
+import static com.mule.einstein.internal.helpers.ConstantUtil.QUERY_PARAM_CLIENT_ID;
 import static com.mule.einstein.internal.helpers.ConstantUtil.QUERY_PARAM_CLIENT_SECRET;
+import static com.mule.einstein.internal.helpers.ConstantUtil.QUERY_PARAM_GRANT_TYPE;
+import static com.mule.einstein.internal.helpers.ConstantUtil.URI_HTTPS_PREFIX;
+import static com.mule.einstein.internal.helpers.ConstantUtil.URI_OAUTH_TOKEN;
 
 public class RequestHelper {
 
