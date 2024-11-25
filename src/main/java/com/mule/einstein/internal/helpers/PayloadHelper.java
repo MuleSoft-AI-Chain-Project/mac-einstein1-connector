@@ -28,7 +28,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.mule.einstein.internal.helpers.ConstantUtil.URL_BASE;
-import static com.mule.einstein.internal.helpers.RequestHelper.getOAuthURL;
+import static com.mule.einstein.internal.helpers.RequestHelper.executeREST;
 
 public class PayloadHelper {
 
@@ -57,64 +57,18 @@ public class PayloadHelper {
 
     public static String getAccessToken(String org, String consumerKey, String consumerSecret) {
 
-    String urlString = getOAuthURL(org);
-    String params = RequestHelper.getOAuthParams(consumerKey,consumerSecret);
-
-    try {
-        URL url = new URL(urlString);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setDoOutput(true);
-        conn.setRequestMethod(ConstantUtil.HTTP_METHOD_POST);
-        conn.setRequestProperty(ConstantUtil.CONTENT_TYPE_STRING, "application/x-www-form-urlencoded");
-
-        try (OutputStream os = conn.getOutputStream()) {
-            byte[] input = params.getBytes(StandardCharsets.UTF_8);
-            os.write(input, 0, input.length);
-        }
-
-        int responseCode = conn.getResponseCode();
-        if (responseCode == HttpURLConnection.HTTP_OK) {
-            try (java.io.BufferedReader br = new java.io.BufferedReader(
-                    new java.io.InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
-                StringBuilder response = new StringBuilder();
-                String responseLine;
-                while ((responseLine = br.readLine()) != null) {
-                    response.append(responseLine.trim());
-                }
-                // Parse JSON response and extract access_token
-                JSONObject jsonResponse = new JSONObject(response.toString());
-                return jsonResponse.getString("access_token");
-            }
-        } else {
-            return "Error: " + responseCode;
-        }
-    } catch (Exception e) {
-        log.error("Exception while getting access token",e);
-        return "Exception occurred: " + e.getMessage();
-    }
-    }
-
-
-    private static HttpURLConnection getConnectionObject(URL url, String accessToken) throws IOException {
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setDoOutput(true);
-        conn.setRequestMethod("POST");
-        conn.setRequestProperty("Authorization", "Bearer " + accessToken);
-        conn.setRequestProperty("x-sfdc-app-context", "EinsteinGPT");
-        conn.setRequestProperty("x-client-feature-id", "ai-platform-models-connected-app");
-        conn.setRequestProperty(ConstantUtil.CONTENT_TYPE_STRING, "application/json;charset=utf-8");
-        return conn;
-    }
-
-
-    private static String executeREST(String accessToken, String payload, String urlString) {
+        String urlString = RequestHelper.getOAuthURL(org);
+        String params = RequestHelper.getOAuthParams(consumerKey,consumerSecret);
 
         try {
             URL url = new URL(urlString);
-            HttpURLConnection conn = getConnectionObject(url, accessToken);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setDoOutput(true);
+            conn.setRequestMethod(ConstantUtil.HTTP_METHOD_POST);
+            conn.setRequestProperty(ConstantUtil.CONTENT_TYPE_STRING, "application/x-www-form-urlencoded");
 
             try (OutputStream os = conn.getOutputStream()) {
-                byte[] input = payload.getBytes(StandardCharsets.UTF_8);
+                byte[] input = params.getBytes(StandardCharsets.UTF_8);
                 os.write(input, 0, input.length);
             }
 
@@ -127,36 +81,32 @@ public class PayloadHelper {
                     while ((responseLine = br.readLine()) != null) {
                         response.append(responseLine.trim());
                     }
-                    return response.toString();
+                    // Parse JSON response and extract access_token
+                    JSONObject jsonResponse = new JSONObject(response.toString());
+                    return jsonResponse.getString("access_token");
                 }
             } else {
                 return "Error: " + responseCode;
             }
         } catch (Exception e) {
-            log.error("Exception during REST request ",e);
+            log.error("Exception while getting access token",e);
             return "Exception occurred: " + e.getMessage();
         }
-
     }
-
 
     private static String generateText(String accessToken, String payload, String modelName, String resource) {
         String urlString = URL_BASE + getMappedValue(modelName) + resource;
         return executeREST(accessToken, payload, urlString);
     }
 
-
     private static String generateEmbedding(String accessToken, String payload, String modelName, String resource) {
         String urlString = URL_BASE + getMappedValue(modelName) + resource;
         return executeREST(accessToken, payload, urlString);
     }
 
-
-
-
     public static String EmbeddingFromFile(String filePath, EinsteinConnection connection, ParametersEmbeddingDocument MuleChainEinsteinParameters) throws IOException, SAXException, TikaException {
 
-        String access_token = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
+        String accessToken = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
         /* 
         List<String> corpus;
         if (MuleChainEinsteinParameters.getOptionType().equals("FULL")) {
@@ -169,7 +119,6 @@ public class PayloadHelper {
 
         try {
 
-
             //JSONObject queryResponse = generateEmbedding(modelId, body, configuration, region);
             String response = "";
             JSONObject jsonObject;
@@ -181,21 +130,20 @@ public class PayloadHelper {
             List<JSONArray> corpusEmbeddings = new ArrayList<>();
 
             for (String text : corpus) {
-                corpusBody = constructEmbeddingJSON(text); 
+                corpusBody = constructEmbeddingJSON(text);
                 if (text != null && !text.isEmpty()) {
-                    response = generateEmbedding(access_token, constructEmbeddingJSON(corpusBody), MuleChainEinsteinParameters.getModelName(), "/embeddings");
+                    response = generateEmbedding(accessToken, constructEmbeddingJSON(corpusBody), MuleChainEinsteinParameters.getModelName(), "/embeddings");
                     jsonObject = new JSONObject(response);
                     embeddingsArray = jsonObject.getJSONArray("embeddings");
                     corpusEmbeddings.add(embeddingsArray.getJSONObject(0).getJSONArray("embedding"));
                 }
             }
 
-
             // Convert results list to a JSONArray
             JSONArray jsonArray = new JSONArray(corpusEmbeddings);
 
             return jsonArray.toString();
-       } catch (Exception e) {
+        } catch (Exception e) {
             log.error("Exception during embedding from file",e);
             return null;
 
@@ -228,30 +176,30 @@ public class PayloadHelper {
 
     private static String constrcutJsonMessages(String message, ParamsModelDetails paramsModelDetails){
         JSONArray messages = new JSONArray(message);
-        
+
         JSONObject locale = new JSONObject();
         locale.put("locale", paramsModelDetails.getLocale());
         locale.put("probability", paramsModelDetails.getProbability());
-        
+
         JSONArray inputLocales = new JSONArray();
         inputLocales.put(locale);
-        
+
         JSONArray expectedLocales = new JSONArray();
         expectedLocales.put(paramsModelDetails.getLocale());
-        
+
         JSONObject localization = new JSONObject();
         localization.put("defaultLocale", paramsModelDetails.getLocale());
         localization.put("inputLocales", inputLocales);
         localization.put("expectedLocales", expectedLocales);
-        
+
         JSONObject tags = new JSONObject();
-        
+
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("messages", messages);
         jsonObject.put("localization", localization);
         jsonObject.put("tags", tags);
-        
-        return jsonObject.toString();        
+
+        return jsonObject.toString();
     }
 
     private static String constructEmbeddingJSON(String text) {
@@ -337,8 +285,8 @@ public class PayloadHelper {
         } else {
             response = "Payload not found!";
         }
-       
-        
+
+
         return response;
     }
 
@@ -354,44 +302,44 @@ public class PayloadHelper {
     }
 
     public static String executeGenerateText(String prompt, EinsteinConnection connection, ParamsModelDetails paramDetails){
-        String access_token = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
+        String accessToken = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
         String payload = constructJsonPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
-        String response = generateText(access_token, payload, paramDetails.getModelName(), "/generations");
+        String response = generateText(accessToken, payload, paramDetails.getModelName(), "/generations");
         return response;
     }
 
     public static String executeGenerateChat(String messages, EinsteinConnection connection, ParamsModelDetails paramDetails){
-        String access_token = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
+        String accessToken = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
         String payload = constrcutJsonMessages(messages, paramDetails);
-        String response = generateText(access_token, payload, paramDetails.getModelName(), "/chat-generations");
+        String response = generateText(accessToken, payload, paramDetails.getModelName(), "/chat-generations");
         return response;
     }
 
 
     public static String executeGenerateEmbedding(String text, EinsteinConnection connection, ParamsEmbeddingDetails paramDetails){
-        String access_token = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
+        String accessToken = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
         String payload = constructEmbeddingJSON(text);
-        String response = generateEmbedding(access_token, payload, paramDetails.getModelName(), "/embeddings");
+        String response = generateEmbedding(accessToken, payload, paramDetails.getModelName(), "/embeddings");
         return response;
     }
 
     public static String executeRAG(String text, EinsteinConnection connection, RAGParamsModelDetails paramDetails){
-        String access_token = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
+        String accessToken = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
         String payload = constructJsonPayload(text, paramDetails.getLocale(), paramDetails.getProbability());
-        String response = generateText(access_token, payload, paramDetails.getModelName(), "/generations");
+        String response = generateText(accessToken, payload, paramDetails.getModelName(), "/generations");
         return response;
     }
 
     public static String executeTools(String originalPrompt, String prompt, String filePath, EinsteinConnection connection, ParamsModelDetails paramDetails) throws IOException{
-        String access_token = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
+        String accessToken = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
         String payload = constructJsonPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
         String payloadOptional = constructJsonPayload(originalPrompt, paramDetails.getLocale(), paramDetails.getProbability());
 
-        String intermediateAnswer = generateText(access_token, payload, paramDetails.getModelName(), "/generations");
+        String intermediateAnswer = generateText(accessToken, payload, paramDetails.getModelName(), "/generations");
 
-        String response = generateText(access_token, payloadOptional, paramDetails.getModelName(), "/generations");
+        String response = generateText(accessToken, payloadOptional, paramDetails.getModelName(), "/generations");
         //response = intermediateAnswer;
-        List<String> findURL = extractUrls(intermediateAnswer.toString());
+        List<String> findURL = extractUrls(intermediateAnswer);
         String ePayload = "";
         if (findURL!=null){
             JSONObject jsonObject = new JSONObject(intermediateAnswer);
@@ -403,7 +351,7 @@ public class PayloadHelper {
 
             response = getAttributes(findURL.get(0),filePath, extractPayload(ePayload));
             String finalPayload = constructJsonPayload("data: " + response + ", question: " + originalPrompt, paramDetails.getLocale(), paramDetails.getProbability());
-            response = generateText(access_token, finalPayload, paramDetails.getModelName(), "/generations");
+            response = generateText(accessToken, finalPayload, paramDetails.getModelName(), "/generations");
 
         }
 
@@ -422,16 +370,7 @@ public class PayloadHelper {
 
     public static String EmbeddingFileQuery(String prompt, String filePath, EinsteinConnection connection, String modelName, String fileType, String optionType) throws IOException, SAXException, TikaException {
 
-        String access_token = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
-
-        /* 
-        List<String> corpus;
-        if (MuleChainEinsteinParameters.getOptionType().equals("FULL")) {
-            corpus = Arrays.asList(splitFullDocument(filePath,MuleChainEinsteinParameters));
-        } else {
-            corpus = Arrays.asList(splitByType(filePath,MuleChainEinsteinParameters));
-        }
-        */
+        String accessToken = getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
 
         List<String> corpus = createCorpusList(filePath, fileType, optionType);
 
@@ -439,8 +378,7 @@ public class PayloadHelper {
 
         try {
 
-            //JSONObject queryResponse = generateEmbedding(modelId, body, configuration, region);
-            String response = generateEmbedding(access_token, body, modelName, "/embeddings");
+            String response = generateEmbedding(accessToken, body, modelName, "/embeddings");
             JSONObject jsonObject = new JSONObject(response);
             //Generate embedding for query
             JSONArray embeddingsArray = jsonObject.getJSONArray("embeddings");
@@ -456,9 +394,9 @@ public class PayloadHelper {
             List<JSONArray> corpusEmbeddings = new ArrayList<>();
 
             for (String text : corpus) {
-                corpusBody = constructEmbeddingJSON(text); 
+                corpusBody = constructEmbeddingJSON(text);
                 if (text != null && !text.isEmpty()) {
-                    response = generateEmbedding(access_token, constructEmbeddingJSON(corpusBody), modelName, "/embeddings");
+                    response = generateEmbedding(accessToken, constructEmbeddingJSON(corpusBody), modelName, "/embeddings");
 
                     jsonObject = new JSONObject(response);
                     embeddingsArray = jsonObject.getJSONArray("embeddings");
@@ -511,35 +449,22 @@ public class PayloadHelper {
 
         List<String> results = new ArrayList<>();
 
-        if (similarityScores.size() != 0 && corpus.size() != 0) {
+        if (!similarityScores.isEmpty() && !corpus.isEmpty()) {
             for (int index : indices) {
                 results.add(similarityScores.get(index) + " - " + corpus.get(index));
             }
         }
 
-         
+
         return results;
     }
-
-    /* 
-    private static String getContentFromFile(String filePath) throws IOException, SAXException, TikaException {
-        BodyContentHandler handler = new BodyContentHandler();
-        Metadata metadata = new Metadata();
-        FileInputStream inputstream = new FileInputStream(new File(filePath));
-        ParseContext pcontext = new ParseContext();
-
-        PDFParser pdfparser = new PDFParser();
-        pdfparser.parse(inputstream, handler, metadata, pcontext);
-        return handler.toString();
-    }    
-    */
 
     private static String getContentFromUrl(String urlString) throws IOException, SAXException, TikaException {
         BodyContentHandler handler = new BodyContentHandler(-1);
         Metadata metadata = new Metadata();
         InputStream inputstream = new URL(urlString).openStream();
         ParseContext pcontext = new ParseContext();
-    
+
         Parser parser = new AutoDetectParser();
         parser.parse(inputstream, handler, metadata, pcontext);
         return handler.toString();
@@ -550,7 +475,7 @@ public class PayloadHelper {
         Metadata metadata = new Metadata();
         FileInputStream inputstream = new FileInputStream(new File(filePath));
         ParseContext pcontext = new ParseContext();
-    
+
         AutoDetectParser parser = new AutoDetectParser();
         parser.parse(inputstream, handler, metadata, pcontext);
         return handler.toString();
@@ -566,9 +491,6 @@ public class PayloadHelper {
         parser.parse(inputstream, handler, metadata, pcontext);
         return handler.toString();
     }
-
-
-
 
     private static String getFileTypeContextFromFile(String filePath, String fileType) throws IOException, SAXException, TikaException {
 /*         if (fileType.equals("URL")) {
@@ -588,18 +510,14 @@ public class PayloadHelper {
     }
 
     private static String splitFullDocument(String filePath, String fileType) throws IOException, SAXException, TikaException {
-        String content = getFileTypeContextFromFile(filePath, fileType);
-        return content;
+        return getFileTypeContextFromFile(filePath, fileType);
     }
 
 
     private static String[] splitByType(String filePath, String fileType, String splitOption) throws IOException, SAXException, TikaException {
         String content = getFileTypeContextFromFile(filePath, fileType);
-        String[] parts = splitContent(content, splitOption);
-        return parts;
+        return splitContent(content, splitOption);
     }
-
-
 
     private static String[] splitContent(String text, String option) {
         switch (option) {
@@ -610,21 +528,20 @@ public class PayloadHelper {
             default:
                 throw new IllegalArgumentException("Unknown split option: " + option);
         }
-      }
-      
-      private static String[] splitByParagraphs(String text) {
+    }
+
+    private static String[] splitByParagraphs(String text) {
         // Assuming paragraphs are separated by two or more newlines
-       
+
         return removeEmptyStrings(text.split("\\r?\\n\\r?\\n"));
-      }
-      
-      private static String[] splitBySentences(String text) {
+    }
+
+    private static String[] splitBySentences(String text) {
         // Split by sentences (simple implementation using period followed by space)
         return removeEmptyStrings(text.split("(?<!Mr|Mrs|Ms|Dr|Sr|Jr|Prof)\\.\\s+"));
-      }
+    }
 
-
-      public static String[] removeEmptyStrings(String[] array) {
+    public static String[] removeEmptyStrings(String[] array) {
         // Convert array to list
         List<String> list = new ArrayList<>(Arrays.asList(array));
 
@@ -634,28 +551,24 @@ public class PayloadHelper {
         // Convert list back to array
         return list.toArray(new String[0]);
     }
-     
-
-
 
     private static List<String> extractUrls(String input) {
         // Define the URL pattern
-        //String urlPattern = "(https?://\\S+?)(\\s|$)";
         String urlPattern = "(https?://[\\w\\-\\.]+(?:\\.[\\w\\-]+)+(?:[\\w\\-.,@?^=%&:/~+#]*[\\w\\-@?^=%&/~+#])?)";
 
         // Compile the pattern
         Pattern pattern = Pattern.compile(urlPattern);
-        
+
         // Create a matcher from the input string
         Matcher matcher = pattern.matcher(input);
-        
+
         // Find and collect all matches
         List<String> urls = new ArrayList<>();
         while (matcher.find()) {
             // Group 1 contains the URL without trailing whitespace
             urls.add(matcher.group(1));
         }
-        
+
         // Return null if no URLs are found
         return urls.isEmpty() ? null : urls;
     }
