@@ -28,19 +28,19 @@ public class ConnectionProvider implements PoolingConnectionProvider<EinsteinCon
   private String salesforceOrg;
 
   @Parameter
-  @Placement(order = 2,tab = Placement.CONNECTION_TAB)
+  @Placement(order = 2, tab = Placement.CONNECTION_TAB)
   @DisplayName("Client ID")
   private String clientId;
 
   @Parameter
-  @Placement(order = 3,tab = Placement.CONNECTION_TAB)
+  @Placement(order = 3, tab = Placement.CONNECTION_TAB)
   @DisplayName("Client Secret")
   private String clientSecret;
 
   @Override
   public EinsteinConnection connect() throws ConnectionException {
     try {
-      int responseCode = getConnectionResponseCode(salesforceOrg,clientId,clientSecret);
+      int responseCode = getConnectionResponseCode(salesforceOrg, clientId, clientSecret);
 
       if (responseCode == 200) {
         return new EinsteinConnection(salesforceOrg, clientId, clientSecret);
@@ -64,7 +64,8 @@ public class ConnectionProvider implements PoolingConnectionProvider<EinsteinCon
   @Override
   public ConnectionValidationResult validate(EinsteinConnection connection) {
     try {
-      int responseCode = getConnectionResponseCode(connection.getSalesforceOrg(),connection.getClientId(),connection.getClientSecret());
+      int responseCode =
+          getConnectionResponseCode(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
 
       if (responseCode == 200) {
         return ConnectionValidationResult.success();
@@ -78,10 +79,10 @@ public class ConnectionProvider implements PoolingConnectionProvider<EinsteinCon
 
   private int getConnectionResponseCode(String salesforceOrg, String clientId, String clientSecret) throws IOException {
 
-    log.debug("Preparing request for connection for salesforce org:{}",salesforceOrg);
+    log.debug("Preparing request for connection for salesforce org:{}", salesforceOrg);
 
     String urlStr = RequestHelper.getOAuthURL(salesforceOrg);
-    String urlParameters = RequestHelper.getOAuthParams(clientId,clientSecret);
+    String urlParameters = RequestHelper.getOAuthParams(clientId, clientSecret);
 
     byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
@@ -92,7 +93,7 @@ public class ConnectionProvider implements PoolingConnectionProvider<EinsteinCon
     conn.getOutputStream().write(postData);
     int respCode = conn.getResponseCode();
 
-    log.debug("Response code for connection request:{}",respCode);
+    log.debug("Response code for connection request:{}", respCode);
     return respCode;
   }
 }

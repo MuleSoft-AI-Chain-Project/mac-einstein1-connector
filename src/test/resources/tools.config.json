@@ -1,0 +1,47 @@
+
+[
+    {
+        "action": "Execute POST requests for API endpoints.",
+        "url": "http://check-inventory-material.cloudhub.io/mmbe",
+        "name": "Check Inventory",
+        "method": "POST",
+        "headers": "Basic XXX",
+        "example-payload": "{\n \"materialNo\": \"paramValue\"}",
+        "query": [
+            "Check inventory in SAP",
+            "Check Stock Overview",
+            "Show product availability for MULETEST0",
+            "Check the inventory for MULETEST0",
+            "Check Stock for 400-110"
+        ],
+        "description": "Check inventory details for material in SAP by providing the materialNo as input for paramValue. Please use the materialNo and not materialNumber. This action applies whenever users' intent is 'Stock overview', 'product availability', 'Inventory', 'available stock'. Use the headers to perform the request."
+    },
+    {
+        "action": "Execute GET requests for API endpoints.",
+        "url": "https://anypoint.mulesoft.com/mocking/api/v1/sources/exchange/assets/612eb739-4266-4f4c-bf2f-29953c153d80/accounts-api/1.0.1/m/accounts",
+        "name": "Show Accounts",
+        "method": "GET",
+        "headers": "",
+        "example-payload": "{}",
+        "query": [
+            "Get all accounts",
+            "Show all accounts from CRM"
+        ],
+        "description": "Get all accounts from a CRM. This action applies whenever users' intent is 'CRM accounts', 'customers', 'customer accounts', 'accounts'."
+    },
+    {
+        "action": "Execute GET requests for API endpoints.",
+        "url": "https://anypoint.mulesoft.com/mocking/api/v1/sources/exchange/assets/7b99cead-a984-497b-9e6c-c16a3b4dcb76/employee-api/1.0.1/m/employees",
+        "name": "Show Employees",
+        "method": "GET",
+        "headers": "",
+        "example-payload": "{}",
+        "query": [
+            "Get all employee information",
+            "Show employees for the country Switzerland",
+            "How many employees do we have",
+            "Show a list of all employees"
+        ],
+        "description": "Get all information about employees. This action applies whenever users' intent is 'employees', 'workforce'."
+    }
+]
