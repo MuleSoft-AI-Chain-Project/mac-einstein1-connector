@@ -6,38 +6,34 @@ import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
 import org.mule.runtime.extension.api.annotation.values.OfValues;
 
-import com.mule.einstein.internal.models.EmbeddingNameProvider;
+import static com.mule.einstein.internal.helpers.ConstantUtil.OPENAI_ADA_002;
 
 public class ParametersEmbeddingDocument {
-	@Parameter
-	@Expression(ExpressionSupport.SUPPORTED)
-	@OfValues(EmbeddingNameProvider.class)
-	@Optional(defaultValue = "OpenAI Ada 002")
-	private String modelName;
 
-	public String getModelName() {
-		return modelName;
-	}
+  @Parameter
+  @Expression(ExpressionSupport.SUPPORTED)
+  @Optional(defaultValue = OPENAI_ADA_002)
+  private String modelName;
+  @Parameter
+  @Expression(ExpressionSupport.SUPPORTED)
+  @OfValues(DocumentFileType.class)
+  @Optional(defaultValue = "PDF")
+  private String fileType;
+  @Parameter
+  @Expression(ExpressionSupport.SUPPORTED)
+  @OfValues(DocumentSplitOptions.class)
+  @Optional(defaultValue = "FULL")
+  private String optionType;
 
-	@Parameter
-	@Expression(ExpressionSupport.SUPPORTED)
-	@OfValues(DocumentFileType.class)
-	@Optional(defaultValue = "PDF")
-	private String fileType;
+  public String getModelName() {
+    return modelName;
+  }
 
-	public String getFileType() {
-		return fileType;
-	}
+  public String getFileType() {
+    return fileType;
+  }
 
-	@Parameter
-	@Expression(ExpressionSupport.SUPPORTED)
-	@OfValues(DocumentSplitOptions.class)
-	@Optional(defaultValue = "FULL")
-	private String optionType;
-
-	public String getOptionType() {
-		return optionType;
-	}
-
-
+  public String getOptionType() {
+    return optionType;
+  }
 }
