@@ -33,6 +33,9 @@ Thumbs.db
 generated-sources/
 generated-test-sources/
 
+### Mule Connectors ###
+automation-credentials.properties
+
 # Configuration files
 .vscode/
 .classpath

@@ -1,5 +1,6 @@
 package com.mule.einstein.internal.models;
 
+import com.mule.einstein.internal.models.provider.ModelApiNameProvider;
 import org.mule.runtime.api.meta.ExpressionSupport;
 import org.mule.runtime.extension.api.annotation.Expression;
 import org.mule.runtime.extension.api.annotation.param.Optional;
@@ -12,6 +13,7 @@ public class ParamsModelDetails {
 
   @Parameter
   @Expression(ExpressionSupport.SUPPORTED)
+  @OfValues(ModelApiNameProvider.class)
   @Optional(defaultValue = OPENAI_GPT_3_5_TURBO)
   private String modelName;
 

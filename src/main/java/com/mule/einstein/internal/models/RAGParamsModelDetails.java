@@ -1,5 +1,7 @@
 package com.mule.einstein.internal.models;
 
+import com.mule.einstein.internal.models.provider.EmbeddingModelApiNameProvider;
+import com.mule.einstein.internal.models.provider.ModelApiNameProvider;
 import org.mule.runtime.api.meta.ExpressionSupport;
 import org.mule.runtime.extension.api.annotation.Expression;
 import org.mule.runtime.extension.api.annotation.param.Optional;
@@ -16,6 +18,7 @@ public class RAGParamsModelDetails {
 
   @Parameter
   @Expression(ExpressionSupport.SUPPORTED)
+  @OfValues(EmbeddingModelApiNameProvider.class)
   @Optional(defaultValue = OPENAI_ADA_002)
   private String embeddingName;
 
@@ -33,6 +36,7 @@ public class RAGParamsModelDetails {
 
   @Parameter
   @Expression(ExpressionSupport.SUPPORTED)
+  @OfValues(ModelApiNameProvider.class)
   @Optional(defaultValue = OPENAI_GPT_3_5_TURBO)
   private String modelName;
 

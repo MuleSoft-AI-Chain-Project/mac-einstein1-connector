@@ -84,7 +84,8 @@ public class EinsteinOperations {
   @Alias("RAG-adhoc-load-document")
   @Throws(EmbeddingErrorTypeProvider.class)
   public Result<InputStream, Void> ragOnFiles(String prompt, String filePath, @Connection EinsteinConnection connection,
-                                              @ParameterGroup(name = "Additional properties") RAGParamsModelDetails paramDetails) {
+                                              @ParameterGroup(
+                                                  name = "Additional properties") RAGParamsModelDetails paramDetails) {
 
     log.info("Executing rag adhoc load document.");
     try {
