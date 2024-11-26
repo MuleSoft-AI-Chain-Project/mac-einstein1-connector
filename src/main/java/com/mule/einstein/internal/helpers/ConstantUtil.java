@@ -16,7 +16,7 @@ public class ConstantUtil {
   public static final String QUERY_PARAM_CLIENT_SECRET = "client_secret";
   public static final String GRANT_TYPE_CLIENT_CREDENTIALS = "client_credentials";
   public static final String OPENAI_ADA_002 = "sfdc_ai__DefaultOpenAITextEmbeddingAda_002";
-  public static final String OPENAI_GPT_3_5_TURBO = "sfdc_ai__DefaultOpenAIGPT4OmniMini";
+  public static final String OPENAI_GPT_3_5_TURBO = "sfdc_ai__DefaultOpenAIGPT35Turbo";
 
 
 
