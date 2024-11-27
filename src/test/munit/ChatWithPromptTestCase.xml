@@ -1,0 +1,124 @@
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+      xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:ms-einstein="http://www.mulesoft.org/schema/mule/ms-einstein"
+      xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+        http://www.mulesoft.org/schema/mule/munit-tools http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+        http://www.mulesoft.org/schema/mule/ms-einstein http://www.mulesoft.org/schema/mule/ms-einstein/current/mule-ms-einstein.xsd">
+
+    <munit:config name="ChatWithPromptTestCase.xml" />
+
+    <munit:test name="ChatWithPrompt">
+        <munit:execution>
+            <logger message="Test ChatWithPrompt started" level="INFO" />
+            <ms-einstein:chat-answer-prompt doc:name="Chat answer prompt" doc:id="5f8c7c79-dffe-4331-a5b4-30375baa66bc"
+                                                    prompt="How many continents are there in the world?" config-ref="Einstein_AI_Config"/>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[payload.response]"
+                                     is="#[MunitTools::matches('There are (7|seven) continents in the world.*')]"
+                                     doc:name="Assert Generated Text"/>
+        </munit:validation>
+    </munit:test>
+
+
+    <munit:test name="ChatGenerateFromMessages">
+        <munit:execution>
+            <logger message="Test ChatGenerateFromMessages started" level="INFO" />
+            <ms-einstein:chat-generate-from-messages doc:name="Chat generate from messages" doc:id="5f8c7c79-dffe-4331-a5b4-30375baa66bc"
+                                                             messages="[{'role':'user','content':'Can you give me a recipe for classic cherry pie?'}]" config-ref="Einstein_AI_Config"/>
+        </munit:execution>
+        <munit:validation >
+            <munit-tools:assert-that
+                    expression="#[payload.generationDetails.generations[0].content]"
+                    is="#[MunitTools::containsString('cherry pie')]"
+                    doc:name="Assert that content includes a recipe for cherry pie"/>
+        </munit:validation>
+    </munit:test>
+
+
+                <munit:test name="EmbeddingAdhocFileQuery">
+                    <munit:execution>
+                        <logger message="Test EmbeddingAdhocFileQuery started" level="INFO" />
+                        <ms-einstein:embedding-adhoc-file-query doc:name="Chat answer prompt" doc:id="5f8c7c79-dffe-4331-a5b4-30375baa66bc"
+                                                                prompt="What is Mule 4 ?"
+                                                                 filePath='${app.home}/embeddingaddfiletest/embedtest.pdf'
+                                                                config-ref="Einstein_AI_Config"/>
+                    </munit:execution>
+                    <munit:validation>
+                        <munit-tools:assert-that
+                                expression="#[payload[0]]"
+                                is="#[MunitTools::matches('(?is).*What is mule 4.*Mule 4 is the newest version of Mule runtime engine.*reactive programming.*scalability.*')]"
+                                doc:name="Assert Mule 4 description response"/>
+                    </munit:validation>
+                </munit:test>
+
+
+                <munit:test name="RAGAdhocLoadDocument">
+                    <munit:execution>
+                        <logger message="Test RAGAdhocLoadDocument started" level="INFO" />
+                        <ms-einstein:rag-adhoc-load-document doc:name="RAG Adhoc Load Document" prompt="What is Mule 4 ?"
+                                                              filePath='${app.home}/embeddingaddfiletest/embedtest.pdf'
+                                                              config-ref="Einstein_AI_Config"/>
+                    </munit:execution>
+                    <munit:validation>
+                        <munit-tools:assert-that
+                                expression="#[payload.response]"
+                                is="#[MunitTools::matches('(?i).*Mule 4.*reactive programming.*')]"
+                                doc:name="Assert that generatedText contains expected content"/>
+                    </munit:validation>
+                </munit:test>
+
+
+                    <munit:test name="ToolsUseAiService">
+                        <munit:execution>
+                            <logger message="Test ToolsUseAiService started" level="INFO" />
+                            <ms-einstein:tools-use-ai-service doc:name="tools use ai service"
+                                                               prompt="Which is the biggest ocean?"
+                                                               toolsConfig='${app.home}/tools.config.json'
+                                                               config-ref="Einstein_AI_Config"/>
+                        </munit:execution>
+                        <munit:validation>
+                            <munit-tools:assert-that
+                                    expression="#[payload.response]"
+                                    is="#[MunitTools::matches('(?i).*Pacific Ocean.*')]"
+                                    doc:name="Assert that generatedText contains expected content"/>
+                        </munit:validation>
+                    </munit:test>
+
+    <munit:test name="CHATAnswerPromptWithMemory" description="Test chat answer with memory">
+        <munit:execution>
+            <logger message="Test CHATAnswerPromptWithMemory started" level="INFO" />
+            <flow-ref name="ask-question-flow" doc:name="Invoke Ask Question Flow"/>
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that
+                    expression="#[payload.response]"
+                    is="#[MunitTools::containsString('ostrich')]"
+                    doc:name="Assert that the response mentions Ostrich"/>
+        </munit:validation>
+    </munit:test>
+
+
+    <munit:test name="AgentDefinePromptTemplate" description="Test define agent prompt template">
+        <munit:execution>
+            <logger message="Test AgentDefinePromptTemplate started" level="INFO" />
+            <ms-einstein:agent-define-prompt-template doc:name="agent define prompt template"
+                                                       template="You are a customer satisfaction agent, who analyses the customer feedback in the dataset Answer via json output and add type for the result only with positive or negative as well as the complete answer."
+                                                       instructions="If the customer feedback in the dataset is negative, open service satisfaction case and apaolize to the customer. If the customer feedback in the dataset is positive, thank the customer and wish them a nice day. Don't repeat the feedback and be more direct starting the conversation with formal greetings."
+                                                       dataset="It was horrible training last week"
+                                                       config-ref="Einstein_AI_Config"/>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that
+                    expression="#[payload != null and payload.response != null and payload.response != '']"
+                    is="#[MunitTools::equalTo(true)]"
+                    doc:name="Validate Generated Text is Not Null or Blank" />
+        </munit:validation>
+    </munit:test>
+</mule>

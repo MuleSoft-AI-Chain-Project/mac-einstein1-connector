@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:ms-einstein="http://www.mulesoft.org/schema/mule/ms-einstein"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+      xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+       http://www.mulesoft.org/schema/mule/ms-einstein http://www.mulesoft.org/schema/mule/ms-einstein/current/mule-ms-einstein.xsd">
+
+    <configuration-properties doc:name="Configuration properties" file="automation-credentials.properties"/>
+
+    <ms-einstein:config name="Einstein_AI_Config" doc:name="Einstein AI Config" doc:id="4a7dffd2-3890-4895-8af7-498a4fde3d2d" >
+        <ms-einstein:connection clientId="${config.client-id}" clientSecret="${config.client-secret}" salesforceOrg="${config.salesforce-org}" />
+    </ms-einstein:config>
+
+</mule>
