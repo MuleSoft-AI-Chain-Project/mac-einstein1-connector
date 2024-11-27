@@ -61,7 +61,7 @@ public class MuleChainEinstein1ConnectionProvider implements PoolingConnectionPr
   @Override
   public ConnectionValidationResult validate(MuleChainEinstein1Connection connection) {
     try {
-      String urlStr = "https://" + connection.getSalesforceOrg() + ".my.salesforce.com/services/oauth2/token";
+      String urlStr = "https://" + connection.getSalesforceOrg() + "/services/oauth2/token";
       String urlParameters = "grant_type=client_credentials&client_id=" + connection.getClientId() + "&client_secret=" + connection.getClientSecret();
       byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
