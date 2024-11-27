@@ -17,6 +17,7 @@
     </parent>
 
     <properties>
+        <skipVerifications>false</skipVerifications>
         <muleJavaEeBomVersion>4.6.0</muleJavaEeBomVersion>
         <json.version>20240303</json.version>
         <formatterConfigPath>formatter.xml</formatterConfigPath>
@@ -109,9 +110,9 @@
                 <artifactId>formatter-maven-plugin</artifactId>
                 <version>${javaFormatter.plugin.version}</version>
                 <configuration>
-                    <compilerCompliance>${javaVersion}</compilerCompliance>
-                    <compilerSource>${javaVersion}</compilerSource>
-                    <compilerTargetPlatform>${javaVersion}</compilerTargetPlatform>
+                    <compilerCompliance>${jdk.version}</compilerCompliance>
+                    <compilerSource>${jdk.version}</compilerSource>
+                    <compilerTargetPlatform>${jdk.version}</compilerTargetPlatform>
                     <configFile>${basedir}/${formatterConfigPath}</configFile>
                     <configJsFile>${basedir}/${formatterConfigPath}</configJsFile>
                     <aggregator>false</aggregator>

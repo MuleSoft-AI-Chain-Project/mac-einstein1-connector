@@ -1,6 +1,8 @@
 package com.mule.einstein.internal.helpers.chatmemory;
 
-import org.mapdb.*;
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
+import org.mapdb.Serializer;
 
 import java.io.File;
 import java.util.ArrayList;
