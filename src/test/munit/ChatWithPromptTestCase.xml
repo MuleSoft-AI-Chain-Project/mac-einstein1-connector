@@ -19,7 +19,7 @@
                                                     prompt="How many continents are there in the world?" config-ref="Einstein_AI_Config"/>
         </munit:execution>
         <munit:validation>
-            <munit-tools:assert-that expression="#[payload.generation.generatedText]"
+            <munit-tools:assert-that expression="#[payload.response]"
                                      is="#[MunitTools::matches('There are (7|seven) continents in the world.*')]"
                                      doc:name="Assert Generated Text"/>
         </munit:validation>
@@ -67,7 +67,7 @@
                     </munit:execution>
                     <munit:validation>
                         <munit-tools:assert-that
-                                expression="#[payload.generation.generatedText]"
+                                expression="#[payload.response]"
                                 is="#[MunitTools::matches('(?i).*Mule 4.*reactive programming.*')]"
                                 doc:name="Assert that generatedText contains expected content"/>
                     </munit:validation>
@@ -84,7 +84,7 @@
                         </munit:execution>
                         <munit:validation>
                             <munit-tools:assert-that
-                                    expression="#[payload.generation.generatedText]"
+                                    expression="#[payload.response]"
                                     is="#[MunitTools::matches('(?i).*Pacific Ocean.*')]"
                                     doc:name="Assert that generatedText contains expected content"/>
                         </munit:validation>
@@ -98,14 +98,14 @@
 
         <munit:validation>
             <munit-tools:assert-that
-                    expression="#[payload.generation.generatedText]"
-                    is="#[MunitTools::matches('(?i).*ostrich.*')]"
+                    expression="#[payload.response]"
+                    is="#[MunitTools::containsString('ostrich')]"
                     doc:name="Assert that the response mentions Ostrich"/>
         </munit:validation>
     </munit:test>
 
 
-    <munit:test name="AgentDefinePromptTemplate" description="Test chat answer with memory">
+    <munit:test name="AgentDefinePromptTemplate" description="Test define agent prompt template">
         <munit:execution>
             <logger message="Test AgentDefinePromptTemplate started" level="INFO" />
             <ms-einstein:agent-define-prompt-template doc:name="agent define prompt template"
@@ -116,7 +116,7 @@
         </munit:execution>
         <munit:validation>
             <munit-tools:assert-that
-                    expression="#[payload.generation.generatedText != null and payload.generation.generatedText != '']"
+                    expression="#[payload != null and payload.response != null and payload.response != '']"
                     is="#[MunitTools::equalTo(true)]"
                     doc:name="Validate Generated Text is Not Null or Blank" />
         </munit:validation>
