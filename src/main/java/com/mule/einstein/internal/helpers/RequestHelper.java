@@ -4,18 +4,12 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-import static com.mule.einstein.internal.helpers.ConstantUtil.GRANT_TYPE_CLIENT_CREDENTIALS;
-import static com.mule.einstein.internal.helpers.ConstantUtil.QUERY_PARAM_CLIENT_ID;
-import static com.mule.einstein.internal.helpers.ConstantUtil.QUERY_PARAM_CLIENT_SECRET;
-import static com.mule.einstein.internal.helpers.ConstantUtil.QUERY_PARAM_GRANT_TYPE;
-import static com.mule.einstein.internal.helpers.ConstantUtil.URI_HTTPS_PREFIX;
-import static com.mule.einstein.internal.helpers.ConstantUtil.URI_OAUTH_TOKEN;
+import static com.mule.einstein.internal.helpers.ConstantUtil.*;
 
 public class RequestHelper {
 
@@ -34,31 +28,27 @@ public class RequestHelper {
   public static String executeREST(String accessToken, String payload, String urlString) {
 
     try {
-      URL url = new URL(urlString);
-      HttpURLConnection conn = getConnectionObject(url, accessToken);
+      HttpURLConnection httpConnection = creteURLConnection(urlString);
+      populateConnectionObject(httpConnection, accessToken);
 
-      try (OutputStream os = conn.getOutputStream()) {
+      try (OutputStream os = httpConnection.getOutputStream()) {
         byte[] input = payload.getBytes(StandardCharsets.UTF_8);
         os.write(input, 0, input.length);
       }
 
-      int responseCode = conn.getResponseCode();
+      int responseCode = httpConnection.getResponseCode();
       if (responseCode == HttpURLConnection.HTTP_OK) {
-        try (java.io.BufferedReader br = new java.io.BufferedReader(
-                                                                    new java.io.InputStreamReader(conn.getInputStream(),
-                                                                                                  StandardCharsets.UTF_8))) {
-          StringBuilder response = new StringBuilder();
-          String responseLine;
-          while ((responseLine = br.readLine()) != null) {
-            response.append(responseLine.trim());
-          }
-          return response.toString();
+        if (httpConnection.getInputStream() == null) {
+          return "Error: No response received from Einstein";
         }
+        return readResponse(httpConnection.getInputStream());
       } else {
-        return "Error: " + responseCode;
+        String errorMessage = readErrorStream(httpConnection.getErrorStream());
+        log.error("Error response code: {}, message: {}", responseCode, errorMessage);
+        return String.format("Error: %d", responseCode);
       }
     } catch (Exception e) {
-      log.error("Exception during REST request ", e);
+      log.error("Exception during REST request execution ", e);
       return "Exception occurred: " + e.getMessage();
     }
   }
@@ -69,49 +59,74 @@ public class RequestHelper {
     String params = RequestHelper.getOAuthParams(consumerKey, consumerSecret);
 
     try {
-      URL url = new URL(urlString);
-      HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-      conn.setDoOutput(true);
-      conn.setRequestMethod(ConstantUtil.HTTP_METHOD_POST);
-      conn.setRequestProperty(ConstantUtil.CONTENT_TYPE_STRING, "application/x-www-form-urlencoded");
+      HttpURLConnection httpConnection = creteURLConnection(urlString);
+      httpConnection.setRequestProperty(ConstantUtil.CONTENT_TYPE_STRING, CONTENT_TYPE_X_WWW_FORM_URLENCODED);
 
-      try (OutputStream os = conn.getOutputStream()) {
+      try (OutputStream os = httpConnection.getOutputStream()) {
         byte[] input = params.getBytes(StandardCharsets.UTF_8);
         os.write(input, 0, input.length);
       }
 
-      int responseCode = conn.getResponseCode();
+      int responseCode = httpConnection.getResponseCode();
       if (responseCode == HttpURLConnection.HTTP_OK) {
-        try (java.io.BufferedReader br = new java.io.BufferedReader(
-                                                                    new java.io.InputStreamReader(conn.getInputStream(),
-                                                                                                  StandardCharsets.UTF_8))) {
-          StringBuilder response = new StringBuilder();
-          String responseLine;
-          while ((responseLine = br.readLine()) != null) {
-            response.append(responseLine.trim());
-          }
-          // Parse JSON response and extract access_token
-          JSONObject jsonResponse = new JSONObject(response.toString());
-          return jsonResponse.getString("access_token");
-        }
+        String response = readResponse(httpConnection.getInputStream());
+        JSONObject jsonResponse = new JSONObject(response);
+        return jsonResponse.getString(ACCESS_TOKEN);
       } else {
-        return "Error: " + responseCode;
+        String errorMessage = readErrorStream(httpConnection.getErrorStream());
+        log.error("Error response code: {}, message: {}", responseCode, errorMessage);
+        return String.format("Error: %d", responseCode);
       }
     } catch (Exception e) {
-      log.error("Exception while getting access token", e);
+      log.error("Exception while getting access token ", e);
       return "Exception occurred: " + e.getMessage();
     }
   }
 
-  private static HttpURLConnection getConnectionObject(URL url, String accessToken) throws IOException {
+  private static HttpURLConnection creteURLConnection(String urlString) throws IOException {
+    URL url = new URL(urlString);
     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    conn.setRequestMethod(HTTP_METHOD_POST);
+    conn.setConnectTimeout(CONNECTION_TIMEOUT);
+    conn.setReadTimeout(READ_TIMEOUT);
     conn.setDoOutput(true);
-    conn.setRequestMethod("POST");
-    conn.setRequestProperty("Authorization", "Bearer " + accessToken);
-    conn.setRequestProperty("x-sfdc-app-context", "EinsteinGPT");
-    conn.setRequestProperty("x-client-feature-id", "ai-platform-models-connected-app");
-    conn.setRequestProperty(ConstantUtil.CONTENT_TYPE_STRING, "application/json;charset=utf-8");
     return conn;
   }
 
+  private static void populateConnectionObject(HttpURLConnection conn, String accessToken) throws IOException {
+    conn.setRequestProperty(AUTHORIZATION, "Bearer " + accessToken);
+    conn.setRequestProperty(X_SFDC_APP_CONTEXT, EINSTEIN_GPT);
+    conn.setRequestProperty(X_CLIENT_FEATURE_ID, AI_PLATFORM_MODELS_CONNECTED_APP);
+    conn.setRequestProperty(ConstantUtil.CONTENT_TYPE_STRING, CONTENT_TYPE_APPLICATION_JSON);
+  }
+
+  private static String readErrorStream(InputStream errorStream) {
+    if (errorStream == null) {
+      return "No error details available.";
+    }
+    try (BufferedReader br = new BufferedReader(new InputStreamReader(errorStream, StandardCharsets.UTF_8))) {
+      StringBuilder errorResponse = new StringBuilder();
+      String line;
+      while ((line = br.readLine()) != null) {
+        errorResponse.append(line.trim());
+      }
+      return errorResponse.toString();
+    } catch (IOException e) {
+      log.error("Error reading error stream", e);
+      return "Unable to get response from Einstein. Could not read reading error details as well.";
+    }
+  }
+
+  private static String readResponse(InputStream inputStream) throws IOException {
+    try (java.io.BufferedReader br = new java.io.BufferedReader(
+                                                                new java.io.InputStreamReader(inputStream,
+                                                                                              StandardCharsets.UTF_8))) {
+      StringBuilder response = new StringBuilder();
+      String responseLine;
+      while ((responseLine = br.readLine()) != null) {
+        response.append(responseLine.trim());
+      }
+      return response.toString();
+    }
+  }
 }
