@@ -121,4 +121,15 @@
                     doc:name="Validate Generated Text is Not Null or Blank" />
         </munit:validation>
     </munit:test>
+
+    <munit:test name="EinsteinWithError" description="Test to validate error"  expectedErrorType="MS-EINSTEIN:CONNECTIVITY">
+        <munit:execution>
+            <logger message="Test EinsteinWithError started" level="INFO" />
+            <ms-einstein:agent-define-prompt-template doc:name="agent define prompt template"
+                                                      template="You are a customer satisfaction agent, who analyses the customer feedback in the dataset Answer via json output and add type for the result only with positive or negative as well as the complete answer."
+                                                      instructions="If the customer feedback in the dataset is negative, open service satisfaction case and apaolize to the customer. If the customer feedback in the dataset is positive, thank the customer and wish them a nice day. Don't repeat the feedback and be more direct starting the conversation with formal greetings."
+                                                      dataset="It was horrible training last week"
+                                                      config-ref="Einstein_AI_Config_Error"/>
+        </munit:execution>
+    </munit:test>
 </mule>
