@@ -16,4 +16,8 @@
         <ms-einstein:connection clientId="${config.client-id}" clientSecret="${config.client-secret}" salesforceOrg="${config.salesforce-org}" />
     </ms-einstein:config>
 
+    <ms-einstein:config name="Einstein_AI_Config_Error" doc:name="Einstein AI Config Error">
+        <ms-einstein:connection clientId="testId" clientSecret="testSecret" salesforceOrg="testOrg" />
+    </ms-einstein:config>
+
 </mule>
