@@ -27,9 +27,10 @@
         <mule.sdk.api.version>0.9.0-rc1</mule.sdk.api.version>
         <munit.input.directory>src/test/munit</munit.input.directory>
         <munit.output.directory>${basedir}/target/test-mule/munit</munit.output.directory>
-        <munit.extensions.maven.plugin.version>1.2.0</munit.extensions.maven.plugin.version>
         <jacoco.version>0.8.12</jacoco.version>
         <maven.surefire.version>2.22.2</maven.surefire.version>
+        <munit.extensions.maven.plugin.version>1.4.0-rc1</munit.extensions.maven.plugin.version>
+        <munit.version>3.3.1</munit.version>
     </properties>
 
     <dependencyManagement>
