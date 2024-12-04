@@ -44,21 +44,21 @@ public class PayloadHelper {
     String accessToken =
         RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
     String payload = constructJsonPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
-    return executeEinsteinRequest(accessToken, payload, paramDetails.getModelName(), URI_MODELS_API_GENERATIONS);
+    return executeEinsteinRequest(accessToken, payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
   }
 
   public static String executeGenerateChat(String messages, EinsteinConnection connection, ParamsModelDetails paramDetails) {
     String accessToken =
         RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
     String payload = constrcutJsonMessages(messages, paramDetails);
-    return executeEinsteinRequest(accessToken, payload, paramDetails.getModelName(), URI_MODELS_API_CHAT_GENERATIONS);
+    return executeEinsteinRequest(accessToken, payload, paramDetails.getModelApiName(), URI_MODELS_API_CHAT_GENERATIONS);
   }
 
   public static String executeRAG(String text, EinsteinConnection connection, RAGParamsModelDetails paramDetails) {
     String accessToken =
         RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
     String payload = constructJsonPayload(text, paramDetails.getLocale(), paramDetails.getProbability());
-    return executeEinsteinRequest(accessToken, payload, paramDetails.getModelName(), URI_MODELS_API_GENERATIONS);
+    return executeEinsteinRequest(accessToken, payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
   }
 
   public static String executeTools(String originalPrompt, String prompt, String filePath, EinsteinConnection connection,
@@ -70,10 +70,10 @@ public class PayloadHelper {
     String payloadOptional = constructJsonPayload(originalPrompt, paramDetails.getLocale(), paramDetails.getProbability());
 
     String intermediateAnswer =
-        executeEinsteinRequest(accessToken, payload, paramDetails.getModelName(), URI_MODELS_API_GENERATIONS);
+        executeEinsteinRequest(accessToken, payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
 
     String response =
-        executeEinsteinRequest(accessToken, payloadOptional, paramDetails.getModelName(), URI_MODELS_API_GENERATIONS);
+        executeEinsteinRequest(accessToken, payloadOptional, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
     List<String> findURL = extractUrls(intermediateAnswer);
     String ePayload = "";
     if (findURL != null) {
@@ -85,7 +85,7 @@ public class PayloadHelper {
       response = getAttributes(findURL.get(0), filePath, extractPayload(ePayload));
       String finalPayload = constructJsonPayload("data: " + response + ", question: " + originalPrompt, paramDetails.getLocale(),
                                                  paramDetails.getProbability());
-      response = executeEinsteinRequest(accessToken, finalPayload, paramDetails.getModelName(), URI_MODELS_API_GENERATIONS);
+      response = executeEinsteinRequest(accessToken, finalPayload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
 
     }
     return response;

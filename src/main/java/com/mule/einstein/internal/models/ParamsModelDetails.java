@@ -16,8 +16,8 @@ public class ParamsModelDetails {
   @Expression(ExpressionSupport.SUPPORTED)
   @OfValues(ModelApiNameProvider.class)
   @Optional(defaultValue = OPENAI_GPT_3_5_TURBO)
-  @DisplayName("Model Name")
-  private String modelName;
+  @DisplayName("Model API Name")
+  private String modelApiName;
 
   @Parameter
   @Expression(ExpressionSupport.SUPPORTED)
@@ -31,8 +31,8 @@ public class ParamsModelDetails {
   @DisplayName("Locale")
   private String locale;
 
-  public String getModelName() {
-    return modelName;
+  public String getModelApiName() {
+    return modelApiName;
   }
 
   public Number getProbability() {

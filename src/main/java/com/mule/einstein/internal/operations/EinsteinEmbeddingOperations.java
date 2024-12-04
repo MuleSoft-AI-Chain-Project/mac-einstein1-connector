@@ -47,7 +47,7 @@ public class EinsteinEmbeddingOperations {
     log.info("Executing embedding adhoc file query operation.");
     try {
 
-      String response = PayloadHelper.embeddingFileQuery(prompt, filePath, connection, paramDetails.getModelName(),
+      String response = PayloadHelper.embeddingFileQuery(prompt, filePath, connection, paramDetails.getModelApiName(),
                                                          paramDetails.getFileType(), paramDetails.getOptionType());
 
       return ResponseHelper.createEinsteinDefaultResponse(response);

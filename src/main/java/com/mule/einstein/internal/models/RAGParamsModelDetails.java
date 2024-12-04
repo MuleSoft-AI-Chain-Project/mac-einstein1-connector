@@ -28,19 +28,22 @@ public class RAGParamsModelDetails {
   @Expression(ExpressionSupport.SUPPORTED)
   @OfValues(DocumentFileType.class)
   @Optional(defaultValue = "PDF")
+  @DisplayName("File Type")
   private String fileType;
 
   @Parameter
   @Expression(ExpressionSupport.SUPPORTED)
   @OfValues(DocumentSplitOptions.class)
   @Optional(defaultValue = "FULL")
+  @DisplayName("Option Type")
   private String optionType;
 
   @Parameter
   @Expression(ExpressionSupport.SUPPORTED)
   @OfValues(ModelApiNameProvider.class)
   @Optional(defaultValue = OPENAI_GPT_3_5_TURBO)
-  private String modelName;
+  @DisplayName("Model API Name")
+  private String modelApiName;
 
   @Parameter
   @Expression(ExpressionSupport.SUPPORTED)
@@ -66,8 +69,8 @@ public class RAGParamsModelDetails {
     return optionType;
   }
 
-  public String getModelName() {
-    return modelName;
+  public String getModelApiName() {
+    return modelApiName;
   }
 
   public Number getProbability() {

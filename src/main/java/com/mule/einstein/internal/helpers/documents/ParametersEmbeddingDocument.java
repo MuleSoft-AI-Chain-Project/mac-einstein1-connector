@@ -16,8 +16,8 @@ public class ParametersEmbeddingDocument {
   @Expression(ExpressionSupport.SUPPORTED)
   @OfValues(EmbeddingModelApiNameProvider.class)
   @Optional(defaultValue = OPENAI_ADA_002)
-  @DisplayName("Model Name")
-  private String modelName;
+  @DisplayName("Model API Name")
+  private String modelApiName;
 
   @Parameter
   @Expression(ExpressionSupport.SUPPORTED)
@@ -33,8 +33,8 @@ public class ParametersEmbeddingDocument {
   @DisplayName("Option Type")
   private String optionType;
 
-  public String getModelName() {
-    return modelName;
+  public String getModelApiName() {
+    return modelApiName;
   }
 
   public String getFileType() {
