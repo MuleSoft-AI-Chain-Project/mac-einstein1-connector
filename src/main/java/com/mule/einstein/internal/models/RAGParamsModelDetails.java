@@ -6,6 +6,7 @@ import org.mule.runtime.api.meta.ExpressionSupport;
 import org.mule.runtime.extension.api.annotation.Expression;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
+import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
 import org.mule.runtime.extension.api.annotation.values.OfValues;
 
 import com.mule.einstein.internal.helpers.documents.DocumentFileType;
@@ -20,6 +21,7 @@ public class RAGParamsModelDetails {
   @Expression(ExpressionSupport.SUPPORTED)
   @OfValues(EmbeddingModelApiNameProvider.class)
   @Optional(defaultValue = OPENAI_ADA_002)
+  @DisplayName("Embedding Name")
   private String embeddingName;
 
   @Parameter
@@ -43,11 +45,13 @@ public class RAGParamsModelDetails {
   @Parameter
   @Expression(ExpressionSupport.SUPPORTED)
   @Optional(defaultValue = "0.8")
+  @DisplayName("Probability")
   private Number probability;
 
   @Parameter
   @Expression(ExpressionSupport.SUPPORTED)
   @Optional(defaultValue = "en_US")
+  @DisplayName("Locale")
   private String locale;
 
   public String getEmbeddingName() {
@@ -73,5 +77,4 @@ public class RAGParamsModelDetails {
   public String getLocale() {
     return locale;
   }
-
 }

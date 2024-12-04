@@ -11,6 +11,7 @@ import com.mule.einstein.internal.models.ParamsModelDetails;
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.error.Throws;
 import org.mule.runtime.extension.api.annotation.param.Connection;
+import org.mule.runtime.extension.api.annotation.param.Content;
 import org.mule.runtime.extension.api.annotation.param.MediaType;
 import org.mule.runtime.extension.api.annotation.param.ParameterGroup;
 import org.mule.runtime.extension.api.exception.ModuleException;
@@ -37,8 +38,9 @@ public class EinsteinGenerationOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("AGENT-define-prompt-template")
   @Throws(ChatErrorTypeProvider.class)
-  public Result<InputStream, EinsteinResponseAttributes> definePromptTemplate(String template, String instructions,
-                                                                              String dataset,
+  public Result<InputStream, EinsteinResponseAttributes> definePromptTemplate(@Content(primary = true) String template,
+                                                                              @Content String instructions,
+                                                                              @Content String dataset,
                                                                               @Connection EinsteinConnection connection,
                                                                               @ParameterGroup(
                                                                                   name = "Additional properties") ParamsModelDetails paramDetails) {
@@ -63,7 +65,8 @@ public class EinsteinGenerationOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("CHAT-answer-prompt")
   @Throws(ChatErrorTypeProvider.class)
-  public Result<InputStream, EinsteinResponseAttributes> generateText(String prompt, @Connection EinsteinConnection connection,
+  public Result<InputStream, EinsteinResponseAttributes> generateText(@Content String prompt,
+                                                                      @Connection EinsteinConnection connection,
                                                                       @ParameterGroup(
                                                                           name = "Additional properties") ParamsModelDetails paramDetails) {
     log.info("Executing chat answer prompt operation.");
@@ -85,7 +88,9 @@ public class EinsteinGenerationOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("CHAT-answer-prompt-with-memory")
   @Throws(ChatErrorTypeProvider.class)
-  public Result<InputStream, EinsteinResponseAttributes> generateTextMemory(String prompt, String memoryPath, String memoryName,
+  public Result<InputStream, EinsteinResponseAttributes> generateTextMemory(@Content(primary = true) String prompt,
+                                                                            String memoryPath,
+                                                                            String memoryName,
                                                                             Integer keepLastMessages,
                                                                             @Connection EinsteinConnection connection,
                                                                             @ParameterGroup(
@@ -110,7 +115,7 @@ public class EinsteinGenerationOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("CHAT-generate-from-messages")
   @Throws(ChatErrorTypeProvider.class)
-  public Result<InputStream, Void> generateChat(String messages, @Connection EinsteinConnection connection,
+  public Result<InputStream, Void> generateChat(@Content String messages, @Connection EinsteinConnection connection,
                                                 @ParameterGroup(
                                                     name = "Additional properties") ParamsModelDetails paramDetails) {
     log.info("Executing chat generate from message operation.");
