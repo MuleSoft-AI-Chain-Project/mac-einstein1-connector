@@ -11,6 +11,7 @@ import com.mule.einstein.internal.models.RAGParamsModelDetails;
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.error.Throws;
 import org.mule.runtime.extension.api.annotation.param.Connection;
+import org.mule.runtime.extension.api.annotation.param.Content;
 import org.mule.runtime.extension.api.annotation.param.MediaType;
 import org.mule.runtime.extension.api.annotation.param.ParameterGroup;
 import org.mule.runtime.extension.api.exception.ModuleException;
@@ -39,14 +40,14 @@ public class EinsteinEmbeddingOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("EMBEDDING-adhoc-file-query")
   @Throws(EmbeddingErrorTypeProvider.class)
-  public Result<InputStream, Void> queryEmbeddingOnFiles(String prompt, String filePath,
+  public Result<InputStream, Void> queryEmbeddingOnFiles(@Content String prompt, String filePath,
                                                          @Connection EinsteinConnection connection,
                                                          @ParameterGroup(
                                                              name = "Additional properties") ParametersEmbeddingDocument paramDetails) {
     log.info("Executing embedding adhoc file query operation.");
     try {
 
-      String response = PayloadHelper.embeddingFileQuery(prompt, filePath, connection, paramDetails.getModelName(),
+      String response = PayloadHelper.embeddingFileQuery(prompt, filePath, connection, paramDetails.getModelApiName(),
                                                          paramDetails.getFileType(), paramDetails.getOptionType());
 
       return ResponseHelper.createEinsteinDefaultResponse(response);
@@ -64,7 +65,7 @@ public class EinsteinEmbeddingOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("RAG-adhoc-load-document")
   @Throws(EmbeddingErrorTypeProvider.class)
-  public Result<InputStream, EinsteinResponseAttributes> ragOnFiles(String prompt, String filePath,
+  public Result<InputStream, EinsteinResponseAttributes> ragOnFiles(@Content String prompt, String filePath,
                                                                     @Connection EinsteinConnection connection,
                                                                     @ParameterGroup(
                                                                         name = "Additional properties") RAGParamsModelDetails paramDetails) {
@@ -91,7 +92,7 @@ public class EinsteinEmbeddingOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("Tools-use-ai-service")
   @Throws(EmbeddingErrorTypeProvider.class)
-  public Result<InputStream, EinsteinResponseAttributes> executeTools(String prompt, String toolsConfig,
+  public Result<InputStream, EinsteinResponseAttributes> executeTools(@Content String prompt, String toolsConfig,
                                                                       @Connection EinsteinConnection connection,
                                                                       @ParameterGroup(
                                                                           name = "Additional properties") ParamsModelDetails paramDetails) {

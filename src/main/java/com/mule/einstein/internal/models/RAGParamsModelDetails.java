@@ -6,6 +6,7 @@ import org.mule.runtime.api.meta.ExpressionSupport;
 import org.mule.runtime.extension.api.annotation.Expression;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
+import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
 import org.mule.runtime.extension.api.annotation.values.OfValues;
 
 import com.mule.einstein.internal.helpers.documents.DocumentFileType;
@@ -20,34 +21,40 @@ public class RAGParamsModelDetails {
   @Expression(ExpressionSupport.SUPPORTED)
   @OfValues(EmbeddingModelApiNameProvider.class)
   @Optional(defaultValue = OPENAI_ADA_002)
+  @DisplayName("Embedding Name")
   private String embeddingName;
 
   @Parameter
   @Expression(ExpressionSupport.SUPPORTED)
   @OfValues(DocumentFileType.class)
   @Optional(defaultValue = "PDF")
+  @DisplayName("File Type")
   private String fileType;
 
   @Parameter
   @Expression(ExpressionSupport.SUPPORTED)
   @OfValues(DocumentSplitOptions.class)
   @Optional(defaultValue = "FULL")
+  @DisplayName("Option Type")
   private String optionType;
 
   @Parameter
   @Expression(ExpressionSupport.SUPPORTED)
   @OfValues(ModelApiNameProvider.class)
   @Optional(defaultValue = OPENAI_GPT_3_5_TURBO)
-  private String modelName;
+  @DisplayName("Model API Name")
+  private String modelApiName;
 
   @Parameter
   @Expression(ExpressionSupport.SUPPORTED)
   @Optional(defaultValue = "0.8")
+  @DisplayName("Probability")
   private Number probability;
 
   @Parameter
   @Expression(ExpressionSupport.SUPPORTED)
   @Optional(defaultValue = "en_US")
+  @DisplayName("Locale")
   private String locale;
 
   public String getEmbeddingName() {
@@ -62,8 +69,8 @@ public class RAGParamsModelDetails {
     return optionType;
   }
 
-  public String getModelName() {
-    return modelName;
+  public String getModelApiName() {
+    return modelApiName;
   }
 
   public Number getProbability() {
@@ -73,5 +80,4 @@ public class RAGParamsModelDetails {
   public String getLocale() {
     return locale;
   }
-
 }
