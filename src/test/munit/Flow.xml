@@ -8,22 +8,27 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
   http://www.mulesoft.org/schema/mule/ms-einstein http://www.mulesoft.org/schema/mule/ms-einstein/current/mule-ms-einstein.xsd">
 
     <flow name="populate-memory-flow">
+        <set-variable variableName="prompt" value="Ostrich is the biggest bird in the world." doc:name="Set Prompt Variable" />
         <ms-einstein:chat-answer-prompt-with-memory
                 doc:name="CHAT Answer Prompt With Memory"
-                prompt="Ostrich is the biggest bird in the world."
                 memoryPath='${app.home}/embeddingaddfiletest/testdb'
                 memoryName="vt"
                 keepLastMessages="10"
-                config-ref="Einstein_AI_Config"/>
+                config-ref="Einstein_AI_Config">
+            <ms-einstein:prompt>#[vars.prompt]</ms-einstein:prompt>
+        </ms-einstein:chat-answer-prompt-with-memory>
     </flow>
+
     <flow name="ask-question-flow">
         <flow-ref name="populate-memory-flow" doc:name="Call Populate Memory Flow"/>
+        <set-variable variableName="prompt" value="Which is the biggest bird in the world?" doc:name="Set Prompt Variable"/>
         <ms-einstein:chat-answer-prompt-with-memory
                 doc:name="CHAT Answer Prompt With Memory"
-                prompt="Which is the biggest bird in the world?"
                 memoryPath='${app.home}/embeddingaddfiletest/testdb'
                 memoryName="vt"
                 keepLastMessages="10"
-                config-ref="Einstein_AI_Config"/>
+                config-ref="Einstein_AI_Config">
+            <ms-einstein:prompt>#[vars.prompt]</ms-einstein:prompt>
+        </ms-einstein:chat-answer-prompt-with-memory>
     </flow>
 </mule>
