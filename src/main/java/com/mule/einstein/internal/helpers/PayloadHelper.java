@@ -12,7 +12,6 @@ import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.txt.TXTParser;
 import org.apache.tika.sax.BodyContentHandler;
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -40,8 +39,6 @@ import static com.mule.einstein.internal.helpers.ConstantUtil.*;
 import static com.mule.einstein.internal.helpers.RequestHelper.executeREST;
 
 public class PayloadHelper {
-
-  private static final Logger log = LoggerFactory.getLogger(PayloadHelper.class);
 
   public static String executeGenerateText(String prompt, EinsteinConnection connection, ParamsModelDetails paramDetails) {
     String accessToken =
@@ -147,7 +144,6 @@ public class PayloadHelper {
     return new JSONArray(results).toString();
   }
 
-  @NotNull
   private static List<JSONArray> getCorpusEmbeddings(String modelName, List<String> corpus, String accessToken) {
 
     String embeddingResponse;
