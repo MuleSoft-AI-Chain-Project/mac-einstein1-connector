@@ -9,7 +9,6 @@ import com.mule.einstein.internal.models.ParamsEmbeddingDocumentDetails;
 import com.mule.einstein.internal.models.ParamsEmbeddingModelDetails;
 import com.mule.einstein.internal.models.ParamsModelDetails;
 import com.mule.einstein.internal.models.RAGParamsModelDetails;
-import org.apache.tika.exception.TikaException;
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.error.Throws;
 import org.mule.runtime.extension.api.annotation.param.Connection;
@@ -20,16 +19,12 @@ import org.mule.runtime.extension.api.exception.ModuleException;
 import org.mule.runtime.extension.api.runtime.operation.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 
 import static com.mule.einstein.internal.error.EinsteinErrorType.*;
 import static com.mule.einstein.internal.helpers.ConstantUtil.MODELAPI_OPENAI_ADA_002;
 import static java.lang.String.format;
-import static org.apache.commons.io.IOUtils.toInputStream;
 import static org.mule.runtime.extension.api.annotation.param.MediaType.APPLICATION_JSON;
 
 
@@ -45,9 +40,17 @@ public class EinsteinEmbeddingOperations {
    */
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("EMBEDDING-generate-from-text")
-  public InputStream generateEmbedding(String text, @Connection EinsteinConnection connection,
-                                       @ParameterGroup(name = "Additional properties") ParamsEmbeddingModelDetails paramDetails) {
-    return toInputStream(PayloadHelper.executeGenerateEmbedding(text, connection, paramDetails), StandardCharsets.UTF_8);
+  public Result<InputStream, Void> generateEmbedding(String text, @Connection EinsteinConnection connection,
+                                                     @ParameterGroup(
+                                                         name = "Additional properties") ParamsEmbeddingModelDetails paramDetails) {
+    try {
+      String response = PayloadHelper.executeGenerateEmbedding(text, connection, paramDetails);
+
+      return ResponseHelper.createEinsteinDefaultResponse(response);
+    } catch (Exception e) {
+      throw new ModuleException("Error while executing embedding generate from text operation",
+                                EMBEDDING_OPERATIONS_FAILURE, e);
+    }
   }
 
   /**
@@ -56,11 +59,13 @@ public class EinsteinEmbeddingOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("EMBEDDING-generate-from-file")
   @Throws(EmbeddingErrorTypeProvider.class)
-  public InputStream embeddingFromFiles(String filePath, @Connection EinsteinConnection connection,
-                                        @ParameterGroup(
-                                            name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails) {
+  public Result<InputStream, Void> embeddingFromFiles(String filePath, @Connection EinsteinConnection connection,
+                                                      @ParameterGroup(
+                                                          name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails) {
     try {
-      return toInputStream(PayloadHelper.embeddingFromFile(filePath, connection, paramDetails), StandardCharsets.UTF_8);
+      String response = PayloadHelper.embeddingFromFile(filePath, connection, paramDetails);
+
+      return ResponseHelper.createEinsteinDefaultResponse(response);
     } catch (Exception e) {
       throw new ModuleException("Error while executing embedding generate from file operation",
                                 EMBEDDING_OPERATIONS_FAILURE, e);
@@ -79,7 +84,6 @@ public class EinsteinEmbeddingOperations {
                                                              name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails) {
     log.info("Executing embedding adhoc file query operation.");
     try {
-
       String response = PayloadHelper.embeddingFileQuery(prompt, filePath, connection, paramDetails.getModelApiName(),
                                                          paramDetails.getFileType(), paramDetails.getOptionType());
 
