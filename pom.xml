@@ -18,7 +18,7 @@
 
     <properties>
         <skipVerifications>false</skipVerifications>
-        <muleJavaEeBomVersion>4.6.9</muleJavaEeBomVersion>
+        <muleJavaEeBomVersion>4.6.0</muleJavaEeBomVersion>
         <json.version>20240303</json.version>
         <formatterConfigPath>formatter.xml</formatterConfigPath>
         <javaFormatter.plugin.version>2.0.1</javaFormatter.plugin.version>
