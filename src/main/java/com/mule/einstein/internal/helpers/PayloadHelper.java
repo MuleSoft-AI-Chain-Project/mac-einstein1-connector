@@ -1,6 +1,8 @@
 package com.mule.einstein.internal.helpers;
 
 import com.mule.einstein.internal.connection.EinsteinConnection;
+import com.mule.einstein.internal.models.ParamsEmbeddingDocumentDetails;
+import com.mule.einstein.internal.models.ParamsEmbeddingModelDetails;
 import com.mule.einstein.internal.models.ParamsModelDetails;
 import com.mule.einstein.internal.models.RAGParamsModelDetails;
 import org.apache.tika.exception.TikaException;
@@ -54,6 +56,52 @@ public class PayloadHelper {
     return executeEinsteinRequest(accessToken, payload, paramDetails.getModelApiName(), URI_MODELS_API_CHAT_GENERATIONS);
   }
 
+  public static String executeGenerateEmbedding(String text, EinsteinConnection connection,
+                                                ParamsEmbeddingModelDetails paramDetails) {
+    String accessToken =
+        RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
+    String payload = constructEmbeddingJSON(text);
+    return executeEinsteinRequest(accessToken, payload, paramDetails.getModelApiName(), URI_MODELS_API_EMBEDDINGS);
+  }
+
+  public static String embeddingFromFile(String filePath, EinsteinConnection connection,
+                                         ParamsEmbeddingDocumentDetails einsteinParameters)
+      throws IOException, SAXException, TikaException {
+
+    String accessToken =
+        RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
+    List<String> corpus = createCorpusList(filePath, einsteinParameters.getFileType(), einsteinParameters.getOptionType());
+
+    try {
+      String response;
+      JSONObject jsonObject;
+      //Generate embedding for query
+      JSONArray embeddingsArray;
+
+      String corpusBody;
+      // Generate embeddings for the corpus
+      List<JSONArray> corpusEmbeddings = new ArrayList<>();
+
+      for (String text : corpus) {
+        corpusBody = constructEmbeddingJSON(text);
+        if (text != null && !text.isEmpty()) {
+          response = executeEinsteinRequest(accessToken, constructEmbeddingJSON(corpusBody), einsteinParameters.getModelApiName(),
+                                            URI_MODELS_API_EMBEDDINGS);
+          jsonObject = new JSONObject(response);
+          embeddingsArray = jsonObject.getJSONArray(JSON_KEY_EMBEDDINGS);
+          corpusEmbeddings.add(embeddingsArray.getJSONObject(0).getJSONArray(JSON_KEY_EMBEDDING));
+        }
+      }
+      // Convert results list to a JSONArray
+      JSONArray jsonArray = new JSONArray(corpusEmbeddings);
+
+      return jsonArray.toString();
+    } catch (Exception e) {
+      log.error("Exception during embedding from file", e);
+      return null;
+    }
+  }
+
   public static String executeRAG(String text, EinsteinConnection connection, RAGParamsModelDetails paramDetails) {
     String accessToken =
         RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
@@ -75,7 +123,7 @@ public class PayloadHelper {
     String response =
         executeEinsteinRequest(accessToken, payloadOptional, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
     List<String> findURL = extractUrls(intermediateAnswer);
-    String ePayload = "";
+    String ePayload;
     if (findURL != null) {
       JSONObject jsonObject = new JSONObject(intermediateAnswer);
       String generatedText = jsonObject.getJSONObject("generation").getString("generatedText");
@@ -431,14 +479,12 @@ public class PayloadHelper {
 
     Pattern pattern = Pattern.compile("\\{.*\\}");
     Matcher matcher = pattern.matcher(payload);
-    String response = "";
+    String response;
     if (matcher.find()) {
       response = matcher.group();
     } else {
       response = "Payload not found!";
     }
-
-
     return response;
   }
 

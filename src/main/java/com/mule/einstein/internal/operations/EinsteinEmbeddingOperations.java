@@ -5,9 +5,11 @@ import com.mule.einstein.internal.connection.EinsteinConnection;
 import com.mule.einstein.internal.error.provider.EmbeddingErrorTypeProvider;
 import com.mule.einstein.internal.helpers.PayloadHelper;
 import com.mule.einstein.internal.helpers.ResponseHelper;
-import com.mule.einstein.internal.helpers.documents.ParametersEmbeddingDocument;
+import com.mule.einstein.internal.models.ParamsEmbeddingDocumentDetails;
+import com.mule.einstein.internal.models.ParamsEmbeddingModelDetails;
 import com.mule.einstein.internal.models.ParamsModelDetails;
 import com.mule.einstein.internal.models.RAGParamsModelDetails;
+import org.apache.tika.exception.TikaException;
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.error.Throws;
 import org.mule.runtime.extension.api.annotation.param.Connection;
@@ -18,12 +20,16 @@ import org.mule.runtime.extension.api.exception.ModuleException;
 import org.mule.runtime.extension.api.runtime.operation.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import static com.mule.einstein.internal.error.EinsteinErrorType.*;
-import static com.mule.einstein.internal.helpers.ConstantUtil.OPENAI_ADA_002;
+import static com.mule.einstein.internal.helpers.ConstantUtil.MODELAPI_OPENAI_ADA_002;
 import static java.lang.String.format;
+import static org.apache.commons.io.IOUtils.toInputStream;
 import static org.mule.runtime.extension.api.annotation.param.MediaType.APPLICATION_JSON;
 
 
@@ -35,6 +41,31 @@ public class EinsteinEmbeddingOperations {
   private static final Logger log = LoggerFactory.getLogger(EinsteinEmbeddingOperations.class);
 
   /**
+   * Create an embedding vector representing the input text.
+   */
+  @MediaType(value = APPLICATION_JSON, strict = false)
+  @Alias("EMBEDDING-generate-from-text")
+  public InputStream generateEmbedding(String text, @Connection EinsteinConnection connection,
+                                       @ParameterGroup(name = "Additional properties") ParamsEmbeddingModelDetails paramDetails) {
+    return toInputStream(PayloadHelper.executeGenerateEmbedding(text, connection, paramDetails), StandardCharsets.UTF_8);
+  }
+
+  /**
+   * Performs .
+   * @throws TikaException
+   * @throws SAXException
+   * @throws IOException
+   */
+  @MediaType(value = APPLICATION_JSON, strict = false)
+  @Alias("EMBEDDING-generate-from-file")
+  public InputStream embeddingFromFiles(String filePath, @Connection EinsteinConnection connection,
+                                        @ParameterGroup(
+                                            name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails)
+      throws IOException, SAXException, TikaException {
+    return toInputStream(PayloadHelper.embeddingFromFile(filePath, connection, paramDetails), StandardCharsets.UTF_8);
+  }
+
+  /**
    * Generate a response based on a file embedding.
    */
   @MediaType(value = APPLICATION_JSON, strict = false)
@@ -43,7 +74,7 @@ public class EinsteinEmbeddingOperations {
   public Result<InputStream, Void> queryEmbeddingOnFiles(@Content String prompt, String filePath,
                                                          @Connection EinsteinConnection connection,
                                                          @ParameterGroup(
-                                                             name = "Additional properties") ParametersEmbeddingDocument paramDetails) {
+                                                             name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails) {
     log.info("Executing embedding adhoc file query operation.");
     try {
 
@@ -100,7 +131,7 @@ public class EinsteinEmbeddingOperations {
     try {
 
       String content =
-          PayloadHelper.embeddingFileQuery(prompt, toolsConfig, connection, OPENAI_ADA_002, "text", "FULL");
+          PayloadHelper.embeddingFileQuery(prompt, toolsConfig, connection, MODELAPI_OPENAI_ADA_002, "text", "FULL");
       String response = PayloadHelper.executeTools(prompt, "data: " + content + ", question: " + prompt,
                                                    toolsConfig, connection, paramDetails);
 
