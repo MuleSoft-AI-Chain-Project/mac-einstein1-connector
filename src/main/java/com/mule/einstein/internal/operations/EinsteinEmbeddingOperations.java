@@ -51,18 +51,20 @@ public class EinsteinEmbeddingOperations {
   }
 
   /**
-   * Performs .
-   * @throws TikaException
-   * @throws SAXException
-   * @throws IOException
+   * Create an embedding vector representing the input file .
    */
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("EMBEDDING-generate-from-file")
+  @Throws(EmbeddingErrorTypeProvider.class)
   public InputStream embeddingFromFiles(String filePath, @Connection EinsteinConnection connection,
                                         @ParameterGroup(
-                                            name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails)
-      throws IOException, SAXException, TikaException {
-    return toInputStream(PayloadHelper.embeddingFromFile(filePath, connection, paramDetails), StandardCharsets.UTF_8);
+                                            name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails) {
+    try {
+      return toInputStream(PayloadHelper.embeddingFromFile(filePath, connection, paramDetails), StandardCharsets.UTF_8);
+    } catch (Exception e) {
+      throw new ModuleException("Error while executing embedding generate from file operation",
+                                EMBEDDING_OPERATIONS_FAILURE, e);
+    }
   }
 
   /**

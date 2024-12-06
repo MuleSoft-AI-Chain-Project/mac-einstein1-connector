@@ -73,34 +73,9 @@ public class PayloadHelper {
         RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
     List<String> corpus = createCorpusList(filePath, einsteinParameters.getFileType(), einsteinParameters.getOptionType());
 
-    try {
-      String response;
-      JSONObject jsonObject;
-      //Generate embedding for query
-      JSONArray embeddingsArray;
-
-      String corpusBody;
-      // Generate embeddings for the corpus
-      List<JSONArray> corpusEmbeddings = new ArrayList<>();
-
-      for (String text : corpus) {
-        corpusBody = constructEmbeddingJSON(text);
-        if (text != null && !text.isEmpty()) {
-          response = executeEinsteinRequest(accessToken, constructEmbeddingJSON(corpusBody), einsteinParameters.getModelApiName(),
-                                            URI_MODELS_API_EMBEDDINGS);
-          jsonObject = new JSONObject(response);
-          embeddingsArray = jsonObject.getJSONArray(JSON_KEY_EMBEDDINGS);
-          corpusEmbeddings.add(embeddingsArray.getJSONObject(0).getJSONArray(JSON_KEY_EMBEDDING));
-        }
-      }
-      // Convert results list to a JSONArray
-      JSONArray jsonArray = new JSONArray(corpusEmbeddings);
-
-      return jsonArray.toString();
-    } catch (Exception e) {
-      log.error("Exception during embedding from file", e);
-      return null;
-    }
+    return new JSONArray(
+                         getCorpusEmbeddings(einsteinParameters.getModelApiName(), corpus, accessToken))
+                             .toString();
   }
 
   public static String executeRAG(String text, EinsteinConnection connection, RAGParamsModelDetails paramDetails) {
@@ -155,34 +130,26 @@ public class PayloadHelper {
     List<String> corpus = createCorpusList(filePath, fileType, optionType);
     String body = constructEmbeddingJSON(prompt);
 
-    try {
+    String embeddingResponse = executeEinsteinRequest(accessToken, body, modelName, URI_MODELS_API_EMBEDDINGS);
+    JSONArray queryEmbedding = getQueryEmbedding(embeddingResponse);
+    List<JSONArray> corpusEmbeddings = getCorpusEmbeddings(modelName, corpus, accessToken);
 
-      String embeddingResponse = executeEinsteinRequest(accessToken, body, modelName, URI_MODELS_API_EMBEDDINGS);
-      JSONArray queryEmbedding = getQueryEmbedding(embeddingResponse);
-      List<JSONArray> corpusEmbeddings = getCorpusEmbeddings(modelName, corpus, accessToken);
-
-      // Compare embeddings and rank results
-      List<Double> similarityScores = new ArrayList<>();
-      for (JSONArray corpusEmbedding : corpusEmbeddings) {
-        similarityScores.add(calculateCosineSimilarity(queryEmbedding, corpusEmbedding));
-      }
-
-      // Rank and print results
-      List<String> results = rankAndPrintResults(corpus, similarityScores);
-
-      // Convert results list to a JSONArray
-      JSONArray jsonArray = new JSONArray(results);
-
-      return jsonArray.toString();
-
-    } catch (Exception e) {
-      log.error("Exception during embedding file query ", e);
-      return null;
+    // Compare embeddings and rank results
+    List<Double> similarityScores = new ArrayList<>();
+    for (JSONArray corpusEmbedding : corpusEmbeddings) {
+      similarityScores.add(calculateCosineSimilarity(queryEmbedding, corpusEmbedding));
     }
+
+    // Rank and print results
+    List<String> results = rankAndPrintResults(corpus, similarityScores);
+
+    // Convert results list to a JSONArray
+    return new JSONArray(results).toString();
   }
 
   @NotNull
   private static List<JSONArray> getCorpusEmbeddings(String modelName, List<String> corpus, String accessToken) {
+
     String embeddingResponse;
     JSONArray embeddingsArray;
     JSONObject jsonObject;
@@ -214,7 +181,7 @@ public class PayloadHelper {
     JSONObject firstEmbeddingObject = embeddingsArray.getJSONObject(0);
 
     // Extract the embedding array from the first embedding object
-      return firstEmbeddingObject.getJSONArray(JSON_KEY_EMBEDDING);
+    return firstEmbeddingObject.getJSONArray(JSON_KEY_EMBEDDING);
   }
 
   private static List<String> createCorpusList(String filePath, String fileType, String splitOption)
