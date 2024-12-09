@@ -9,6 +9,7 @@ import org.mule.runtime.extension.api.annotation.Operations;
 import org.mule.runtime.extension.api.annotation.connectivity.ConnectionProviders;
 import org.mule.runtime.extension.api.annotation.dsl.xml.Xml;
 import org.mule.runtime.extension.api.annotation.error.ErrorTypes;
+import org.mule.runtime.extension.api.annotation.license.RequiresEnterpriseLicense;
 import org.mule.sdk.api.annotation.JavaVersionSupport;
 
 import static org.mule.sdk.api.meta.JavaVersion.JAVA_11;
@@ -24,6 +25,7 @@ import static org.mule.sdk.api.meta.JavaVersion.JAVA_8;
 @ErrorTypes(EinsteinErrorType.class)
 @Operations({EinsteinEmbeddingOperations.class, EinsteinGenerationOperations.class})
 @ConnectionProviders(ConnectionProvider.class)
+@RequiresEnterpriseLicense(allowEvaluationLicense = true)
 @JavaVersionSupport({JAVA_8, JAVA_11, JAVA_17})
 public class EinsteinConnector {
 
