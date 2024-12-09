@@ -40,6 +40,8 @@ import static com.mule.einstein.internal.helpers.RequestHelper.executeREST;
 
 public class PayloadHelper {
 
+  private static final Logger log = LoggerFactory.getLogger(PayloadHelper.class);
+
   public static String executeGenerateText(String prompt, EinsteinConnection connection, ParamsModelDetails paramDetails) {
     String accessToken =
         RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
