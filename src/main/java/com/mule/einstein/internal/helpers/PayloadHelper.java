@@ -106,54 +106,47 @@ public class PayloadHelper {
     List<String> corpus = createCorpusList(filePath, fileType, optionType);
 
     String body = constructEmbeddingJSON(prompt);
+    String response = executeEinsteinRequest(accessToken, body, modelName, URI_MODELS_API_EMBEDDINGS);
+    JSONObject jsonObject = new JSONObject(response);
+    //Generate embedding for query
+    JSONArray embeddingsArray = jsonObject.getJSONArray("embeddings");
 
-    try {
+    // Extract the first embedding object
+    JSONObject firstEmbeddingObject = embeddingsArray.getJSONObject(0);
 
-      String response = executeEinsteinRequest(accessToken, body, modelName, URI_MODELS_API_EMBEDDINGS);
-      JSONObject jsonObject = new JSONObject(response);
-      //Generate embedding for query
-      JSONArray embeddingsArray = jsonObject.getJSONArray("embeddings");
+    // Extract the embedding array from the first embedding object
+    JSONArray queryEmbedding = firstEmbeddingObject.getJSONArray("embedding");
 
-      // Extract the first embedding object
-      JSONObject firstEmbeddingObject = embeddingsArray.getJSONObject(0);
+    String corpusBody = null;
+    // Generate embeddings for the corpus
+    List<JSONArray> corpusEmbeddings = new ArrayList<>();
 
-      // Extract the embedding array from the first embedding object
-      JSONArray queryEmbedding = firstEmbeddingObject.getJSONArray("embedding");
+    for (String text : corpus) {
+      corpusBody = constructEmbeddingJSON(text);
+      if (text != null && !text.isEmpty()) {
+        response =
+            executeEinsteinRequest(accessToken, constructEmbeddingJSON(corpusBody), modelName, URI_MODELS_API_EMBEDDINGS);
 
-      String corpusBody = null;
-      // Generate embeddings for the corpus
-      List<JSONArray> corpusEmbeddings = new ArrayList<>();
-
-      for (String text : corpus) {
-        corpusBody = constructEmbeddingJSON(text);
-        if (text != null && !text.isEmpty()) {
-          response =
-              executeEinsteinRequest(accessToken, constructEmbeddingJSON(corpusBody), modelName, URI_MODELS_API_EMBEDDINGS);
-
-          jsonObject = new JSONObject(response);
-          embeddingsArray = jsonObject.getJSONArray("embeddings");
-          corpusEmbeddings.add(embeddingsArray.getJSONObject(0).getJSONArray("embedding"));
-        }
+        jsonObject = new JSONObject(response);
+        embeddingsArray = jsonObject.getJSONArray("embeddings");
+        corpusEmbeddings.add(embeddingsArray.getJSONObject(0).getJSONArray("embedding"));
       }
-
-      // Compare embeddings and rank results
-      List<Double> similarityScores = new ArrayList<>();
-      for (JSONArray corpusEmbedding : corpusEmbeddings) {
-        similarityScores.add(calculateCosineSimilarity(queryEmbedding, corpusEmbedding));
-      }
-
-      // Rank and print results
-      List<String> results = rankAndPrintResults(corpus, similarityScores);
-
-      // Convert results list to a JSONArray
-      JSONArray jsonArray = new JSONArray(results);
-
-      return jsonArray.toString();
-
-    } catch (Exception e) {
-      log.error("Exception during embedding file query ", e);
-      return null;
     }
+
+    // Compare embeddings and rank results
+    List<Double> similarityScores = new ArrayList<>();
+    for (JSONArray corpusEmbedding : corpusEmbeddings) {
+      similarityScores.add(calculateCosineSimilarity(queryEmbedding, corpusEmbedding));
+    }
+
+    // Rank and print results
+    List<String> results = rankAndPrintResults(corpus, similarityScores);
+
+    // Convert results list to a JSONArray
+    JSONArray jsonArray = new JSONArray(results);
+
+    return jsonArray.toString();
+
   }
 
   private static List<String> createCorpusList(String filePath, String fileType, String splitOption)
