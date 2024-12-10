@@ -24,8 +24,8 @@ public class ConstantUtil {
   public static final String ACCESS_TOKEN = "access_token";
   public static final String AUTHORIZATION = "Authorization";
 
-  public static final String REQUEST_PROPERTY_X_SFDC_APP_CONTEXT = "x-sfdc-app-context";
-  public static final String REQUEST_PROPERTY_X_CLIENT_FEATURE_ID = "x-client-feature-id";
+  public static final String X_SFDC_APP_CONTEXT = "x-sfdc-app-context";
+  public static final String X_CLIENT_FEATURE_ID = "x-client-feature-id";
   public static final String FEATURE_AI_PLATFORM_MODELS_CONNECTED_APP = "ai-platform-models-connected-app";
   public static final String APP_CONTEXT_EINSTEIN_GPT = "EinsteinGPT";
 
