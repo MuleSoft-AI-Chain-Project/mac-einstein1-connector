@@ -12,6 +12,21 @@
 
     <munit:config name="EmbeddingOperationsTestCase.xml"/>
 
+    <munit:test name="EmbeddingFromFile">
+        <munit:execution>
+            <logger message="Test Generate-Embedding-from-file started" level="INFO"/>
+            <ms-einstein:embedding-generate-from-file doc:name="Embedding generate fromfile"
+                                                    doc:id="5f8c7c79-dffe-4331-a5b4-30375baa66bd"
+                                                    filePath='${app.home}/embeddingaddfiletest/embedtest.pdf'
+                                                    optionType="SENTENCES"
+                                                    config-ref="Einstein_AI_Config">
+            </ms-einstein:embedding-generate-from-file>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that is="#[MunitTools::equalTo(3)]" expression="#[sizeOf(payload.result)]"/>
+        </munit:validation>
+    </munit:test>
+
     <munit:test name="EmbeddingAdhocFileQuery">
         <munit:execution>
             <munit:set-event doc:name="Set Event" doc:id="1c45d3f8-1234-5678-9abc-01234def6789">
@@ -27,7 +42,7 @@
         </munit:execution>
         <munit:validation>
             <munit-tools:assert-that
-                    expression="#[payload[0]]"
+                    expression="#[payload.result[0]]"
                     is="#[MunitTools::matches('(?is).*What is mule 4.*Mule 4 is the newest version of Mule runtime engine.*reactive programming.*scalability.*')]"
                     doc:name="Assert Mule 4 description response"/>
         </munit:validation>

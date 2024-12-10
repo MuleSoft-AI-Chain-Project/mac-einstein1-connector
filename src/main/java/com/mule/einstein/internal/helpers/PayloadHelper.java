@@ -68,8 +68,8 @@ public class PayloadHelper {
     return executeEinsteinRequest(accessToken, payload, paramDetails.getModelApiName(), URI_MODELS_API_EMBEDDINGS);
   }
 
-  public static String embeddingFromFile(String filePath, EinsteinConnection connection,
-                                         ParamsEmbeddingDocumentDetails einsteinParameters)
+  public static JSONArray embeddingFromFile(String filePath, EinsteinConnection connection,
+                                            ParamsEmbeddingDocumentDetails einsteinParameters)
       throws IOException, SAXException, TikaException {
 
     String accessToken =
@@ -77,8 +77,7 @@ public class PayloadHelper {
     List<String> corpus = createCorpusList(filePath, einsteinParameters.getFileType(), einsteinParameters.getOptionType());
 
     return new JSONArray(
-                         getCorpusEmbeddings(einsteinParameters.getModelApiName(), corpus, accessToken))
-                             .toString();
+                         getCorpusEmbeddings(einsteinParameters.getModelApiName(), corpus, accessToken));
   }
 
   public static String executeRAG(String text, EinsteinConnection connection, RAGParamsModelDetails paramDetails) {
@@ -122,8 +121,8 @@ public class PayloadHelper {
     return executeREST(accessToken, payload, urlString);
   }
 
-  public static String embeddingFileQuery(String prompt, String filePath, EinsteinConnection connection, String modelName,
-                                          String fileType, String optionType)
+  public static JSONArray embeddingFileQuery(String prompt, String filePath, EinsteinConnection connection, String modelName,
+                                             String fileType, String optionType)
       throws IOException, SAXException, TikaException {
 
     String accessToken =
@@ -145,7 +144,7 @@ public class PayloadHelper {
     List<String> results = rankAndPrintResults(corpus, similarityScores);
 
     // Convert results list to a JSONArray
-    return new JSONArray(results).toString();
+    return new JSONArray(results);
   }
 
   private static List<List<BigDecimal>> getCorpusEmbeddings(String modelName, List<String> corpus, String accessToken)

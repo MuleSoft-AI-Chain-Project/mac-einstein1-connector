@@ -11,6 +11,7 @@ import com.mule.einstein.internal.models.ParamsEmbeddingDocumentDetails;
 import com.mule.einstein.internal.models.ParamsEmbeddingModelDetails;
 import com.mule.einstein.internal.models.ParamsModelDetails;
 import com.mule.einstein.internal.models.RAGParamsModelDetails;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.error.Throws;
@@ -43,6 +44,7 @@ public class EinsteinEmbeddingOperations {
    */
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("EMBEDDING-generate-from-text")
+  @Throws(EmbeddingErrorTypeProvider.class)
   public Result<EinsteinEmbeddingsResponse, ResponseParameters> generateEmbeddingFromText(@Content String text,
                                                                                           @Connection EinsteinConnection connection,
                                                                                           @ParameterGroup(
@@ -67,12 +69,12 @@ public class EinsteinEmbeddingOperations {
                                                              @ParameterGroup(
                                                                  name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails) {
     try {
-      String response = PayloadHelper.embeddingFromFile(filePath, connection, paramDetails);
+      JSONArray response = PayloadHelper.embeddingFromFile(filePath, connection, paramDetails);
 
       JSONObject jsonObject = new JSONObject();
       jsonObject.put("result", response);
 
-      return ResponseHelper.createEinsteinDefaultResponse(response);
+      return ResponseHelper.createEinsteinDefaultResponse(jsonObject.toString());
     } catch (Exception e) {
       throw new ModuleException("Error while executing embedding generate from file operation",
                                 EMBEDDING_OPERATIONS_FAILURE, e);
@@ -91,12 +93,12 @@ public class EinsteinEmbeddingOperations {
                                                              name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails) {
     log.info("Executing embedding adhoc file query operation.");
     try {
-      String response = PayloadHelper.embeddingFileQuery(prompt, filePath, connection, paramDetails.getModelApiName(),
-                                                         paramDetails.getFileType(), paramDetails.getOptionType());
+      JSONArray response = PayloadHelper.embeddingFileQuery(prompt, filePath, connection, paramDetails.getModelApiName(),
+                                                            paramDetails.getFileType(), paramDetails.getOptionType());
 
       JSONObject jsonObject = new JSONObject();
       jsonObject.put("result", response);
-      return ResponseHelper.createEinsteinDefaultResponse(response);
+      return ResponseHelper.createEinsteinDefaultResponse(jsonObject.toString());
     } catch (Exception e) {
 
       log.error(format("Exception occurred while executing embedding adhoc file query operation %s", e.getMessage()), e);
@@ -119,7 +121,8 @@ public class EinsteinEmbeddingOperations {
     try {
 
       String content = PayloadHelper.embeddingFileQuery(prompt, filePath, connection, paramDetails.getEmbeddingName(),
-                                                        paramDetails.getFileType(), paramDetails.getOptionType());
+                                                        paramDetails.getFileType(), paramDetails.getOptionType())
+          .toString();
       String response = PayloadHelper.executeRAG("data: " + content + ", question: " + prompt, connection,
                                                  paramDetails);
 
@@ -146,7 +149,8 @@ public class EinsteinEmbeddingOperations {
     try {
 
       String content =
-          PayloadHelper.embeddingFileQuery(prompt, toolsConfig, connection, MODELAPI_OPENAI_ADA_002, "text", "FULL");
+          PayloadHelper.embeddingFileQuery(prompt, toolsConfig, connection, MODELAPI_OPENAI_ADA_002, "text", "FULL")
+              .toString();
       String response = PayloadHelper.executeTools(prompt, "data: " + content + ", question: " + prompt,
                                                    toolsConfig, connection, paramDetails);
 
