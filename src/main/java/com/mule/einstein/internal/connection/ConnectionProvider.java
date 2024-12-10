@@ -8,6 +8,7 @@ import org.mule.runtime.api.connection.PoolingConnectionProvider;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
 import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
 import org.mule.runtime.extension.api.annotation.param.display.Example;
+import org.mule.runtime.extension.api.annotation.param.display.Password;
 import org.mule.runtime.extension.api.annotation.param.display.Placement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +33,7 @@ public class ConnectionProvider implements PoolingConnectionProvider<EinsteinCon
   @DisplayName("Client ID")
   private String clientId;
 
+  @Password
   @Parameter
   @Placement(order = 3, tab = Placement.CONNECTION_TAB)
   @DisplayName("Client Secret")
