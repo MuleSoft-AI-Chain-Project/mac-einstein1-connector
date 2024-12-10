@@ -11,6 +11,7 @@ import com.mule.einstein.internal.models.ParamsEmbeddingDocumentDetails;
 import com.mule.einstein.internal.models.ParamsEmbeddingModelDetails;
 import com.mule.einstein.internal.models.ParamsModelDetails;
 import com.mule.einstein.internal.models.RAGParamsModelDetails;
+import org.json.JSONObject;
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.error.Throws;
 import org.mule.runtime.extension.api.annotation.param.Connection;
@@ -42,7 +43,7 @@ public class EinsteinEmbeddingOperations {
    */
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("EMBEDDING-generate-from-text")
-  public Result<EinsteinEmbeddingsResponse, ResponseParameters> generateEmbedding(String text,
+  public Result<EinsteinEmbeddingsResponse, ResponseParameters> generateEmbedding(@Content String text,
                                                                                   @Connection EinsteinConnection connection,
                                                                                   @ParameterGroup(
                                                                                       name = "Additional properties") ParamsEmbeddingModelDetails paramDetails) {
@@ -68,6 +69,9 @@ public class EinsteinEmbeddingOperations {
     try {
       String response = PayloadHelper.embeddingFromFile(filePath, connection, paramDetails);
 
+      JSONObject jsonObject = new JSONObject();
+      jsonObject.put("result", response);
+
       return ResponseHelper.createEinsteinDefaultResponse(response);
     } catch (Exception e) {
       throw new ModuleException("Error while executing embedding generate from file operation",
@@ -90,6 +94,8 @@ public class EinsteinEmbeddingOperations {
       String response = PayloadHelper.embeddingFileQuery(prompt, filePath, connection, paramDetails.getModelApiName(),
                                                          paramDetails.getFileType(), paramDetails.getOptionType());
 
+      JSONObject jsonObject = new JSONObject();
+      jsonObject.put("result", response);
       return ResponseHelper.createEinsteinDefaultResponse(response);
     } catch (Exception e) {
 
