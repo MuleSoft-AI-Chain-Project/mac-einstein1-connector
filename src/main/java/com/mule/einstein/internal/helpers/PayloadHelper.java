@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mule.einstein.internal.connection.EinsteinConnection;
 import com.mule.einstein.internal.dto.EinsteinEmbeddingResponseDTO;
+import com.mule.einstein.internal.dto.OAuthResponseDTO;
 import com.mule.einstein.internal.models.ParamsEmbeddingDocumentDetails;
 import com.mule.einstein.internal.models.ParamsEmbeddingModelDetails;
 import com.mule.einstein.internal.models.ParamsModelDetails;
@@ -18,6 +19,7 @@ import org.apache.tika.sax.BodyContentHandler;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.mule.runtime.api.connection.ConnectionException;
 import org.xml.sax.SAXException;
 
 import java.io.BufferedReader;
@@ -46,60 +48,64 @@ import static com.mule.einstein.internal.helpers.RequestHelper.executeREST;
 
 public class PayloadHelper {
 
-  public static String executeGenerateText(String prompt, EinsteinConnection connection, ParamsModelDetails paramDetails) {
-    String accessToken =
+  public static String executeGenerateText(String prompt, EinsteinConnection connection, ParamsModelDetails paramDetails)
+      throws IOException, ConnectionException {
+    OAuthResponseDTO accessTokeDTO =
         RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
     String payload = constructJsonPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
-    return executeEinsteinRequest(accessToken, payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
+    return executeEinsteinRequest(accessTokeDTO, payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
   }
 
-  public static String executeGenerateChat(String messages, EinsteinConnection connection, ParamsModelDetails paramDetails) {
-    String accessToken =
+  public static String executeGenerateChat(String messages, EinsteinConnection connection, ParamsModelDetails paramDetails)
+      throws IOException, ConnectionException {
+    OAuthResponseDTO accessTokeDTO =
         RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
     String payload = constrcutJsonMessages(messages, paramDetails);
-    return executeEinsteinRequest(accessToken, payload, paramDetails.getModelApiName(), URI_MODELS_API_CHAT_GENERATIONS);
+    return executeEinsteinRequest(accessTokeDTO, payload, paramDetails.getModelApiName(), URI_MODELS_API_CHAT_GENERATIONS);
   }
 
   public static String executeGenerateEmbedding(String text, EinsteinConnection connection,
-                                                ParamsEmbeddingModelDetails paramDetails) {
-    String accessToken =
+                                                ParamsEmbeddingModelDetails paramDetails)
+      throws IOException, ConnectionException {
+    OAuthResponseDTO accessTokeDTO =
         RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
     String payload = constructEmbeddingJSON(text);
-    return executeEinsteinRequest(accessToken, payload, paramDetails.getModelApiName(), URI_MODELS_API_EMBEDDINGS);
+    return executeEinsteinRequest(accessTokeDTO, payload, paramDetails.getModelApiName(), URI_MODELS_API_EMBEDDINGS);
   }
 
   public static JSONArray embeddingFromFile(String filePath, EinsteinConnection connection,
                                             ParamsEmbeddingDocumentDetails einsteinParameters)
-      throws IOException, SAXException, TikaException {
+      throws IOException, SAXException, TikaException, ConnectionException {
 
-    String accessToken =
+    OAuthResponseDTO accessTokeDTO =
         RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
     List<String> corpus = createCorpusList(filePath, einsteinParameters.getFileType(), einsteinParameters.getOptionType());
 
     return new JSONArray(
-                         getCorpusEmbeddings(einsteinParameters.getModelApiName(), corpus, accessToken));
+                         getCorpusEmbeddings(einsteinParameters.getModelApiName(), corpus, accessTokeDTO));
   }
 
-  public static String executeRAG(String text, EinsteinConnection connection, RAGParamsModelDetails paramDetails) {
-    String accessToken =
+  public static String executeRAG(String text, EinsteinConnection connection, RAGParamsModelDetails paramDetails)
+      throws IOException, ConnectionException {
+    OAuthResponseDTO accessTokeDTO =
         RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
     String payload = constructJsonPayload(text, paramDetails.getLocale(), paramDetails.getProbability());
-    return executeEinsteinRequest(accessToken, payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
+    return executeEinsteinRequest(accessTokeDTO, payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
   }
 
   public static String executeTools(String originalPrompt, String prompt, String filePath, EinsteinConnection connection,
                                     ParamsModelDetails paramDetails)
-      throws IOException {
-    String accessToken =
+      throws IOException, ConnectionException {
+    OAuthResponseDTO accessTokeDTO =
         RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
     String payload = constructJsonPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
     String payloadOptional = constructJsonPayload(originalPrompt, paramDetails.getLocale(), paramDetails.getProbability());
 
     String intermediateAnswer =
-        executeEinsteinRequest(accessToken, payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
+        executeEinsteinRequest(accessTokeDTO, payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
 
     String response =
-        executeEinsteinRequest(accessToken, payloadOptional, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
+        executeEinsteinRequest(accessTokeDTO, payloadOptional, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
     List<String> findURL = extractUrls(intermediateAnswer);
     if (findURL != null) {
       JSONObject jsonObject = new JSONObject(intermediateAnswer);
@@ -110,30 +116,31 @@ public class PayloadHelper {
       response = getAttributes(findURL.get(0), filePath, extractPayload(ePayload));
       String finalPayload = constructJsonPayload("data: " + response + ", question: " + originalPrompt, paramDetails.getLocale(),
                                                  paramDetails.getProbability());
-      response = executeEinsteinRequest(accessToken, finalPayload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
+      response = executeEinsteinRequest(accessTokeDTO, finalPayload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
 
     }
     return response;
   }
 
-  private static String executeEinsteinRequest(String accessToken, String payload, String modelName, String resource) {
-    String urlString = URL_BASE + modelName + resource;
-    return executeREST(accessToken, payload, urlString);
+  private static String executeEinsteinRequest(OAuthResponseDTO accessTokenDTO, String payload, String modelName,
+                                               String resource) {
+    String urlString = accessTokenDTO.getApiInstanceUrl() + URI_MODELS_API + modelName + resource;
+    return executeREST(accessTokenDTO.getAccessToken(), payload, urlString);
   }
 
   public static JSONArray embeddingFileQuery(String prompt, String filePath, EinsteinConnection connection, String modelName,
                                              String fileType, String optionType)
-      throws IOException, SAXException, TikaException {
+      throws IOException, SAXException, TikaException, ConnectionException {
 
-    String accessToken =
+    OAuthResponseDTO accessTokeDTO =
         RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
 
     List<String> corpus = createCorpusList(filePath, fileType, optionType);
     String body = constructEmbeddingJSON(prompt);
 
-    List<BigDecimal> embeddingList = getQueryEmbedding(accessToken, body, modelName);
+    List<BigDecimal> embeddingList = getQueryEmbedding(accessTokeDTO, body, modelName);
 
-    List<List<BigDecimal>> corpusEmbeddingList = getCorpusEmbeddings(modelName, corpus, accessToken);
+    List<List<BigDecimal>> corpusEmbeddingList = getCorpusEmbeddings(modelName, corpus, accessTokeDTO);
 
     // Compare embeddings and rank results
     List<BigDecimal> similarityScores = new ArrayList<>();
@@ -147,7 +154,7 @@ public class PayloadHelper {
     return new JSONArray(results);
   }
 
-  private static List<List<BigDecimal>> getCorpusEmbeddings(String modelName, List<String> corpus, String accessToken)
+  private static List<List<BigDecimal>> getCorpusEmbeddings(String modelName, List<String> corpus, OAuthResponseDTO accessTokeDTO)
       throws JsonProcessingException {
 
     String embeddingResponse;
@@ -161,7 +168,7 @@ public class PayloadHelper {
 
       if (text != null && !text.isEmpty()) {
         embeddingResponse =
-            executeEinsteinRequest(accessToken, constructEmbeddingJSON(corpusBody), modelName, URI_MODELS_API_EMBEDDINGS);
+            executeEinsteinRequest(accessTokeDTO, constructEmbeddingJSON(corpusBody), modelName, URI_MODELS_API_EMBEDDINGS);
 
         EinsteinEmbeddingResponseDTO embeddingResponseDTO =
             new ObjectMapper().readValue(embeddingResponse, EinsteinEmbeddingResponseDTO.class);
@@ -172,10 +179,10 @@ public class PayloadHelper {
     return corpusEmbeddings;
   }
 
-  private static List<BigDecimal> getQueryEmbedding(String accessToken, String body, String modelName)
+  private static List<BigDecimal> getQueryEmbedding(OAuthResponseDTO accessTokeDTO, String body, String modelName)
       throws JsonProcessingException {
 
-    String embeddingResponse = executeEinsteinRequest(accessToken, body, modelName, URI_MODELS_API_EMBEDDINGS);
+    String embeddingResponse = executeEinsteinRequest(accessTokeDTO, body, modelName, URI_MODELS_API_EMBEDDINGS);
 
     EinsteinEmbeddingResponseDTO embeddingResponseDTO =
         new ObjectMapper().readValue(embeddingResponse, EinsteinEmbeddingResponseDTO.class);

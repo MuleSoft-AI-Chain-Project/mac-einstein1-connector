@@ -3,7 +3,9 @@ package com.mule.einstein.internal.helpers.chatmemory;
 import com.mule.einstein.internal.connection.EinsteinConnection;
 import com.mule.einstein.internal.helpers.PayloadHelper;
 import com.mule.einstein.internal.models.ParamsModelDetails;
+import org.mule.runtime.api.connection.ConnectionException;
 
+import java.io.IOException;
 import java.util.List;
 
 public class ChatMemoryHelper {
@@ -54,9 +56,9 @@ public class ChatMemoryHelper {
     return formattedPrompt.toString().trim();
   }
 
-
   public static String chatWithMemory(String prompt, String memoryPath, String memoryName, Integer keepLastMessages,
-                                      EinsteinConnection connection, ParamsModelDetails parameters) {
+                                      EinsteinConnection connection, ParamsModelDetails parameters)
+      throws IOException, ConnectionException {
 
     //Chat memory initialization
     ChatMemory chatMemory = intializeChatMemory(memoryPath, memoryName);
@@ -72,6 +74,4 @@ public class ChatMemoryHelper {
 
     return response;
   }
-
-
 }
