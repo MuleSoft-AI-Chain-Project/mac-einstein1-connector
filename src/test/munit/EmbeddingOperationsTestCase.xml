@@ -1,0 +1,120 @@
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+      xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:ms-einstein="http://www.mulesoft.org/schema/mule/ms-einstein"
+      xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+        http://www.mulesoft.org/schema/mule/munit-tools http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+        http://www.mulesoft.org/schema/mule/ms-einstein http://www.mulesoft.org/schema/mule/ms-einstein/current/mule-ms-einstein.xsd">
+
+    <munit:config name="EmbeddingOperationsTestCase.xml"/>
+
+    <munit:test name="EmbeddingAdhocFileQuery">
+        <munit:execution>
+            <munit:set-event doc:name="Set Event" doc:id="1c45d3f8-1234-5678-9abc-01234def6789">
+                <munit:payload value='#[{"prompt": "What is Mule 4 ?"}]'/>
+            </munit:set-event>
+            <logger message="Test EmbeddingAdhocFileQuery started" level="INFO"/>
+            <ms-einstein:embedding-adhoc-file-query doc:name="Chat answer prompt"
+                                                    doc:id="5f8c7c79-dffe-4331-a5b4-30375baa66bc"
+                                                    filePath='${app.home}/embeddingaddfiletest/embedtest.pdf'
+                                                    config-ref="Einstein_AI_Config">
+                <ms-einstein:prompt>#[payload.prompt]</ms-einstein:prompt>
+            </ms-einstein:embedding-adhoc-file-query>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that
+                    expression="#[payload[0]]"
+                    is="#[MunitTools::matches('(?is).*What is mule 4.*Mule 4 is the newest version of Mule runtime engine.*reactive programming.*scalability.*')]"
+                    doc:name="Assert Mule 4 description response"/>
+        </munit:validation>
+    </munit:test>
+
+    <munit:test name="RAGAdhocLoadDocument">
+        <munit:execution>
+            <munit:set-event doc:name="Set Event" doc:id="1c45d3f8-1234-5678-9abc-01234def6789">
+                <munit:payload value='#[{"prompt": "What is Mule 4 ?"}]'/>
+            </munit:set-event>
+            <logger message="Test RAGAdhocLoadDocument started" level="INFO"/>
+            <ms-einstein:rag-adhoc-load-document doc:name="RAG Adhoc Load Document"
+                                                 filePath='${app.home}/embeddingaddfiletest/embedtest.pdf'
+                                                 config-ref="Einstein_AI_Config">
+                <ms-einstein:prompt>#[payload.prompt]</ms-einstein:prompt>
+            </ms-einstein:rag-adhoc-load-document>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that
+                    expression="#[payload.response]"
+                    is="#[MunitTools::matches('(?i).*Mule 4.*reactive programming.*')]"
+                    doc:name="Assert that generatedText contains expected content"/>
+        </munit:validation>
+    </munit:test>
+
+    <munit:test name="ToolsUseAiService">
+        <munit:execution>
+            <munit:set-event doc:name="Set Event" doc:id="1c45d3f8-1234-5678-9abc-01234def6789">
+                <munit:payload value='#[{"prompt": "Which is the biggest ocean?"}]'/>
+            </munit:set-event>
+            <logger message="Test ToolsUseAiService started" level="INFO"/>
+            <ms-einstein:tools-use-ai-service doc:name="tools use ai service"
+                                              toolsConfig='${app.home}/tools.config.json'
+                                              config-ref="Einstein_AI_Config">
+                <ms-einstein:prompt>#[payload.prompt]</ms-einstein:prompt>
+            </ms-einstein:tools-use-ai-service>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that
+                    expression="#[payload.response]"
+                    is="#[MunitTools::matches('(?i).*Pacific Ocean.*')]"
+                    doc:name="Assert that generatedText contains expected content"/>
+        </munit:validation>
+    </munit:test>
+
+    <munit:test name="ToolsAiServiceFailure" description="Tools Use AI Service Failure due to incorrect configuration" expectedErrorType="MS-EINSTEIN:TOOLS_OPERATION_FAILURE">
+        <munit:execution>
+            <munit:set-event doc:name="Set Event" doc:id="1c45d3f8-1234-5678-9abc-01234def6789">
+                <munit:payload value='#[{"prompt": " Check Inventory for MULETEST0, dont assume things and invent answers. Answer with the most probable statement."}]'/>
+            </munit:set-event>
+            <ms-einstein:tools-use-ai-service doc:name="Tools use ai service" doc:id="e7a3fcc4-653e-45c8-8f95-7b22ba9e4a63"
+                                              config-ref="Einstein_AI_Config" toolsConfig="${app.home}/local.tools.config.json">
+                <ms-einstein:prompt>
+                    #[payload.prompt]
+                </ms-einstein:prompt>
+            </ms-einstein:tools-use-ai-service>
+            <logger message="#[payload]" level="INFO"/>
+        </munit:execution>
+    </munit:test>
+
+    <munit:test name="RAGAdhocLoadDocumentFailure" expectedErrorType="MS-EINSTEIN:RAG_FAILURE">
+        <munit:execution>
+            <munit:set-event doc:name="Set Event" doc:id="1c45d3f8-1234-5678-9abc-01234def6789">
+                <munit:payload value='#[{"prompt": "What is Mule 4 ?"}]'/>
+            </munit:set-event>
+            <logger message="Test RAGAdhocLoadDocument started" level="INFO"/>
+            <ms-einstein:rag-adhoc-load-document doc:name="RAG Adhoc Load Document"
+                                                 filePath='${app.home}/embeddingaddfiletest/local-embedtest.pdf'
+                                                 config-ref="Einstein_AI_Config">
+                <ms-einstein:prompt>#[payload.prompt]</ms-einstein:prompt>
+            </ms-einstein:rag-adhoc-load-document>
+        </munit:execution>
+    </munit:test>
+
+    <munit:test name="EmbeddingAdhocFileQueryFailure" expectedErrorType="MS-EINSTEIN:EMBEDDING_OPERATIONS_FAILURE">
+        <munit:execution>
+            <munit:set-event doc:name="Set Event" doc:id="1c45d3f8-1234-5678-9abc-01234def6789">
+                <munit:payload value='#[{"prompt": "What is Mule 4 ?"}]'/>
+            </munit:set-event>
+            <logger message="Test EmbeddingAdhocFileQuery started" level="INFO"/>
+            <ms-einstein:embedding-adhoc-file-query doc:name="Chat answer prompt"
+                                                    doc:id="5f8c7c79-dffe-4331-a5b4-30375baa66bc"
+                                                    filePath='${app.home}/embeddingaddfiletest/local-embedtest.pdf'
+                                                    config-ref="Einstein_AI_Config">
+                <ms-einstein:prompt>#[payload.prompt]</ms-einstein:prompt>
+            </ms-einstein:embedding-adhoc-file-query>
+        </munit:execution>
+    </munit:test>
+
+</mule>
