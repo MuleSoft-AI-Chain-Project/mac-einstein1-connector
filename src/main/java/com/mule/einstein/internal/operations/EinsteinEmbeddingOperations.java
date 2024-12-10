@@ -43,10 +43,10 @@ public class EinsteinEmbeddingOperations {
    */
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("EMBEDDING-generate-from-text")
-  public Result<EinsteinEmbeddingsResponse, ResponseParameters> generateEmbedding(@Content String text,
-                                                                                  @Connection EinsteinConnection connection,
-                                                                                  @ParameterGroup(
-                                                                                      name = "Additional properties") ParamsEmbeddingModelDetails paramDetails) {
+  public Result<EinsteinEmbeddingsResponse, ResponseParameters> generateEmbeddingFromText(@Content String text,
+                                                                                          @Connection EinsteinConnection connection,
+                                                                                          @ParameterGroup(
+                                                                                              name = "Additional properties") ParamsEmbeddingModelDetails paramDetails) {
     try {
       String response = PayloadHelper.executeGenerateEmbedding(text, connection, paramDetails);
 
@@ -63,9 +63,9 @@ public class EinsteinEmbeddingOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("EMBEDDING-generate-from-file")
   @Throws(EmbeddingErrorTypeProvider.class)
-  public Result<InputStream, Void> embeddingFromFiles(String filePath, @Connection EinsteinConnection connection,
-                                                      @ParameterGroup(
-                                                          name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails) {
+  public Result<InputStream, Void> generateEmbeddingFromFile(String filePath, @Connection EinsteinConnection connection,
+                                                             @ParameterGroup(
+                                                                 name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails) {
     try {
       String response = PayloadHelper.embeddingFromFile(filePath, connection, paramDetails);
 

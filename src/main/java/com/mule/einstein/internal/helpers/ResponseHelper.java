@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mule.einstein.api.metadata.EinsteinResponseAttributes;
 import com.mule.einstein.api.metadata.ResponseParameters;
 import com.mule.einstein.api.response.EinsteinEmbeddingsResponse;
+import com.mule.einstein.internal.dto.EinsteinChatFromMessagesResponseDTO;
 import com.mule.einstein.internal.dto.EinsteinEmbeddingResponseDTO;
 import com.mule.einstein.internal.dto.EinsteinGenerationResponseDTO;
 import org.json.JSONObject;
@@ -40,6 +41,23 @@ public class ResponseHelper {
     return Result.<InputStream, EinsteinResponseAttributes>builder()
         .output(toInputStream(jsonObject.toString(), StandardCharsets.UTF_8))
         .attributes(mapResponseAttributes(responseDTO))
+        .attributesMediaType(MediaType.APPLICATION_JSON)
+        .mediaType(MediaType.APPLICATION_JSON)
+        .build();
+  }
+
+  public static Result<InputStream, ResponseParameters> createEinsteinChatFromMessagesResponse(String response)
+      throws JsonProcessingException {
+
+    EinsteinChatFromMessagesResponseDTO responseDTO =
+        new ObjectMapper().readValue(response, EinsteinChatFromMessagesResponseDTO.class);
+
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put("generations", responseDTO.getGenerationDetails().getGenerations());
+
+    return Result.<InputStream, ResponseParameters>builder()
+        .output(toInputStream(jsonObject.toString(), StandardCharsets.UTF_8))
+        .attributes(responseDTO.getGenerationDetails().getParameters())
         .attributesMediaType(MediaType.APPLICATION_JSON)
         .mediaType(MediaType.APPLICATION_JSON)
         .build();

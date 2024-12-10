@@ -46,7 +46,7 @@
         </munit:execution>
         <munit:validation>
             <munit-tools:assert-that
-                    expression="#[payload.generationDetails.generations[0].content]"
+                    expression="#[payload.generations[0].content]"
                     is="#[MunitTools::containsString('cherry pie')]"
                     doc:name="Assert that content includes a recipe for cherry pie"/>
         </munit:validation>

@@ -1,6 +1,7 @@
 package com.mule.einstein.internal.operations;
 
 import com.mule.einstein.api.metadata.EinsteinResponseAttributes;
+import com.mule.einstein.api.metadata.ResponseParameters;
 import com.mule.einstein.internal.connection.EinsteinConnection;
 import com.mule.einstein.internal.error.provider.ChatErrorTypeProvider;
 import com.mule.einstein.internal.helpers.PayloadHelper;
@@ -115,15 +116,15 @@ public class EinsteinGenerationOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("CHAT-generate-from-messages")
   @Throws(ChatErrorTypeProvider.class)
-  public Result<InputStream, Void> generateChat(@Content String messages, @Connection EinsteinConnection connection,
-                                                @ParameterGroup(
-                                                    name = "Additional properties") ParamsModelDetails paramDetails) {
+  public Result<InputStream, ResponseParameters> generateChat(@Content String messages, @Connection EinsteinConnection connection,
+                                                              @ParameterGroup(
+                                                                  name = "Additional properties") ParamsModelDetails paramDetails) {
     log.info("Executing chat generate from message operation.");
     try {
 
       String response = PayloadHelper.executeGenerateChat(messages, connection, paramDetails);
 
-      return ResponseHelper.createEinsteinDefaultResponse(response);
+      return ResponseHelper.createEinsteinChatFromMessagesResponse(response);
     } catch (Exception e) {
 
       log.error(format("Exception occurred while executing chat generate from message operation %s", e.getMessage()), e);
