@@ -98,12 +98,11 @@ public class PayloadHelper {
     String response =
         executeEinsteinRequest(accessToken, payloadOptional, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
     List<String> findURL = extractUrls(intermediateAnswer);
-    String ePayload;
     if (findURL != null) {
       JSONObject jsonObject = new JSONObject(intermediateAnswer);
       String generatedText = jsonObject.getJSONObject("generation").getString("generatedText");
 
-      ePayload = buildPayload(generatedText);
+      String ePayload = buildPayload(generatedText);
 
       response = getAttributes(findURL.get(0), filePath, extractPayload(ePayload));
       String finalPayload = constructJsonPayload("data: " + response + ", question: " + originalPrompt, paramDetails.getLocale(),
