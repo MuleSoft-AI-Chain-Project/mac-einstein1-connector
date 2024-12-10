@@ -1,6 +1,9 @@
 package com.mule.einstein.internal.helpers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mule.einstein.internal.connection.EinsteinConnection;
+import com.mule.einstein.internal.dto.EinsteinEmbeddingResponseDTO;
 import com.mule.einstein.internal.models.ParamsEmbeddingDocumentDetails;
 import com.mule.einstein.internal.models.ParamsEmbeddingModelDetails;
 import com.mule.einstein.internal.models.ParamsModelDetails;
@@ -15,8 +18,6 @@ import org.apache.tika.sax.BodyContentHandler;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import java.io.BufferedReader;
@@ -25,22 +26,25 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.mule.einstein.internal.helpers.ConstantUtil.*;
 import static com.mule.einstein.internal.helpers.RequestHelper.executeREST;
 
 public class PayloadHelper {
-
-  private static final Logger log = LoggerFactory.getLogger(PayloadHelper.class);
 
   public static String executeGenerateText(String prompt, EinsteinConnection connection, ParamsModelDetails paramDetails) {
     String accessToken =
@@ -128,16 +132,15 @@ public class PayloadHelper {
     List<String> corpus = createCorpusList(filePath, fileType, optionType);
     String body = constructEmbeddingJSON(prompt);
 
-    String embeddingResponse = executeEinsteinRequest(accessToken, body, modelName, URI_MODELS_API_EMBEDDINGS);
-    JSONArray queryEmbedding = getQueryEmbedding(embeddingResponse);
-    List<JSONArray> corpusEmbeddings = getCorpusEmbeddings(modelName, corpus, accessToken);
+    List<BigDecimal> embeddingList = getQueryEmbedding(accessToken, body, modelName);
+
+    List<List<BigDecimal>> corpusEmbeddingList = getCorpusEmbeddings(modelName, corpus, accessToken);
 
     // Compare embeddings and rank results
-    List<Double> similarityScores = new ArrayList<>();
-    for (JSONArray corpusEmbedding : corpusEmbeddings) {
-      similarityScores.add(calculateCosineSimilarity(queryEmbedding, corpusEmbedding));
-    }
-
+    List<BigDecimal> similarityScores = new ArrayList<>();
+    corpusEmbeddingList
+        .forEach(corpusEmbedding -> similarityScores.add(
+                                                         calculateCosineSimilarity(embeddingList, corpusEmbedding)));
     // Rank and print results
     List<String> results = rankAndPrintResults(corpus, similarityScores);
 
@@ -145,40 +148,40 @@ public class PayloadHelper {
     return new JSONArray(results).toString();
   }
 
-  private static List<JSONArray> getCorpusEmbeddings(String modelName, List<String> corpus, String accessToken) {
+  private static List<List<BigDecimal>> getCorpusEmbeddings(String modelName, List<String> corpus, String accessToken)
+      throws JsonProcessingException {
 
     String embeddingResponse;
-    JSONArray embeddingsArray;
-    JSONObject jsonObject;
-
     String corpusBody;
     // Generate embeddings for the corpus
-    List<JSONArray> corpusEmbeddings = new ArrayList<>();
+    List<List<BigDecimal>> corpusEmbeddings = new ArrayList<>();
 
     for (String text : corpus) {
+
       corpusBody = constructEmbeddingJSON(text);
+
       if (text != null && !text.isEmpty()) {
         embeddingResponse =
             executeEinsteinRequest(accessToken, constructEmbeddingJSON(corpusBody), modelName, URI_MODELS_API_EMBEDDINGS);
 
-        jsonObject = new JSONObject(embeddingResponse);
-        embeddingsArray = jsonObject.getJSONArray(JSON_KEY_EMBEDDINGS);
-        corpusEmbeddings.add(embeddingsArray.getJSONObject(0).getJSONArray(JSON_KEY_EMBEDDING));
+        EinsteinEmbeddingResponseDTO embeddingResponseDTO =
+            new ObjectMapper().readValue(embeddingResponse, EinsteinEmbeddingResponseDTO.class);
+
+        corpusEmbeddings.add(embeddingResponseDTO.getEmbeddings().get(0).getEmbedding());
       }
     }
     return corpusEmbeddings;
   }
 
-  private static JSONArray getQueryEmbedding(String embeddingResponse) {
-    JSONObject jsonObject = new JSONObject(embeddingResponse);
-    //Generate embedding for query
-    JSONArray embeddingsArray = jsonObject.getJSONArray(JSON_KEY_EMBEDDINGS);
+  private static List<BigDecimal> getQueryEmbedding(String accessToken, String body, String modelName)
+      throws JsonProcessingException {
 
-    // Extract the first embedding object
-    JSONObject firstEmbeddingObject = embeddingsArray.getJSONObject(0);
+    String embeddingResponse = executeEinsteinRequest(accessToken, body, modelName, URI_MODELS_API_EMBEDDINGS);
 
-    // Extract the embedding array from the first embedding object
-    return firstEmbeddingObject.getJSONArray(JSON_KEY_EMBEDDING);
+    EinsteinEmbeddingResponseDTO embeddingResponseDTO =
+        new ObjectMapper().readValue(embeddingResponse, EinsteinEmbeddingResponseDTO.class);
+
+    return embeddingResponseDTO.getEmbeddings().get(0).getEmbedding();
   }
 
   private static List<String> createCorpusList(String filePath, String fileType, String splitOption)
@@ -192,36 +195,40 @@ public class PayloadHelper {
     return corpus;
   }
 
-  private static double calculateCosineSimilarity(JSONArray vec1, JSONArray vec2) {
-    double dotProduct = 0.0;
-    double normA = 0.0;
-    double normB = 0.0;
-    for (int i = 0; i < vec1.length(); i++) {
-      double a = vec1.getDouble(i);
-      double b = vec2.getDouble(i);
-      dotProduct += a * b;
-      normA += Math.pow(a, 2);
-      normB += Math.pow(b, 2);
+  private static BigDecimal calculateCosineSimilarity(List<BigDecimal> embeddingList, List<BigDecimal> corpusEmbedding) {
+    BigDecimal dotProduct = BigDecimal.ZERO;
+    BigDecimal normA = BigDecimal.ZERO;
+    BigDecimal normB = BigDecimal.ZERO;
+    for (int i = 0; i < embeddingList.size(); i++) {
+      BigDecimal a = embeddingList.get(i);
+      BigDecimal b = corpusEmbedding.get(i);
+      dotProduct = dotProduct.add(a.multiply(b));
+      normA = normA.add(a.pow(2));
+      normB = normB.add(b.pow(2));
     }
-    return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+    return dotProduct.divide(
+                             BigDecimal.valueOf(Math.sqrt(normA.doubleValue()) * Math.sqrt(normB.doubleValue())),
+                             RoundingMode.HALF_UP);
   }
 
-  private static List<String> rankAndPrintResults(List<String> corpus, List<Double> similarityScores) {
-    List<Integer> indices = new ArrayList<>();
-    for (int i = 0; i < corpus.size(); i++) {
-      indices.add(i);
-    }
 
-    indices.sort((i, j) -> Double.compare(similarityScores.get(j), similarityScores.get(i)));
 
-    List<String> results = new ArrayList<>();
+  private static List<String> rankAndPrintResults(List<String> corpus, List<BigDecimal> similarityScores) {
 
     if (!similarityScores.isEmpty() && !corpus.isEmpty()) {
-      for (int index : indices) {
-        results.add(similarityScores.get(index) + " - " + corpus.get(index));
-      }
+
+      List<Integer> indices = IntStream
+          .range(0, corpus.size())
+          .boxed()
+          .sorted((i, j) -> similarityScores.get(j)
+              .compareTo(similarityScores.get(i)))
+          .collect(Collectors.toList());
+
+      return indices.stream()
+          .map(index -> similarityScores.get(index) + " - " + corpus.get(index))
+          .collect(Collectors.toList());
     }
-    return results;
+    return Collections.emptyList();
   }
 
   private static String getContentFromUrl(String urlString) throws IOException, SAXException, TikaException {
