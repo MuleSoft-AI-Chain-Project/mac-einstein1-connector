@@ -20,6 +20,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.mule.runtime.api.connection.ConnectionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import java.io.BufferedReader;
@@ -28,8 +30,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
@@ -47,6 +47,8 @@ import static com.mule.einstein.internal.helpers.ConstantUtil.*;
 import static com.mule.einstein.internal.helpers.RequestHelper.executeREST;
 
 public class PayloadHelper {
+
+  private static final Logger log = LoggerFactory.getLogger(PayloadHelper.class);
 
   public static String executeGenerateText(String prompt, EinsteinConnection connection, ParamsModelDetails paramDetails)
       throws IOException, ConnectionException {
@@ -122,12 +124,6 @@ public class PayloadHelper {
     return response;
   }
 
-  private static String executeEinsteinRequest(OAuthResponseDTO accessTokenDTO, String payload, String modelName,
-                                               String resource) {
-    String urlString = accessTokenDTO.getApiInstanceUrl() + URI_MODELS_API + modelName + resource;
-    return executeREST(accessTokenDTO.getAccessToken(), payload, urlString);
-  }
-
   public static JSONArray embeddingFileQuery(String prompt, String filePath, EinsteinConnection connection, String modelName,
                                              String fileType, String optionType)
       throws IOException, SAXException, TikaException, ConnectionException {
@@ -138,12 +134,12 @@ public class PayloadHelper {
     List<String> corpus = createCorpusList(filePath, fileType, optionType);
     String body = constructEmbeddingJSON(prompt);
 
-    List<BigDecimal> embeddingList = getQueryEmbedding(accessTokeDTO, body, modelName);
+    List<Double> embeddingList = getQueryEmbedding(accessTokeDTO, body, modelName);
 
-    List<List<BigDecimal>> corpusEmbeddingList = getCorpusEmbeddings(modelName, corpus, accessTokeDTO);
+    List<List<Double>> corpusEmbeddingList = getCorpusEmbeddings(modelName, corpus, accessTokeDTO);
 
     // Compare embeddings and rank results
-    List<BigDecimal> similarityScores = new ArrayList<>();
+    List<Double> similarityScores = new ArrayList<>();
     corpusEmbeddingList
         .forEach(corpusEmbedding -> similarityScores.add(
                                                          calculateCosineSimilarity(embeddingList, corpusEmbedding)));
@@ -154,13 +150,13 @@ public class PayloadHelper {
     return new JSONArray(results);
   }
 
-  private static List<List<BigDecimal>> getCorpusEmbeddings(String modelName, List<String> corpus, OAuthResponseDTO accessTokeDTO)
+  private static List<List<Double>> getCorpusEmbeddings(String modelName, List<String> corpus, OAuthResponseDTO accessTokeDTO)
       throws JsonProcessingException {
 
     String embeddingResponse;
     String corpusBody;
     // Generate embeddings for the corpus
-    List<List<BigDecimal>> corpusEmbeddings = new ArrayList<>();
+    List<List<Double>> corpusEmbeddings = new ArrayList<>();
 
     for (String text : corpus) {
 
@@ -179,7 +175,7 @@ public class PayloadHelper {
     return corpusEmbeddings;
   }
 
-  private static List<BigDecimal> getQueryEmbedding(OAuthResponseDTO accessTokeDTO, String body, String modelName)
+  private static List<Double> getQueryEmbedding(OAuthResponseDTO accessTokeDTO, String body, String modelName)
       throws JsonProcessingException {
 
     String embeddingResponse = executeEinsteinRequest(accessTokeDTO, body, modelName, URI_MODELS_API_EMBEDDINGS);
@@ -201,33 +197,30 @@ public class PayloadHelper {
     return corpus;
   }
 
-  private static BigDecimal calculateCosineSimilarity(List<BigDecimal> embeddingList, List<BigDecimal> corpusEmbedding) {
-    BigDecimal dotProduct = BigDecimal.ZERO;
-    BigDecimal normA = BigDecimal.ZERO;
-    BigDecimal normB = BigDecimal.ZERO;
+  private static double calculateCosineSimilarity(List<Double> embeddingList, List<Double> corpusEmbedding) {
+
+    double dotProduct = 0.0;
+    double normA = 0.0;
+    double normB = 0.0;
     for (int i = 0; i < embeddingList.size(); i++) {
-      BigDecimal a = embeddingList.get(i);
-      BigDecimal b = corpusEmbedding.get(i);
-      dotProduct = dotProduct.add(a.multiply(b));
-      normA = normA.add(a.pow(2));
-      normB = normB.add(b.pow(2));
+      double a = embeddingList.get(i);
+      double b = corpusEmbedding.get(i);
+      dotProduct += a * b;
+      normA += Math.pow(a, 2);
+      normB += Math.pow(b, 2);
     }
-    return dotProduct.divide(
-                             BigDecimal.valueOf(Math.sqrt(normA.doubleValue()) * Math.sqrt(normB.doubleValue())),
-                             RoundingMode.HALF_UP);
+    return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
   }
 
-
-
-  private static List<String> rankAndPrintResults(List<String> corpus, List<BigDecimal> similarityScores) {
+  private static List<String> rankAndPrintResults(List<String> corpus, List<Double> similarityScores) {
 
     if (!similarityScores.isEmpty() && !corpus.isEmpty()) {
 
       List<Integer> indices = IntStream
           .range(0, corpus.size())
           .boxed()
-          .sorted((i, j) -> similarityScores.get(j)
-              .compareTo(similarityScores.get(i)))
+          .sorted((i, j) -> Double.compare(similarityScores.get(j),
+                                           similarityScores.get(i)))
           .collect(Collectors.toList());
 
       return indices.stream()
@@ -235,6 +228,15 @@ public class PayloadHelper {
           .collect(Collectors.toList());
     }
     return Collections.emptyList();
+  }
+
+  private static String executeEinsteinRequest(OAuthResponseDTO accessTokenDTO, String payload, String modelName,
+                                               String resource) {
+
+    String urlString = accessTokenDTO.getApiInstanceUrl() + URI_MODELS_API + modelName + resource;
+    log.debug("Einstein Request URL: {}", urlString);
+
+    return executeREST(accessTokenDTO.getAccessToken(), payload, urlString);
   }
 
   private static String getContentFromUrl(String urlString) throws IOException, SAXException, TikaException {
