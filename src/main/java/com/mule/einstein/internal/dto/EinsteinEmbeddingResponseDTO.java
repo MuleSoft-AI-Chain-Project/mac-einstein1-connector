@@ -1,20 +1,19 @@
 package com.mule.einstein.internal.dto;
 
 import com.mule.einstein.api.metadata.ResponseParameters;
-import com.mule.einstein.api.response.EinsteinEmbedding;
 
 import java.util.List;
 
 public class EinsteinEmbeddingResponseDTO {
 
-  private List<EinsteinEmbedding> embeddings;
+  private List<EinsteinEmbeddingDTO> embeddings;
   private ResponseParameters parameters;
 
-  public List<EinsteinEmbedding> getEmbeddings() {
+  public List<EinsteinEmbeddingDTO> getEmbeddings() {
     return embeddings;
   }
 
-  public void setEmbeddings(List<EinsteinEmbedding> embeddings) {
+  public void setEmbeddings(List<EinsteinEmbeddingDTO> embeddings) {
     this.embeddings = embeddings;
   }
 

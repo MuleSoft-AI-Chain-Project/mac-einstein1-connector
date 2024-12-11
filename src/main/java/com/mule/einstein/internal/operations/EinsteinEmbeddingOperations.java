@@ -2,7 +2,6 @@ package com.mule.einstein.internal.operations;
 
 import com.mule.einstein.api.metadata.EinsteinResponseAttributes;
 import com.mule.einstein.api.metadata.ResponseParameters;
-import com.mule.einstein.api.response.EinsteinEmbeddingsResponse;
 import com.mule.einstein.internal.connection.EinsteinConnection;
 import com.mule.einstein.internal.error.provider.EmbeddingErrorTypeProvider;
 import com.mule.einstein.internal.helpers.PayloadHelper;
@@ -45,14 +44,14 @@ public class EinsteinEmbeddingOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("EMBEDDING-generate-from-text")
   @Throws(EmbeddingErrorTypeProvider.class)
-  public Result<EinsteinEmbeddingsResponse, ResponseParameters> generateEmbeddingFromText(@Content String text,
-                                                                                          @Connection EinsteinConnection connection,
-                                                                                          @ParameterGroup(
-                                                                                              name = "Additional properties") ParamsEmbeddingModelDetails paramDetails) {
+  public Result<InputStream, ResponseParameters> generateEmbeddingFromText(@Content String text,
+                                                                           @Connection EinsteinConnection connection,
+                                                                           @ParameterGroup(
+                                                                               name = "Additional properties") ParamsEmbeddingModelDetails paramDetails) {
     try {
       String response = PayloadHelper.executeGenerateEmbedding(text, connection, paramDetails);
 
-      return ResponseHelper.createEinsteinEmbeddedResponse(response);
+      return ResponseHelper.createEinsteinEmbeddingResponse(response);
     } catch (Exception e) {
       throw new ModuleException("Error while executing embedding generate from text operation",
                                 EMBEDDING_OPERATIONS_FAILURE, e);

@@ -10,7 +10,24 @@
         http://www.mulesoft.org/schema/mule/munit-tools http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
         http://www.mulesoft.org/schema/mule/ms-einstein http://www.mulesoft.org/schema/mule/ms-einstein/current/mule-ms-einstein.xsd">
 
-    <munit:config name="EmbeddingOperationsTestCase.xml"/>
+<munit:config name="EmbeddingOperationsTestCase.xml"/>
+
+    <munit:test name="EmbeddingFromText">
+        <munit:execution>
+            <munit:set-event doc:name="Set Event" doc:id="1c45d3f8-1234-5678-9abc-01234def6789">
+                <munit:payload value='#[{"text": "Einstein Connector will be a great success"}]'/>
+            </munit:set-event>
+            <logger message="Test EmbeddingAdhocFileQuery started" level="INFO"/>
+            <ms-einstein:embedding-generate-from-text doc:name="Embedding from text"
+                                                      doc:id="5f8c7c79-dffe-4331-a5b4-30375baa66bc"
+                                                      config-ref="Einstein_AI_Config">
+                <ms-einstein:text>#[payload.text]</ms-einstein:text>
+            </ms-einstein:embedding-generate-from-text>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that is="#[MunitTools::greaterThan(2)]" expression="#[sizeOf(payload.embeddings[0].embedding)]"/>
+        </munit:validation>
+    </munit:test>
 
     <munit:test name="EmbeddingFromFile">
         <munit:execution>
