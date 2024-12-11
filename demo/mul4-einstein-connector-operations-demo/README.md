@@ -14,7 +14,7 @@ How to Run Sample
 -----------------
 
 1. Import the project folder demo in Studio.
-2. Update the Client Id, Client Secret, Salesforce Org
+2. Update the Client Id, Client Secret and Salesforce Org in the Connection config
 3. Save the configuration & run the application
 
 
@@ -29,6 +29,8 @@ You can use postman to trigger curls under the web server http://localhost:8081
 * POST - /chat (Chat answer prompt)
 * POST - /chatwithmemory (Chat answer prompt with memory)
 * POST - /chatgenfrommsg (Chat Generate From Messages )
-* POST - /embeddingAdd (Generate Embedding from Adhoc File Query)
+* POST - /embedtext (Generate Embedding from Text)
+* POST - /embedfile (Generate Embedding from File)
+* POST - /embedquery (Embedding Adhoc File Query)
 * POST - /ragadhoc (Perform RAG over a file/doc provided)
 * POST - /toolsai (Tools implementation)
