@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mule.einstein.api.metadata.EinsteinResponseAttributes;
 import com.mule.einstein.api.metadata.ResponseParameters;
-import com.mule.einstein.api.response.EinsteinEmbeddingsResponse;
+import com.mule.einstein.internal.dto.EinsteinChatFromMessagesResponseDTO;
 import com.mule.einstein.internal.dto.EinsteinEmbeddingResponseDTO;
 import com.mule.einstein.internal.dto.EinsteinGenerationResponseDTO;
 import org.json.JSONObject;
@@ -45,13 +45,34 @@ public class ResponseHelper {
         .build();
   }
 
-  public static Result<EinsteinEmbeddingsResponse, ResponseParameters> createEinsteinEmbeddedResponse(String response)
+  public static Result<InputStream, ResponseParameters> createEinsteinChatFromMessagesResponse(String response)
       throws JsonProcessingException {
 
-    EinsteinEmbeddingResponseDTO responseDTO = new ObjectMapper().readValue(response, EinsteinEmbeddingResponseDTO.class);
+    EinsteinChatFromMessagesResponseDTO responseDTO =
+        new ObjectMapper().readValue(response, EinsteinChatFromMessagesResponseDTO.class);
 
-    return Result.<EinsteinEmbeddingsResponse, ResponseParameters>builder()
-        .output(new EinsteinEmbeddingsResponse(responseDTO.getEmbeddings()))
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put("generations", responseDTO.getGenerationDetails().getGenerations());
+
+    return Result.<InputStream, ResponseParameters>builder()
+        .output(toInputStream(jsonObject.toString(), StandardCharsets.UTF_8))
+        .attributes(responseDTO.getGenerationDetails().getParameters())
+        .attributesMediaType(MediaType.APPLICATION_JSON)
+        .mediaType(MediaType.APPLICATION_JSON)
+        .build();
+  }
+
+  public static Result<InputStream, ResponseParameters> createEinsteinEmbeddingResponse(String response)
+      throws JsonProcessingException {
+
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    EinsteinEmbeddingResponseDTO responseDTO = objectMapper.readValue(response, EinsteinEmbeddingResponseDTO.class);
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put("embeddings", responseDTO.getEmbeddings());
+
+    return Result.<InputStream, ResponseParameters>builder()
+        .output(toInputStream(jsonObject.toString(), StandardCharsets.UTF_8))
         .attributes(mapEmbeddingResponseAttributes(responseDTO))
         .attributesMediaType(MediaType.APPLICATION_JSON)
         .mediaType(MediaType.APPLICATION_JSON)

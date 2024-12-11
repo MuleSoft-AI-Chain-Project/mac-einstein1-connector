@@ -4,18 +4,10 @@ import com.mule.einstein.api.metadata.ResponseParameters;
 
 import java.util.List;
 
-public class EinsteinEmbeddingResponseDTO {
+public class GenerationDetailsDTO {
 
-  private List<EinsteinEmbeddingDTO> embeddings;
   private ResponseParameters parameters;
-
-  public List<EinsteinEmbeddingDTO> getEmbeddings() {
-    return embeddings;
-  }
-
-  public void setEmbeddings(List<EinsteinEmbeddingDTO> embeddings) {
-    this.embeddings = embeddings;
-  }
+  private List<GenerationsChatFromMessagesDTO> generations;
 
   public ResponseParameters getParameters() {
     return parameters;
@@ -23,5 +15,13 @@ public class EinsteinEmbeddingResponseDTO {
 
   public void setParameters(ResponseParameters parameters) {
     this.parameters = parameters;
+  }
+
+  public List<GenerationsChatFromMessagesDTO> getGenerations() {
+    return generations;
+  }
+
+  public void setGenerations(List<GenerationsChatFromMessagesDTO> generations) {
+    this.generations = generations;
   }
 }

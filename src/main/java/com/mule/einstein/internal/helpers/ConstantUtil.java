@@ -2,9 +2,8 @@ package com.mule.einstein.internal.helpers;
 
 public class ConstantUtil {
 
-  public static final String URL_BASE = "https://api.salesforce.com/einstein/platform/v1/models/";
-
   public static final String URI_HTTPS_PREFIX = "https://";
+  public static final String URI_MODELS_API = "/einstein/platform/v1/models/";
   public static final String URI_OAUTH_TOKEN = "/services/oauth2/token";
   public static final String URI_MODELS_API_EMBEDDINGS = "/embeddings";
   public static final String URI_MODELS_API_GENERATIONS = "/generations";
@@ -35,6 +34,4 @@ public class ConstantUtil {
   public static final String MODELAPI_OPENAI_ADA_002 = "sfdc_ai__DefaultOpenAITextEmbeddingAda_002";
   public static final String MODELAPI_OPENAI_GPT_3_5_TURBO = "sfdc_ai__DefaultOpenAIGPT35Turbo";
 
-  public static final String JSON_KEY_EMBEDDINGS = "embeddings";
-  public static final String JSON_KEY_EMBEDDING = "embedding";
 }

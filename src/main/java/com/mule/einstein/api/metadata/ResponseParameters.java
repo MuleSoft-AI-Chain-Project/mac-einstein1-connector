@@ -13,14 +13,14 @@ public class ResponseParameters {
 
   private final TokenUsage tokenUsage;
   private final String model;
-  private final String systemFingerPrint;
+  private final String systemFingerprint;
   private final String object;
 
-  @ConstructorProperties({"usage", "model", "systemFingerPrint", "object"})
-  public ResponseParameters(TokenUsage tokenUsage, String model, String systemFingerPrint, String object) {
+  @ConstructorProperties({"usage", "model", "systemFingerprint", "object"})
+  public ResponseParameters(TokenUsage tokenUsage, String model, String systemFingerprint, String object) {
     this.tokenUsage = tokenUsage;
     this.model = model;
-    this.systemFingerPrint = systemFingerPrint;
+    this.systemFingerprint = systemFingerprint;
     this.object = object;
   }
 
@@ -32,8 +32,8 @@ public class ResponseParameters {
     return model;
   }
 
-  public String getSystemFingerPrint() {
-    return systemFingerPrint;
+  public String getSystemFingerprint() {
+    return systemFingerprint;
   }
 
   public String getObject() {

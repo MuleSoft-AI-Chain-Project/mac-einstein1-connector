@@ -1,6 +1,8 @@
 package com.mule.einstein.internal.helpers;
 
-import org.json.JSONObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mule.einstein.internal.dto.OAuthResponseDTO;
+import org.mule.runtime.api.connection.ConnectionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,33 +57,28 @@ public class RequestHelper {
     }
   }
 
-  public static String getAccessToken(String org, String consumerKey, String consumerSecret) {
+  public static OAuthResponseDTO getAccessToken(String org, String consumerKey, String consumerSecret)
+      throws IOException, ConnectionException {
 
     String urlString = RequestHelper.getOAuthURL(org);
     String params = RequestHelper.getOAuthParams(consumerKey, consumerSecret);
 
-    try {
-      HttpURLConnection httpConnection = creteURLConnection(urlString);
-      httpConnection.setRequestProperty(ConstantUtil.CONTENT_TYPE_STRING, CONTENT_TYPE_X_WWW_FORM_URLENCODED);
+    HttpURLConnection httpConnection = creteURLConnection(urlString);
+    httpConnection.setRequestProperty(ConstantUtil.CONTENT_TYPE_STRING, CONTENT_TYPE_X_WWW_FORM_URLENCODED);
 
-      try (OutputStream os = httpConnection.getOutputStream()) {
-        byte[] input = params.getBytes(StandardCharsets.UTF_8);
-        os.write(input, 0, input.length);
-      }
+    try (OutputStream os = httpConnection.getOutputStream()) {
+      byte[] input = params.getBytes(StandardCharsets.UTF_8);
+      os.write(input, 0, input.length);
+    }
 
-      int responseCode = httpConnection.getResponseCode();
-      if (responseCode == HttpURLConnection.HTTP_OK) {
-        String response = readResponse(httpConnection.getInputStream());
-        JSONObject jsonResponse = new JSONObject(response);
-        return jsonResponse.getString(ACCESS_TOKEN);
-      } else {
-        String errorMessage = readErrorStream(httpConnection.getErrorStream());
-        log.error("Error response code: {}, message: {}", responseCode, errorMessage);
-        return String.format("Error: %d", responseCode);
-      }
-    } catch (Exception e) {
-      log.error("Exception while getting access token ", e);
-      return "Exception occurred: " + e.getMessage();
+    int responseCode = httpConnection.getResponseCode();
+    if (responseCode == HttpURLConnection.HTTP_OK) {
+      String response = readResponse(httpConnection.getInputStream());
+      return new ObjectMapper().readValue(response, OAuthResponseDTO.class);
+    } else {
+      String errorMessage = readErrorStream(httpConnection.getErrorStream());
+      log.error("Error response code: {}, message: {}", responseCode, errorMessage);
+      throw new ConnectionException("Failed to connect to Salesforce: HTTP " + responseCode);
     }
   }
 

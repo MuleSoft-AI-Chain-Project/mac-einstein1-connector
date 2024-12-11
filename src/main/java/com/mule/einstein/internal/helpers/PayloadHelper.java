@@ -1,6 +1,10 @@
 package com.mule.einstein.internal.helpers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mule.einstein.internal.connection.EinsteinConnection;
+import com.mule.einstein.internal.dto.EinsteinEmbeddingResponseDTO;
+import com.mule.einstein.internal.dto.OAuthResponseDTO;
 import com.mule.einstein.internal.models.ParamsEmbeddingDocumentDetails;
 import com.mule.einstein.internal.models.ParamsEmbeddingModelDetails;
 import com.mule.einstein.internal.models.ParamsModelDetails;
@@ -15,6 +19,7 @@ import org.apache.tika.sax.BodyContentHandler;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.mule.runtime.api.connection.ConnectionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -31,9 +36,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.mule.einstein.internal.helpers.ConstantUtil.*;
 import static com.mule.einstein.internal.helpers.RequestHelper.executeREST;
@@ -42,61 +50,64 @@ public class PayloadHelper {
 
   private static final Logger log = LoggerFactory.getLogger(PayloadHelper.class);
 
-  public static String executeGenerateText(String prompt, EinsteinConnection connection, ParamsModelDetails paramDetails) {
-    String accessToken =
+  public static String executeGenerateText(String prompt, EinsteinConnection connection, ParamsModelDetails paramDetails)
+      throws IOException, ConnectionException {
+    OAuthResponseDTO accessTokeDTO =
         RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
     String payload = constructJsonPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
-    return executeEinsteinRequest(accessToken, payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
+    return executeEinsteinRequest(accessTokeDTO, payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
   }
 
-  public static String executeGenerateChat(String messages, EinsteinConnection connection, ParamsModelDetails paramDetails) {
-    String accessToken =
+  public static String executeGenerateChat(String messages, EinsteinConnection connection, ParamsModelDetails paramDetails)
+      throws IOException, ConnectionException {
+    OAuthResponseDTO accessTokeDTO =
         RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
     String payload = constrcutJsonMessages(messages, paramDetails);
-    return executeEinsteinRequest(accessToken, payload, paramDetails.getModelApiName(), URI_MODELS_API_CHAT_GENERATIONS);
+    return executeEinsteinRequest(accessTokeDTO, payload, paramDetails.getModelApiName(), URI_MODELS_API_CHAT_GENERATIONS);
   }
 
   public static String executeGenerateEmbedding(String text, EinsteinConnection connection,
-                                                ParamsEmbeddingModelDetails paramDetails) {
-    String accessToken =
+                                                ParamsEmbeddingModelDetails paramDetails)
+      throws IOException, ConnectionException {
+    OAuthResponseDTO accessTokeDTO =
         RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
     String payload = constructEmbeddingJSON(text);
-    return executeEinsteinRequest(accessToken, payload, paramDetails.getModelApiName(), URI_MODELS_API_EMBEDDINGS);
+    return executeEinsteinRequest(accessTokeDTO, payload, paramDetails.getModelApiName(), URI_MODELS_API_EMBEDDINGS);
   }
 
-  public static String embeddingFromFile(String filePath, EinsteinConnection connection,
-                                         ParamsEmbeddingDocumentDetails einsteinParameters)
-      throws IOException, SAXException, TikaException {
+  public static JSONArray embeddingFromFile(String filePath, EinsteinConnection connection,
+                                            ParamsEmbeddingDocumentDetails einsteinParameters)
+      throws IOException, SAXException, TikaException, ConnectionException {
 
-    String accessToken =
+    OAuthResponseDTO accessTokeDTO =
         RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
     List<String> corpus = createCorpusList(filePath, einsteinParameters.getFileType(), einsteinParameters.getOptionType());
 
     return new JSONArray(
-                         getCorpusEmbeddings(einsteinParameters.getModelApiName(), corpus, accessToken))
-                             .toString();
+                         getCorpusEmbeddings(einsteinParameters.getModelApiName(), corpus, accessTokeDTO));
   }
 
-  public static String executeRAG(String text, EinsteinConnection connection, RAGParamsModelDetails paramDetails) {
-    String accessToken =
+  public static String executeRAG(String text, EinsteinConnection connection, RAGParamsModelDetails paramDetails)
+      throws IOException, ConnectionException {
+    OAuthResponseDTO accessTokeDTO =
         RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
     String payload = constructJsonPayload(text, paramDetails.getLocale(), paramDetails.getProbability());
-    return executeEinsteinRequest(accessToken, payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
+    return executeEinsteinRequest(accessTokeDTO, payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
   }
 
   public static String executeTools(String originalPrompt, String prompt, String filePath, EinsteinConnection connection,
                                     ParamsModelDetails paramDetails)
-      throws IOException {
-    String accessToken =
+      throws IOException, ConnectionException {
+    OAuthResponseDTO accessTokeDTO =
         RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
     String payload = constructJsonPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
     String payloadOptional = constructJsonPayload(originalPrompt, paramDetails.getLocale(), paramDetails.getProbability());
 
     String intermediateAnswer =
-        executeEinsteinRequest(accessToken, payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
+        executeEinsteinRequest(accessTokeDTO, payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
 
     String response =
-        executeEinsteinRequest(accessToken, payloadOptional, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
+        executeEinsteinRequest(accessTokeDTO, payloadOptional, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
     List<String> findURL = extractUrls(intermediateAnswer);
     if (findURL != null) {
       JSONObject jsonObject = new JSONObject(intermediateAnswer);
@@ -107,78 +118,72 @@ public class PayloadHelper {
       response = getAttributes(findURL.get(0), filePath, extractPayload(ePayload));
       String finalPayload = constructJsonPayload("data: " + response + ", question: " + originalPrompt, paramDetails.getLocale(),
                                                  paramDetails.getProbability());
-      response = executeEinsteinRequest(accessToken, finalPayload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
+      response = executeEinsteinRequest(accessTokeDTO, finalPayload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
 
     }
     return response;
   }
 
-  private static String executeEinsteinRequest(String accessToken, String payload, String modelName, String resource) {
-    String urlString = URL_BASE + modelName + resource;
-    return executeREST(accessToken, payload, urlString);
-  }
+  public static JSONArray embeddingFileQuery(String prompt, String filePath, EinsteinConnection connection, String modelName,
+                                             String fileType, String optionType)
+      throws IOException, SAXException, TikaException, ConnectionException {
 
-  public static String embeddingFileQuery(String prompt, String filePath, EinsteinConnection connection, String modelName,
-                                          String fileType, String optionType)
-      throws IOException, SAXException, TikaException {
-
-    String accessToken =
+    OAuthResponseDTO accessTokeDTO =
         RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
 
     List<String> corpus = createCorpusList(filePath, fileType, optionType);
     String body = constructEmbeddingJSON(prompt);
 
-    String embeddingResponse = executeEinsteinRequest(accessToken, body, modelName, URI_MODELS_API_EMBEDDINGS);
-    JSONArray queryEmbedding = getQueryEmbedding(embeddingResponse);
-    List<JSONArray> corpusEmbeddings = getCorpusEmbeddings(modelName, corpus, accessToken);
+    List<Double> embeddingList = getQueryEmbedding(accessTokeDTO, body, modelName);
+
+    List<List<Double>> corpusEmbeddingList = getCorpusEmbeddings(modelName, corpus, accessTokeDTO);
 
     // Compare embeddings and rank results
     List<Double> similarityScores = new ArrayList<>();
-    for (JSONArray corpusEmbedding : corpusEmbeddings) {
-      similarityScores.add(calculateCosineSimilarity(queryEmbedding, corpusEmbedding));
-    }
-
+    corpusEmbeddingList
+        .forEach(corpusEmbedding -> similarityScores.add(
+                                                         calculateCosineSimilarity(embeddingList, corpusEmbedding)));
     // Rank and print results
     List<String> results = rankAndPrintResults(corpus, similarityScores);
 
     // Convert results list to a JSONArray
-    return new JSONArray(results).toString();
+    return new JSONArray(results);
   }
 
-  private static List<JSONArray> getCorpusEmbeddings(String modelName, List<String> corpus, String accessToken) {
+  private static List<List<Double>> getCorpusEmbeddings(String modelName, List<String> corpus, OAuthResponseDTO accessTokeDTO)
+      throws JsonProcessingException {
 
     String embeddingResponse;
-    JSONArray embeddingsArray;
-    JSONObject jsonObject;
-
     String corpusBody;
     // Generate embeddings for the corpus
-    List<JSONArray> corpusEmbeddings = new ArrayList<>();
+    List<List<Double>> corpusEmbeddings = new ArrayList<>();
 
     for (String text : corpus) {
+
       corpusBody = constructEmbeddingJSON(text);
+
       if (text != null && !text.isEmpty()) {
         embeddingResponse =
-            executeEinsteinRequest(accessToken, constructEmbeddingJSON(corpusBody), modelName, URI_MODELS_API_EMBEDDINGS);
+            executeEinsteinRequest(accessTokeDTO, constructEmbeddingJSON(corpusBody), modelName, URI_MODELS_API_EMBEDDINGS);
 
-        jsonObject = new JSONObject(embeddingResponse);
-        embeddingsArray = jsonObject.getJSONArray(JSON_KEY_EMBEDDINGS);
-        corpusEmbeddings.add(embeddingsArray.getJSONObject(0).getJSONArray(JSON_KEY_EMBEDDING));
+        EinsteinEmbeddingResponseDTO embeddingResponseDTO =
+            new ObjectMapper().readValue(embeddingResponse, EinsteinEmbeddingResponseDTO.class);
+
+        corpusEmbeddings.add(embeddingResponseDTO.getEmbeddings().get(0).getEmbedding());
       }
     }
     return corpusEmbeddings;
   }
 
-  private static JSONArray getQueryEmbedding(String embeddingResponse) {
-    JSONObject jsonObject = new JSONObject(embeddingResponse);
-    //Generate embedding for query
-    JSONArray embeddingsArray = jsonObject.getJSONArray(JSON_KEY_EMBEDDINGS);
+  private static List<Double> getQueryEmbedding(OAuthResponseDTO accessTokeDTO, String body, String modelName)
+      throws JsonProcessingException {
 
-    // Extract the first embedding object
-    JSONObject firstEmbeddingObject = embeddingsArray.getJSONObject(0);
+    String embeddingResponse = executeEinsteinRequest(accessTokeDTO, body, modelName, URI_MODELS_API_EMBEDDINGS);
 
-    // Extract the embedding array from the first embedding object
-    return firstEmbeddingObject.getJSONArray(JSON_KEY_EMBEDDING);
+    EinsteinEmbeddingResponseDTO embeddingResponseDTO =
+        new ObjectMapper().readValue(embeddingResponse, EinsteinEmbeddingResponseDTO.class);
+
+    return embeddingResponseDTO.getEmbeddings().get(0).getEmbedding();
   }
 
   private static List<String> createCorpusList(String filePath, String fileType, String splitOption)
@@ -192,13 +197,14 @@ public class PayloadHelper {
     return corpus;
   }
 
-  private static double calculateCosineSimilarity(JSONArray vec1, JSONArray vec2) {
+  private static double calculateCosineSimilarity(List<Double> embeddingList, List<Double> corpusEmbedding) {
+
     double dotProduct = 0.0;
     double normA = 0.0;
     double normB = 0.0;
-    for (int i = 0; i < vec1.length(); i++) {
-      double a = vec1.getDouble(i);
-      double b = vec2.getDouble(i);
+    for (int i = 0; i < embeddingList.size(); i++) {
+      double a = embeddingList.get(i);
+      double b = corpusEmbedding.get(i);
       dotProduct += a * b;
       normA += Math.pow(a, 2);
       normB += Math.pow(b, 2);
@@ -207,21 +213,30 @@ public class PayloadHelper {
   }
 
   private static List<String> rankAndPrintResults(List<String> corpus, List<Double> similarityScores) {
-    List<Integer> indices = new ArrayList<>();
-    for (int i = 0; i < corpus.size(); i++) {
-      indices.add(i);
-    }
-
-    indices.sort((i, j) -> Double.compare(similarityScores.get(j), similarityScores.get(i)));
-
-    List<String> results = new ArrayList<>();
 
     if (!similarityScores.isEmpty() && !corpus.isEmpty()) {
-      for (int index : indices) {
-        results.add(similarityScores.get(index) + " - " + corpus.get(index));
-      }
+
+      List<Integer> indices = IntStream
+          .range(0, corpus.size())
+          .boxed()
+          .sorted((i, j) -> Double.compare(similarityScores.get(j),
+                                           similarityScores.get(i)))
+          .collect(Collectors.toList());
+
+      return indices.stream()
+          .map(index -> similarityScores.get(index) + " - " + corpus.get(index))
+          .collect(Collectors.toList());
     }
-    return results;
+    return Collections.emptyList();
+  }
+
+  private static String executeEinsteinRequest(OAuthResponseDTO accessTokenDTO, String payload, String modelName,
+                                               String resource) {
+
+    String urlString = accessTokenDTO.getApiInstanceUrl() + URI_MODELS_API + modelName + resource;
+    log.debug("Einstein Request URL: {}", urlString);
+
+    return executeREST(accessTokenDTO.getAccessToken(), payload, urlString);
   }
 
   private static String getContentFromUrl(String urlString) throws IOException, SAXException, TikaException {

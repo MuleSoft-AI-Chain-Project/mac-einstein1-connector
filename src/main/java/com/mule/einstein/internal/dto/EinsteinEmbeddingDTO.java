@@ -1,16 +1,15 @@
-package com.mule.einstein.api.response;
+package com.mule.einstein.internal.dto;
 
 import java.beans.ConstructorProperties;
-import java.math.BigDecimal;
 import java.util.List;
 
-public class EinsteinEmbedding {
+public class EinsteinEmbeddingDTO {
 
   private final int index;
-  private final List<BigDecimal> embedding;
+  private final List<Double> embedding;
 
   @ConstructorProperties({"index", "embedding"})
-  public EinsteinEmbedding(int index, List<BigDecimal> embedding) {
+  public EinsteinEmbeddingDTO(int index, List<Double> embedding) {
     this.index = index;
     this.embedding = embedding;
   }
@@ -19,7 +18,7 @@ public class EinsteinEmbedding {
     return index;
   }
 
-  public List<BigDecimal> getEmbedding() {
+  public List<Double> getEmbedding() {
     return embedding;
   }
 }
