@@ -14,7 +14,7 @@ How to Run Sample
 -----------------
 
 1. Import the project folder demo in Studio.
-2. Change the Client Id, Client Secret, Salesforce Org keys as per convenience in "envVars.json" file under src/main/resources folder.
+2. Update the Client Id, Client Secret, Salesforce Org
 3. Save the configuration & run the application
 
 

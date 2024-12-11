@@ -7,7 +7,7 @@ http://www.mulesoft.org/schema/mule/ms-einstein http://www.mulesoft.org/schema/m
 http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
 	<ms-einstein:config name="Einstein_AI_Config" doc:name="Einstein AI Config" doc:id="40136642-33a7-4a9b-a9cf-8d9bd3724b69" >
-		<ms-einstein:connection salesforceOrg="ddl00000deu66uad-dev-ed.develop.my.salesforce.com" clientId="3MVG9GCMQoQ6rpzS2BNEp6rs1z5btubG9YjqgT02qUf891Hj1S7dTSzVbQ78PR_Y.JzY_pkI9REJf8IEmEm1m" clientSecret="16C88A8BA65F6351DBCCDF33BEECC03BCDA367E7102E1C17A52B4B0E63CC5603" />
+		<ms-einstein:connection salesforceOrg="" clientId="" clientSecret="" />
 	</ms-einstein:config>
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="2430f525-f4b3-47da-8f70-3aecb7950ea6" >
 		<http:listener-connection host="0.0.0.0" port="8081" />
