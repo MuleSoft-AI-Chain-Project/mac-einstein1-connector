@@ -126,8 +126,5 @@
             </ms-einstein:agent-define-prompt-template>
         </munit:execution>
     </munit:test>
-
-
-
-
+    
 </mule>
