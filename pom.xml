@@ -5,10 +5,12 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.mulesoft.connectors</groupId>
-    <artifactId>mule4-einstein-connector</artifactId>
-    <version>0.2.21-SNAPSHOT</version>
+    <artifactId>mule4-agentforce-connector</artifactId>
+    <version>0.2.29-SNAPSHOT</version>
     <packaging>mule-extension</packaging>
-    <name>Einstein AI Connector</name>
+    <name>Anypoint Agentforce Connector</name>
+
+
 
     <parent>
         <groupId>org.mule.extensions</groupId>
