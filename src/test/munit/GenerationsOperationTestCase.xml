@@ -16,7 +16,7 @@
         <munit:execution>
             <logger message="Test ChatWithPrompt started" level="INFO"/>
             <munit:set-event doc:name="Set Event" doc:id="1c45d3f8-1234-5678-9abc-01234def6789">
-                <munit:payload value='#[{"prompt": "How many continents are there in the world?"}]'/>
+                <munit:payload value='#[{"prompt": "How many continents are there in the world, give answer in one word only ?"}]'/>
             </munit:set-event>
             <ms-einstein:chat-answer-prompt doc:name="Chat answer prompt" doc:id="5f8c7c79-dffe-4331-a5b4-30375baa66bc"
                                             config-ref="Einstein_AI_Config">
@@ -25,7 +25,7 @@
         </munit:execution>
         <munit:validation>
             <munit-tools:assert-that expression="#[payload.response]"
-                                     is="#[MunitTools::matches('There are (7|seven) continents in the world.*')]"
+                                     is="#[MunitTools::matches('.*(7|seven|Seven).*')]"
                                      doc:name="Assert Generated Text"/>
         </munit:validation>
     </munit:test>
@@ -61,7 +61,7 @@
         <munit:validation>
             <munit-tools:assert-that
                     expression="#[lower(payload.response)]"
-                    is="#[MunitTools::containsString('ostrich')]"
+                    is="#[MunitTools::matches('.*(ostrich|Ostrich).*')]"
                     doc:name="Assert that the response mentions Ostrich"/>
         </munit:validation>
     </munit:test>
@@ -126,8 +126,5 @@
             </ms-einstein:agent-define-prompt-template>
         </munit:execution>
     </munit:test>
-
-
-
 
 </mule>

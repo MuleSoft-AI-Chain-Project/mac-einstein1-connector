@@ -37,6 +37,7 @@ import static org.mule.runtime.extension.api.annotation.param.MediaType.APPLICAT
 public class EinsteinEmbeddingOperations {
 
   private static final Logger log = LoggerFactory.getLogger(EinsteinEmbeddingOperations.class);
+  PayloadHelper payloadHelper = new PayloadHelper();
 
   /**
    * Create an embedding vector representing the input text.
@@ -49,7 +50,7 @@ public class EinsteinEmbeddingOperations {
                                                                            @ParameterGroup(
                                                                                name = "Additional properties") ParamsEmbeddingModelDetails paramDetails) {
     try {
-      String response = PayloadHelper.executeGenerateEmbedding(text, connection, paramDetails);
+      String response = payloadHelper.executeGenerateEmbedding(text, connection, paramDetails);
 
       return ResponseHelper.createEinsteinEmbeddingResponse(response);
     } catch (Exception e) {
@@ -68,7 +69,7 @@ public class EinsteinEmbeddingOperations {
                                                              @ParameterGroup(
                                                                  name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails) {
     try {
-      JSONArray response = PayloadHelper.embeddingFromFile(filePath, connection, paramDetails);
+      JSONArray response = payloadHelper.embeddingFromFile(filePath, connection, paramDetails);
 
       JSONObject jsonObject = new JSONObject();
       jsonObject.put("result", response);
@@ -92,7 +93,7 @@ public class EinsteinEmbeddingOperations {
                                                              name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails) {
     log.info("Executing embedding adhoc file query operation.");
     try {
-      JSONArray response = PayloadHelper.embeddingFileQuery(prompt, filePath, connection, paramDetails.getModelApiName(),
+      JSONArray response = payloadHelper.embeddingFileQuery(prompt, filePath, connection, paramDetails.getModelApiName(),
                                                             paramDetails.getFileType(), paramDetails.getOptionType());
 
       JSONObject jsonObject = new JSONObject();
@@ -119,10 +120,10 @@ public class EinsteinEmbeddingOperations {
     log.info("Executing rag adhoc load document.");
     try {
 
-      String content = PayloadHelper.embeddingFileQuery(prompt, filePath, connection, paramDetails.getEmbeddingName(),
+      String content = payloadHelper.embeddingFileQuery(prompt, filePath, connection, paramDetails.getEmbeddingName(),
                                                         paramDetails.getFileType(), paramDetails.getOptionType())
           .toString();
-      String response = PayloadHelper.executeRAG("data: " + content + ", question: " + prompt, connection,
+      String response = payloadHelper.executeRAG("data: " + content + ", question: " + prompt, connection,
                                                  paramDetails);
 
       return ResponseHelper.createEinsteinFormattedResponse(response);
@@ -148,9 +149,9 @@ public class EinsteinEmbeddingOperations {
     try {
 
       String content =
-          PayloadHelper.embeddingFileQuery(prompt, toolsConfig, connection, MODELAPI_OPENAI_ADA_002, "text", "FULL")
+          payloadHelper.embeddingFileQuery(prompt, toolsConfig, connection, MODELAPI_OPENAI_ADA_002, "text", "FULL")
               .toString();
-      String response = PayloadHelper.executeTools(prompt, "data: " + content + ", question: " + prompt,
+      String response = payloadHelper.executeTools(prompt, "data: " + content + ", question: " + prompt,
                                                    toolsConfig, connection, paramDetails);
 
       return ResponseHelper.createEinsteinFormattedResponse(response);

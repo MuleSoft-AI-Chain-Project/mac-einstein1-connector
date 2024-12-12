@@ -50,56 +50,50 @@ public class PayloadHelper {
 
   private static final Logger log = LoggerFactory.getLogger(PayloadHelper.class);
 
-  public static String executeGenerateText(String prompt, EinsteinConnection connection, ParamsModelDetails paramDetails)
+  public String executeGenerateText(String prompt, EinsteinConnection connection, ParamsModelDetails paramDetails)
       throws IOException, ConnectionException {
-    OAuthResponseDTO accessTokeDTO =
-        RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
+    OAuthResponseDTO accessTokeDTO = getOAuthResponseDTO(connection);
     String payload = constructJsonPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
     return executeEinsteinRequest(accessTokeDTO, payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
   }
 
-  public static String executeGenerateChat(String messages, EinsteinConnection connection, ParamsModelDetails paramDetails)
+  public String executeGenerateChat(String messages, EinsteinConnection connection, ParamsModelDetails paramDetails)
       throws IOException, ConnectionException {
-    OAuthResponseDTO accessTokeDTO =
-        RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
+    OAuthResponseDTO accessTokeDTO = getOAuthResponseDTO(connection);
     String payload = constrcutJsonMessages(messages, paramDetails);
     return executeEinsteinRequest(accessTokeDTO, payload, paramDetails.getModelApiName(), URI_MODELS_API_CHAT_GENERATIONS);
   }
 
-  public static String executeGenerateEmbedding(String text, EinsteinConnection connection,
-                                                ParamsEmbeddingModelDetails paramDetails)
+  public String executeGenerateEmbedding(String text, EinsteinConnection connection,
+                                         ParamsEmbeddingModelDetails paramDetails)
       throws IOException, ConnectionException {
-    OAuthResponseDTO accessTokeDTO =
-        RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
+    OAuthResponseDTO accessTokeDTO = getOAuthResponseDTO(connection);
     String payload = constructEmbeddingJSON(text);
     return executeEinsteinRequest(accessTokeDTO, payload, paramDetails.getModelApiName(), URI_MODELS_API_EMBEDDINGS);
   }
 
-  public static JSONArray embeddingFromFile(String filePath, EinsteinConnection connection,
-                                            ParamsEmbeddingDocumentDetails einsteinParameters)
+  public JSONArray embeddingFromFile(String filePath, EinsteinConnection connection,
+                                     ParamsEmbeddingDocumentDetails einsteinParameters)
       throws IOException, SAXException, TikaException, ConnectionException {
 
-    OAuthResponseDTO accessTokeDTO =
-        RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
+    OAuthResponseDTO accessTokeDTO = getOAuthResponseDTO(connection);
     List<String> corpus = createCorpusList(filePath, einsteinParameters.getFileType(), einsteinParameters.getOptionType());
 
     return new JSONArray(
                          getCorpusEmbeddings(einsteinParameters.getModelApiName(), corpus, accessTokeDTO));
   }
 
-  public static String executeRAG(String text, EinsteinConnection connection, RAGParamsModelDetails paramDetails)
+  public String executeRAG(String text, EinsteinConnection connection, RAGParamsModelDetails paramDetails)
       throws IOException, ConnectionException {
-    OAuthResponseDTO accessTokeDTO =
-        RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
+    OAuthResponseDTO accessTokeDTO = getOAuthResponseDTO(connection);
     String payload = constructJsonPayload(text, paramDetails.getLocale(), paramDetails.getProbability());
     return executeEinsteinRequest(accessTokeDTO, payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
   }
 
-  public static String executeTools(String originalPrompt, String prompt, String filePath, EinsteinConnection connection,
-                                    ParamsModelDetails paramDetails)
+  public String executeTools(String originalPrompt, String prompt, String filePath, EinsteinConnection connection,
+                             ParamsModelDetails paramDetails)
       throws IOException, ConnectionException {
-    OAuthResponseDTO accessTokeDTO =
-        RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
+    OAuthResponseDTO accessTokeDTO = getOAuthResponseDTO(connection);
     String payload = constructJsonPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
     String payloadOptional = constructJsonPayload(originalPrompt, paramDetails.getLocale(), paramDetails.getProbability());
 
@@ -124,12 +118,11 @@ public class PayloadHelper {
     return response;
   }
 
-  public static JSONArray embeddingFileQuery(String prompt, String filePath, EinsteinConnection connection, String modelName,
-                                             String fileType, String optionType)
+  public JSONArray embeddingFileQuery(String prompt, String filePath, EinsteinConnection connection, String modelName,
+                                      String fileType, String optionType)
       throws IOException, SAXException, TikaException, ConnectionException {
 
-    OAuthResponseDTO accessTokeDTO =
-        RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
+    OAuthResponseDTO accessTokeDTO = getOAuthResponseDTO(connection);
 
     List<String> corpus = createCorpusList(filePath, fileType, optionType);
     String body = constructEmbeddingJSON(prompt);
@@ -150,7 +143,11 @@ public class PayloadHelper {
     return new JSONArray(results);
   }
 
-  private static List<List<Double>> getCorpusEmbeddings(String modelName, List<String> corpus, OAuthResponseDTO accessTokeDTO)
+  private OAuthResponseDTO getOAuthResponseDTO(EinsteinConnection connection) throws IOException, ConnectionException {
+    return RequestHelper.getAccessToken(connection.getSalesforceOrg(), connection.getClientId(), connection.getClientSecret());
+  }
+
+  private List<List<Double>> getCorpusEmbeddings(String modelName, List<String> corpus, OAuthResponseDTO accessTokeDTO)
       throws JsonProcessingException {
 
     String embeddingResponse;
@@ -175,7 +172,7 @@ public class PayloadHelper {
     return corpusEmbeddings;
   }
 
-  private static List<Double> getQueryEmbedding(OAuthResponseDTO accessTokeDTO, String body, String modelName)
+  private List<Double> getQueryEmbedding(OAuthResponseDTO accessTokeDTO, String body, String modelName)
       throws JsonProcessingException {
 
     String embeddingResponse = executeEinsteinRequest(accessTokeDTO, body, modelName, URI_MODELS_API_EMBEDDINGS);
@@ -186,7 +183,7 @@ public class PayloadHelper {
     return embeddingResponseDTO.getEmbeddings().get(0).getEmbedding();
   }
 
-  private static List<String> createCorpusList(String filePath, String fileType, String splitOption)
+  private List<String> createCorpusList(String filePath, String fileType, String splitOption)
       throws IOException, SAXException, TikaException {
     List<String> corpus;
     if (splitOption.equals("FULL")) {
@@ -197,7 +194,7 @@ public class PayloadHelper {
     return corpus;
   }
 
-  private static double calculateCosineSimilarity(List<Double> embeddingList, List<Double> corpusEmbedding) {
+  private double calculateCosineSimilarity(List<Double> embeddingList, List<Double> corpusEmbedding) {
 
     double dotProduct = 0.0;
     double normA = 0.0;
@@ -212,7 +209,7 @@ public class PayloadHelper {
     return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
   }
 
-  private static List<String> rankAndPrintResults(List<String> corpus, List<Double> similarityScores) {
+  private List<String> rankAndPrintResults(List<String> corpus, List<Double> similarityScores) {
 
     if (!similarityScores.isEmpty() && !corpus.isEmpty()) {
 
@@ -230,8 +227,8 @@ public class PayloadHelper {
     return Collections.emptyList();
   }
 
-  private static String executeEinsteinRequest(OAuthResponseDTO accessTokenDTO, String payload, String modelName,
-                                               String resource) {
+  private String executeEinsteinRequest(OAuthResponseDTO accessTokenDTO, String payload, String modelName,
+                                        String resource) {
 
     String urlString = accessTokenDTO.getApiInstanceUrl() + URI_MODELS_API + modelName + resource;
     log.debug("Einstein Request URL: {}", urlString);
@@ -239,7 +236,7 @@ public class PayloadHelper {
     return executeREST(accessTokenDTO.getAccessToken(), payload, urlString);
   }
 
-  private static String getContentFromUrl(String urlString) throws IOException, SAXException, TikaException {
+  private String getContentFromUrl(String urlString) throws IOException, SAXException, TikaException {
     BodyContentHandler handler = new BodyContentHandler(-1);
     Metadata metadata = new Metadata();
     InputStream inputstream = new URL(urlString).openStream();
@@ -250,7 +247,7 @@ public class PayloadHelper {
     return handler.toString();
   }
 
-  private static String getContentFromFile(String filePath) throws IOException, SAXException, TikaException {
+  private String getContentFromFile(String filePath) throws IOException, SAXException, TikaException {
     BodyContentHandler handler = new BodyContentHandler(-1);
     Metadata metadata = new Metadata();
     FileInputStream inputstream = new FileInputStream(filePath);
@@ -261,7 +258,7 @@ public class PayloadHelper {
     return handler.toString();
   }
 
-  private static String getContentFromTxtFile(String filePath) throws IOException, SAXException, TikaException {
+  private String getContentFromTxtFile(String filePath) throws IOException, SAXException, TikaException {
     BodyContentHandler handler = new BodyContentHandler(-1);
     Metadata metadata = new Metadata();
     FileInputStream inputstream = new FileInputStream(filePath);
@@ -272,7 +269,7 @@ public class PayloadHelper {
     return handler.toString();
   }
 
-  private static String getFileTypeContextFromFile(String filePath, String fileType)
+  private String getFileTypeContextFromFile(String filePath, String fileType)
       throws IOException, SAXException, TikaException {
 
     switch (fileType) {
@@ -285,17 +282,17 @@ public class PayloadHelper {
     }
   }
 
-  private static String splitFullDocument(String filePath, String fileType) throws IOException, SAXException, TikaException {
+  private String splitFullDocument(String filePath, String fileType) throws IOException, SAXException, TikaException {
     return getFileTypeContextFromFile(filePath, fileType);
   }
 
-  private static String[] splitByType(String filePath, String fileType, String splitOption)
+  private String[] splitByType(String filePath, String fileType, String splitOption)
       throws IOException, SAXException, TikaException {
     String content = getFileTypeContextFromFile(filePath, fileType);
     return splitContent(content, splitOption);
   }
 
-  private static String[] splitContent(String text, String option) {
+  private String[] splitContent(String text, String option) {
     switch (option) {
       case "PARAGRAPH":
         return splitByParagraphs(text);
@@ -306,18 +303,18 @@ public class PayloadHelper {
     }
   }
 
-  private static String[] splitByParagraphs(String text) {
+  private String[] splitByParagraphs(String text) {
     // Assuming paragraphs are separated by two or more newlines
 
     return removeEmptyStrings(text.split("\\r?\\n\\r?\\n"));
   }
 
-  private static String[] splitBySentences(String text) {
+  private String[] splitBySentences(String text) {
     // Split by sentences (simple implementation using period followed by space)
     return removeEmptyStrings(text.split("(?<!Mr|Mrs|Ms|Dr|Sr|Jr|Prof)\\.\\s+"));
   }
 
-  public static String[] removeEmptyStrings(String[] array) {
+  public String[] removeEmptyStrings(String[] array) {
     // Convert array to list
     List<String> list = new ArrayList<>(Arrays.asList(array));
 
@@ -328,7 +325,7 @@ public class PayloadHelper {
     return list.toArray(new String[0]);
   }
 
-  private static List<String> extractUrls(String input) {
+  private List<String> extractUrls(String input) {
     // Define the URL pattern
     String urlPattern = "(https?://[\\w\\-\\.]+(?:\\.[\\w\\-]+)+(?:[\\w\\-.,@?^=%&:/~+#]*[\\w\\-@?^=%&/~+#])?)";
 
@@ -349,7 +346,7 @@ public class PayloadHelper {
     return urls.isEmpty() ? null : urls;
   }
 
-  private static String constructJsonPayload(String prompt, String locale, Number probability) {
+  private String constructJsonPayload(String prompt, String locale, Number probability) {
     JSONObject localization = new JSONObject();
     localization.put("defaultLocale", locale);
 
@@ -372,7 +369,7 @@ public class PayloadHelper {
     return jsonPayload.toString();
   }
 
-  private static String constrcutJsonMessages(String message, ParamsModelDetails paramsModelDetails) {
+  private String constrcutJsonMessages(String message, ParamsModelDetails paramsModelDetails) {
     JSONArray messages = new JSONArray(message);
 
     JSONObject locale = new JSONObject();
@@ -400,7 +397,7 @@ public class PayloadHelper {
     return jsonObject.toString();
   }
 
-  private static String constructEmbeddingJSON(String text) {
+  private String constructEmbeddingJSON(String text) {
     JSONArray input = new JSONArray();
     input.put(text);
 
@@ -410,7 +407,7 @@ public class PayloadHelper {
     return jsonObject.toString();
   }
 
-  private static String getAttributes(String url, String filePath, String payload) throws IOException {
+  private String getAttributes(String url, String filePath, String payload) throws IOException {
 
     try (InputStream inputStream = Files.newInputStream(Paths.get(filePath))) {
 
@@ -467,7 +464,7 @@ public class PayloadHelper {
     }
   }
 
-  private static String extractPayload(String payload) {
+  private String extractPayload(String payload) {
 
     Pattern pattern = Pattern.compile("\\{.*\\}");
     Matcher matcher = pattern.matcher(payload);
@@ -480,7 +477,7 @@ public class PayloadHelper {
     return response;
   }
 
-  private static String buildPayload(String payload) {
+  private String buildPayload(String payload) {
 
     String findPayload = extractPayload(payload);
     if (findPayload.equals("Payload not found!")) {

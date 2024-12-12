@@ -10,11 +10,11 @@ import java.util.List;
 
 public class ChatMemoryHelper {
 
-  private static ChatMemory intializeChatMemory(String memoryPath, String memoryName) {
+  private ChatMemory intializeChatMemory(String memoryPath, String memoryName) {
     return new ChatMemory(memoryPath, memoryName);
   }
 
-  private static List<String> getKeepLastMessage(ChatMemory chatMemory, Integer keepLastMessages) {
+  private List<String> getKeepLastMessage(ChatMemory chatMemory, Integer keepLastMessages) {
 
     // Retrieve all messages in ascending order of messageId
     List<String> messagesAsc = chatMemory.getAllMessagesByMessageIdAsc();
@@ -26,13 +26,13 @@ public class ChatMemoryHelper {
     return messagesAsc;
   }
 
-  private static void addMessageToMemory(ChatMemory chatMemory, String prompt) {
+  private void addMessageToMemory(ChatMemory chatMemory, String prompt) {
     if (!isQuestion(prompt)) {
       chatMemory.addMessage(chatMemory.getMessageCount() + 1L, prompt);
     }
   }
 
-  private static boolean isQuestion(String message) {
+  private boolean isQuestion(String message) {
     // Check if the message ends with a question mark
     if (message.trim().endsWith("?")) {
       return true;
@@ -48,7 +48,7 @@ public class ChatMemoryHelper {
     return false;
   }
 
-  private static String formatMemoryPrompt(List<String> messages) {
+  private String formatMemoryPrompt(List<String> messages) {
     StringBuilder formattedPrompt = new StringBuilder();
     for (String message : messages) {
       formattedPrompt.append(message).append("\n");
@@ -56,8 +56,8 @@ public class ChatMemoryHelper {
     return formattedPrompt.toString().trim();
   }
 
-  public static String chatWithMemory(String prompt, String memoryPath, String memoryName, Integer keepLastMessages,
-                                      EinsteinConnection connection, ParamsModelDetails parameters)
+  public String chatWithMemory(String prompt, String memoryPath, String memoryName, Integer keepLastMessages,
+                               EinsteinConnection connection, ParamsModelDetails parameters, PayloadHelper payloadHelper)
       throws IOException, ConnectionException {
 
     //Chat memory initialization
@@ -68,7 +68,7 @@ public class ChatMemoryHelper {
     keepLastMessagesList.add(prompt);
     String memoryPrompt = formatMemoryPrompt(keepLastMessagesList);
 
-    String response = PayloadHelper.executeGenerateText(memoryPrompt, connection, parameters);
+    String response = payloadHelper.executeGenerateText(memoryPrompt, connection, parameters);
 
     addMessageToMemory(chatMemory, prompt);
 
