@@ -32,6 +32,16 @@ import static org.mule.runtime.extension.api.annotation.param.MediaType.APPLICAT
 public class EinsteinGenerationOperations {
 
   private static final Logger log = LoggerFactory.getLogger(EinsteinGenerationOperations.class);
+  PayloadHelper payloadHelper = new PayloadHelper();
+  ChatMemoryHelper chatMemoryHelper = new ChatMemoryHelper();
+
+  public void setPayloadHelper(PayloadHelper payloadHelper) {
+    this.payloadHelper = payloadHelper;
+  }
+
+  public void setChatMemoryHelper(ChatMemoryHelper chatMemoryHelper) {
+    this.chatMemoryHelper = chatMemoryHelper;
+  }
 
   /**
    * Helps defining an AI Agent with a prompt template
@@ -49,7 +59,7 @@ public class EinsteinGenerationOperations {
     try {
 
       String finalPromptTemplate = PromptTemplateHelper.definePromptTemplate(template, instructions, dataset);
-      String response = PayloadHelper.executeGenerateText(finalPromptTemplate, connection, paramDetails);
+      String response = payloadHelper.executeGenerateText(finalPromptTemplate, connection, paramDetails);
 
       return ResponseHelper.createEinsteinFormattedResponse(response);
     } catch (Exception e) {
@@ -73,7 +83,7 @@ public class EinsteinGenerationOperations {
     log.info("Executing chat answer prompt operation.");
     try {
 
-      String response = PayloadHelper.executeGenerateText(prompt, connection, paramDetails);
+      String response = payloadHelper.executeGenerateText(prompt, connection, paramDetails);
 
       return ResponseHelper.createEinsteinFormattedResponse(response);
     } catch (Exception e) {
@@ -99,8 +109,8 @@ public class EinsteinGenerationOperations {
     log.info("Executing chat answer prompt with memory operation.");
     try {
 
-      String response = ChatMemoryHelper.chatWithMemory(prompt, memoryPath, memoryName, keepLastMessages,
-                                                        connection, paramDetails);
+      String response = chatMemoryHelper.chatWithMemory(prompt, memoryPath, memoryName, keepLastMessages,
+                                                        connection, paramDetails, payloadHelper);
 
       return ResponseHelper.createEinsteinFormattedResponse(response);
     } catch (Exception e) {
@@ -122,7 +132,7 @@ public class EinsteinGenerationOperations {
     log.info("Executing chat generate from message operation.");
     try {
 
-      String response = PayloadHelper.executeGenerateChat(messages, connection, paramDetails);
+      String response = payloadHelper.executeGenerateChat(messages, connection, paramDetails);
 
       return ResponseHelper.createEinsteinChatFromMessagesResponse(response);
     } catch (Exception e) {
@@ -131,4 +141,5 @@ public class EinsteinGenerationOperations {
       throw new ModuleException("Error while generating the chat from messages " + messages, CHAT_FAILURE, e);
     }
   }
+
 }
