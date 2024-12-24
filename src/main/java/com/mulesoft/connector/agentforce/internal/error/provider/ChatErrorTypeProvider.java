@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.mulesoft.connector.agentforce.internal.error.EinsteinErrorType.CHAT_FAILURE;
+import static com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType.CHAT_FAILURE;
 import static java.util.Collections.unmodifiableSet;
 
 public class ChatErrorTypeProvider implements ErrorTypeProvider {

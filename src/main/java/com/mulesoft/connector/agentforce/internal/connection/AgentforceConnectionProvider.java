@@ -15,9 +15,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public class EinsteinConnectionProvider implements ConnectionProvider<EinsteinConnection> {
+public class AgentforceConnectionProvider implements ConnectionProvider<AgentforceConnection> {
 
-  private final Logger log = LoggerFactory.getLogger(EinsteinConnectionProvider.class);
+  private final Logger log = LoggerFactory.getLogger(AgentforceConnectionProvider.class);
 
   @Parameter
   @Placement(order = 1, tab = Placement.CONNECTION_TAB)
@@ -37,12 +37,12 @@ public class EinsteinConnectionProvider implements ConnectionProvider<EinsteinCo
   private String clientSecret;
 
   @Override
-  public EinsteinConnection connect() throws ConnectionException {
+  public AgentforceConnection connect() throws ConnectionException {
     log.debug("Executing connect method call");
     try {
       OAuthResponseDTO oAuthResponseDTO = RequestHelper.getOAuthResponseDTO(salesforceOrg, clientId, clientSecret);
       if (oAuthResponseDTO != null) {
-        return new EinsteinConnection(salesforceOrg, clientId, clientSecret, oAuthResponseDTO);
+        return new AgentforceConnection(salesforceOrg, clientId, clientSecret, oAuthResponseDTO);
       } else {
         throw new ConnectionException("Failed to connect to Salesforce: HTTP ");
       }
@@ -53,7 +53,7 @@ public class EinsteinConnectionProvider implements ConnectionProvider<EinsteinCo
   }
 
   @Override
-  public void disconnect(EinsteinConnection connection) {
+  public void disconnect(AgentforceConnection connection) {
     log.debug("Executing disconnect method call");
     try {
       connection.invalidate();
@@ -63,12 +63,12 @@ public class EinsteinConnectionProvider implements ConnectionProvider<EinsteinCo
   }
 
   @Override
-  public ConnectionValidationResult validate(EinsteinConnection einsteinConnection) {
+  public ConnectionValidationResult validate(AgentforceConnection agentforceConnection) {
     log.debug("Executing validate method call");
     try {
       OAuthResponseDTO oAuthResponseDTO =
-          RequestHelper.getOAuthResponseDTO(einsteinConnection.getSalesforceOrg(), einsteinConnection.getClientId(),
-                                            einsteinConnection.getClientSecret());
+          RequestHelper.getOAuthResponseDTO(agentforceConnection.getSalesforceOrg(), agentforceConnection.getClientId(),
+                                            agentforceConnection.getClientSecret());
       if (oAuthResponseDTO != null) {
         return ConnectionValidationResult.success();
       } else {

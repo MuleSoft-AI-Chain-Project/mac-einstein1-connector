@@ -1,6 +1,6 @@
 package com.mulesoft.connector.agentforce.internal.operations;
 
-import com.mulesoft.connector.agentforce.internal.connection.EinsteinConnection;
+import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
 import com.mulesoft.connector.agentforce.internal.helpers.PayloadHelper;
 import com.mulesoft.connector.agentforce.internal.helpers.chatmemory.ChatMemoryHelper;
 import com.mulesoft.connector.agentforce.internal.models.ParamsModelDetails;
@@ -14,17 +14,17 @@ import org.mule.runtime.extension.api.exception.ModuleException;
 
 import java.io.IOException;
 
-import static com.mulesoft.connector.agentforce.internal.error.EinsteinErrorType.CHAT_FAILURE;
+import static com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType.CHAT_FAILURE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class EinsteinGenerationOperationsTest {
+public class AgentforceGenerationOperationsTest {
 
   @InjectMocks
-  private EinsteinGenerationOperations einsteinGenerationOperations;
+  private AgentforceGenerationOperations agentforceGenerationOperations;
 
   @Mock
   private PayloadHelper payloadHelperMock;
@@ -33,15 +33,15 @@ public class EinsteinGenerationOperationsTest {
   private ChatMemoryHelper chatMemoryHelperMock;
 
   @Mock
-  private EinsteinConnection connectionMock;
+  private AgentforceConnection connectionMock;
 
   @Mock
   private ParamsModelDetails paramDetailsMock;
 
   @BeforeEach
   void setUp() {
-    einsteinGenerationOperations.setPayloadHelper(payloadHelperMock);
-    einsteinGenerationOperations.setChatMemoryHelper(chatMemoryHelperMock);
+    agentforceGenerationOperations.setPayloadHelper(payloadHelperMock);
+    agentforceGenerationOperations.setChatMemoryHelper(chatMemoryHelperMock);
   }
 
   @Test
@@ -53,7 +53,7 @@ public class EinsteinGenerationOperationsTest {
         .thenThrow(new RuntimeException("Test exception"));
 
     ModuleException exception = assertThrows(ModuleException.class,
-                                             () -> einsteinGenerationOperations.definePromptTemplate(template, instructions,
+                                             () -> agentforceGenerationOperations.definePromptTemplate(template, instructions,
                                                                                                      dataset, connectionMock,
                                                                                                      paramDetailsMock));
 
@@ -71,7 +71,7 @@ public class EinsteinGenerationOperationsTest {
 
     ModuleException exception =
         assertThrows(ModuleException.class,
-                     () -> einsteinGenerationOperations.generateText(prompt, connectionMock, paramDetailsMock));
+                     () -> agentforceGenerationOperations.generateText(prompt, connectionMock, paramDetailsMock));
 
     assertEquals(
                  "Error while generating text for prompt Test Prompt",
@@ -89,7 +89,7 @@ public class EinsteinGenerationOperationsTest {
     when(chatMemoryHelperMock.chatWithMemory(anyString(), anyString(), anyString(), anyInt(), any(), any(), any()))
         .thenThrow(new RuntimeException("Test exception"));
 
-    ModuleException exception = assertThrows(ModuleException.class, () -> einsteinGenerationOperations
+    ModuleException exception = assertThrows(ModuleException.class, () -> agentforceGenerationOperations
         .generateTextMemory(prompt, memoryPath, memoryName, keepLastMessages, connectionMock, paramDetailsMock));
 
     assertEquals(
@@ -107,7 +107,7 @@ public class EinsteinGenerationOperationsTest {
 
     ModuleException exception =
         assertThrows(ModuleException.class,
-                     () -> einsteinGenerationOperations.generateChat(messages, connectionMock, paramDetailsMock));
+                     () -> agentforceGenerationOperations.generateChat(messages, connectionMock, paramDetailsMock));
 
     assertEquals(
                  "Error while generating the chat from messages Test Messages",

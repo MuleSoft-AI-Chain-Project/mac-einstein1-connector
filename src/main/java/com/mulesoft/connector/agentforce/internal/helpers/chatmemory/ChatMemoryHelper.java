@@ -1,6 +1,6 @@
 package com.mulesoft.connector.agentforce.internal.helpers.chatmemory;
 
-import com.mulesoft.connector.agentforce.internal.connection.EinsteinConnection;
+import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
 import com.mulesoft.connector.agentforce.internal.helpers.PayloadHelper;
 import com.mulesoft.connector.agentforce.internal.models.ParamsModelDetails;
 import org.mule.runtime.api.connection.ConnectionException;
@@ -11,7 +11,7 @@ import java.util.List;
 public class ChatMemoryHelper {
 
   public String chatWithMemory(String prompt, String memoryPath, String memoryName, Integer keepLastMessages,
-                               EinsteinConnection connection, ParamsModelDetails parameters, PayloadHelper payloadHelper)
+                               AgentforceConnection connection, ParamsModelDetails parameters, PayloadHelper payloadHelper)
       throws IOException, ConnectionException {
 
     //Chat memory initialization

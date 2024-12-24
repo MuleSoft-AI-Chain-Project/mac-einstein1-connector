@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.mulesoft.connector.agentforce.api.metadata.ResponseParameters;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class EinsteinGenerationResponseDTO {
+public class AgentforceGenerationResponseDTO {
 
   private String id;
   private GenerationDTO generation;

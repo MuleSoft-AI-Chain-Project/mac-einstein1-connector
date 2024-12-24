@@ -1,6 +1,6 @@
 package com.mulesoft.connector.agentforce.internal.dto;
 
-public class EinsteinChatFromMessagesResponseDTO {
+public class AgentforceChatFromMessagesResponseDTO {
 
   private String id;
   private GenerationDetailsDTO generationDetails;

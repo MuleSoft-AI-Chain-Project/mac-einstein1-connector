@@ -2,11 +2,11 @@ package com.mulesoft.connector.agentforce.internal.helpers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mulesoft.connector.agentforce.api.metadata.EinsteinResponseAttributes;
+import com.mulesoft.connector.agentforce.api.metadata.AgentforceResponseAttributes;
 import com.mulesoft.connector.agentforce.api.metadata.ResponseParameters;
-import com.mulesoft.connector.agentforce.internal.dto.EinsteinChatFromMessagesResponseDTO;
-import com.mulesoft.connector.agentforce.internal.dto.EinsteinEmbeddingResponseDTO;
-import com.mulesoft.connector.agentforce.internal.dto.EinsteinGenerationResponseDTO;
+import com.mulesoft.connector.agentforce.internal.dto.AgentforceChatFromMessagesResponseDTO;
+import com.mulesoft.connector.agentforce.internal.dto.AgentforceEmbeddingResponseDTO;
+import com.mulesoft.connector.agentforce.internal.dto.AgentforceGenerationResponseDTO;
 import org.json.JSONObject;
 import org.mule.runtime.api.metadata.MediaType;
 import org.mule.runtime.extension.api.runtime.operation.Result;
@@ -18,7 +18,7 @@ import static org.apache.commons.io.IOUtils.toInputStream;
 
 public class ResponseHelper {
 
-  public static Result<InputStream, Void> createEinsteinDefaultResponse(String response) {
+  public static Result<InputStream, Void> createAgentforceDefaultResponse(String response) {
 
     return Result.<InputStream, Void>builder()
         .output(toInputStream(response, StandardCharsets.UTF_8))
@@ -26,10 +26,10 @@ public class ResponseHelper {
         .build();
   }
 
-  public static Result<InputStream, EinsteinResponseAttributes> createEinsteinFormattedResponse(String response)
+  public static Result<InputStream, AgentforceResponseAttributes> createAgentforceFormattedResponse(String response)
       throws JsonProcessingException {
 
-    EinsteinGenerationResponseDTO responseDTO = new ObjectMapper().readValue(response, EinsteinGenerationResponseDTO.class);
+    AgentforceGenerationResponseDTO responseDTO = new ObjectMapper().readValue(response, AgentforceGenerationResponseDTO.class);
 
     String generatedText =
         responseDTO.getGeneration() != null ? responseDTO.getGeneration().getGeneratedText() : "";
@@ -37,7 +37,7 @@ public class ResponseHelper {
     JSONObject jsonObject = new JSONObject();
     jsonObject.put("response", generatedText);
 
-    return Result.<InputStream, EinsteinResponseAttributes>builder()
+    return Result.<InputStream, AgentforceResponseAttributes>builder()
         .output(toInputStream(jsonObject.toString(), StandardCharsets.UTF_8))
         .attributes(mapResponseAttributes(responseDTO))
         .attributesMediaType(MediaType.APPLICATION_JSON)
@@ -45,11 +45,11 @@ public class ResponseHelper {
         .build();
   }
 
-  public static Result<InputStream, ResponseParameters> createEinsteinChatFromMessagesResponse(String response)
+  public static Result<InputStream, ResponseParameters> createAgentforceChatFromMessagesResponse(String response)
       throws JsonProcessingException {
 
-    EinsteinChatFromMessagesResponseDTO responseDTO =
-        new ObjectMapper().readValue(response, EinsteinChatFromMessagesResponseDTO.class);
+    AgentforceChatFromMessagesResponseDTO responseDTO =
+        new ObjectMapper().readValue(response, AgentforceChatFromMessagesResponseDTO.class);
 
     JSONObject jsonObject = new JSONObject();
     jsonObject.put("generations", responseDTO.getGenerationDetails().getGenerations());
@@ -62,12 +62,12 @@ public class ResponseHelper {
         .build();
   }
 
-  public static Result<InputStream, ResponseParameters> createEinsteinEmbeddingResponse(String response)
+  public static Result<InputStream, ResponseParameters> createAgentforceEmbeddingResponse(String response)
       throws JsonProcessingException {
 
     ObjectMapper objectMapper = new ObjectMapper();
 
-    EinsteinEmbeddingResponseDTO responseDTO = objectMapper.readValue(response, EinsteinEmbeddingResponseDTO.class);
+    AgentforceEmbeddingResponseDTO responseDTO = objectMapper.readValue(response, AgentforceEmbeddingResponseDTO.class);
     JSONObject jsonObject = new JSONObject();
     jsonObject.put("embeddings", responseDTO.getEmbeddings());
 
@@ -79,9 +79,9 @@ public class ResponseHelper {
         .build();
   }
 
-  private static EinsteinResponseAttributes mapResponseAttributes(EinsteinGenerationResponseDTO responseDTO) {
+  private static AgentforceResponseAttributes mapResponseAttributes(AgentforceGenerationResponseDTO responseDTO) {
 
-    return new EinsteinResponseAttributes(
+    return new AgentforceResponseAttributes(
                                           responseDTO.getId(),
                                           responseDTO.getGeneration() != null ? responseDTO.getGeneration().getId() : null,
                                           responseDTO.getGeneration() != null ? responseDTO.getGeneration().getContentQuality()
@@ -91,7 +91,7 @@ public class ResponseHelper {
                                           responseDTO.getParameters());
   }
 
-  private static ResponseParameters mapEmbeddingResponseAttributes(EinsteinEmbeddingResponseDTO responseDTO) {
+  private static ResponseParameters mapEmbeddingResponseAttributes(AgentforceEmbeddingResponseDTO responseDTO) {
 
     return new ResponseParameters(
                                   responseDTO.getParameters() != null ? responseDTO.getParameters().getTokenUsage() : null,

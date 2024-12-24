@@ -4,16 +4,16 @@ import com.mulesoft.connector.agentforce.api.metadata.ResponseParameters;
 
 import java.util.List;
 
-public class EinsteinEmbeddingResponseDTO {
+public class AgentforceEmbeddingResponseDTO {
 
-  private List<EinsteinEmbeddingDTO> embeddings;
+  private List<AgentforceEmbeddingDTO> embeddings;
   private ResponseParameters parameters;
 
-  public List<EinsteinEmbeddingDTO> getEmbeddings() {
+  public List<AgentforceEmbeddingDTO> getEmbeddings() {
     return embeddings;
   }
 
-  public void setEmbeddings(List<EinsteinEmbeddingDTO> embeddings) {
+  public void setEmbeddings(List<AgentforceEmbeddingDTO> embeddings) {
     this.embeddings = embeddings;
   }
 

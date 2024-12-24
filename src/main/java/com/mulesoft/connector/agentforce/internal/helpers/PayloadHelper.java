@@ -1,8 +1,8 @@
 package com.mulesoft.connector.agentforce.internal.helpers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mulesoft.connector.agentforce.internal.connection.EinsteinConnection;
-import com.mulesoft.connector.agentforce.internal.dto.EinsteinEmbeddingResponseDTO;
+import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
+import com.mulesoft.connector.agentforce.internal.dto.AgentforceEmbeddingResponseDTO;
 import com.mulesoft.connector.agentforce.internal.dto.OAuthResponseDTO;
 import com.mulesoft.connector.agentforce.internal.models.ParamsEmbeddingDocumentDetails;
 import com.mulesoft.connector.agentforce.internal.models.ParamsEmbeddingModelDetails;
@@ -48,45 +48,45 @@ public class PayloadHelper {
 
   private static final Logger log = LoggerFactory.getLogger(PayloadHelper.class);
 
-  public String executeGenerateText(String prompt, EinsteinConnection connection, ParamsModelDetails paramDetails)
+  public String executeGenerateText(String prompt, AgentforceConnection connection, ParamsModelDetails paramDetails)
       throws IOException {
     String payload = constructJsonPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
     OAuthResponseDTO accessTokeDTO = connection.getoAuthResponseDTO();
-    return executeEinsteinRequest(accessTokeDTO, payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
+    return executeAgentforceRequest(accessTokeDTO, payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
   }
 
-  public String executeGenerateChat(String messages, EinsteinConnection connection, ParamsModelDetails paramDetails)
+  public String executeGenerateChat(String messages, AgentforceConnection connection, ParamsModelDetails paramDetails)
       throws IOException {
     String payload = constrcutJsonMessages(messages, paramDetails);
     OAuthResponseDTO accessTokeDTO = connection.getoAuthResponseDTO();
-    return executeEinsteinRequest(accessTokeDTO, payload, paramDetails.getModelApiName(), URI_MODELS_API_CHAT_GENERATIONS);
+    return executeAgentforceRequest(accessTokeDTO, payload, paramDetails.getModelApiName(), URI_MODELS_API_CHAT_GENERATIONS);
   }
 
-  public String executeGenerateEmbedding(String text, EinsteinConnection connection,
+  public String executeGenerateEmbedding(String text, AgentforceConnection connection,
                                          ParamsEmbeddingModelDetails paramDetails)
       throws IOException {
     String payload = constructEmbeddingJSON(text);
     OAuthResponseDTO accessTokeDTO = connection.getoAuthResponseDTO();
-    return executeEinsteinRequest(accessTokeDTO, payload, paramDetails.getModelApiName(), URI_MODELS_API_EMBEDDINGS);
+    return executeAgentforceRequest(accessTokeDTO, payload, paramDetails.getModelApiName(), URI_MODELS_API_EMBEDDINGS);
   }
 
-  public JSONArray embeddingFromFile(String filePath, EinsteinConnection connection,
-                                     ParamsEmbeddingDocumentDetails einsteinParameters)
+  public JSONArray embeddingFromFile(String filePath, AgentforceConnection connection,
+                                     ParamsEmbeddingDocumentDetails embeddingDocumentDetails)
       throws IOException, SAXException, TikaException {
 
-    List<String> corpus = createCorpusList(filePath, einsteinParameters.getFileType(), einsteinParameters.getOptionType());
+    List<String> corpus = createCorpusList(filePath, embeddingDocumentDetails.getFileType(), embeddingDocumentDetails.getOptionType());
     OAuthResponseDTO accessTokeDTO = connection.getoAuthResponseDTO();
     return new JSONArray(
-                         getCorpusEmbeddings(einsteinParameters.getModelApiName(), corpus, accessTokeDTO));
+                         getCorpusEmbeddings(embeddingDocumentDetails.getModelApiName(), corpus, accessTokeDTO));
   }
 
-  public String executeRAG(String text, EinsteinConnection connection, RAGParamsModelDetails paramDetails) throws IOException {
+  public String executeRAG(String text, AgentforceConnection connection, RAGParamsModelDetails paramDetails) throws IOException {
     String payload = constructJsonPayload(text, paramDetails.getLocale(), paramDetails.getProbability());
     OAuthResponseDTO accessTokeDTO = connection.getoAuthResponseDTO();
-    return executeEinsteinRequest(accessTokeDTO, payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
+    return executeAgentforceRequest(accessTokeDTO, payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
   }
 
-  public String executeTools(String originalPrompt, String prompt, String filePath, EinsteinConnection connection,
+  public String executeTools(String originalPrompt, String prompt, String filePath, AgentforceConnection connection,
                              ParamsModelDetails paramDetails)
       throws IOException {
     String payload = constructJsonPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
@@ -94,10 +94,10 @@ public class PayloadHelper {
     String payloadOptional = constructJsonPayload(originalPrompt, paramDetails.getLocale(), paramDetails.getProbability());
 
     String intermediateAnswer =
-        executeEinsteinRequest(accessTokeDTO, payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
+        executeAgentforceRequest(accessTokeDTO, payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
 
     String response =
-        executeEinsteinRequest(accessTokeDTO, payloadOptional, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
+        executeAgentforceRequest(accessTokeDTO, payloadOptional, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
     List<String> findURL = extractUrls(intermediateAnswer);
     if (findURL != null) {
       JSONObject jsonObject = new JSONObject(intermediateAnswer);
@@ -108,13 +108,13 @@ public class PayloadHelper {
       response = getAttributes(findURL.get(0), filePath, extractPayload(ePayload));
       String finalPayload = constructJsonPayload("data: " + response + ", question: " + originalPrompt, paramDetails.getLocale(),
                                                  paramDetails.getProbability());
-      response = executeEinsteinRequest(accessTokeDTO, finalPayload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
+      response = executeAgentforceRequest(accessTokeDTO, finalPayload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
 
     }
     return response;
   }
 
-  public JSONArray embeddingFileQuery(String prompt, String filePath, EinsteinConnection connection, String modelName,
+  public JSONArray embeddingFileQuery(String prompt, String filePath, AgentforceConnection connection, String modelName,
                                       String fileType, String optionType)
       throws IOException, SAXException, TikaException {
     List<String> corpus = createCorpusList(filePath, fileType, optionType);
@@ -150,10 +150,10 @@ public class PayloadHelper {
 
       if (text != null && !text.isEmpty()) {
         embeddingResponse =
-            executeEinsteinRequest(accessTokeDTO, constructEmbeddingJSON(corpusBody), modelName, URI_MODELS_API_EMBEDDINGS);
+            executeAgentforceRequest(accessTokeDTO, constructEmbeddingJSON(corpusBody), modelName, URI_MODELS_API_EMBEDDINGS);
 
-        EinsteinEmbeddingResponseDTO embeddingResponseDTO =
-            new ObjectMapper().readValue(embeddingResponse, EinsteinEmbeddingResponseDTO.class);
+        AgentforceEmbeddingResponseDTO embeddingResponseDTO =
+            new ObjectMapper().readValue(embeddingResponse, AgentforceEmbeddingResponseDTO.class);
 
         corpusEmbeddings.add(embeddingResponseDTO.getEmbeddings().get(0).getEmbedding());
       }
@@ -164,10 +164,10 @@ public class PayloadHelper {
   private List<Double> getQueryEmbedding(OAuthResponseDTO accessTokeDTO, String body, String modelName)
       throws IOException {
 
-    String embeddingResponse = executeEinsteinRequest(accessTokeDTO, body, modelName, URI_MODELS_API_EMBEDDINGS);
+    String embeddingResponse = executeAgentforceRequest(accessTokeDTO, body, modelName, URI_MODELS_API_EMBEDDINGS);
 
-    EinsteinEmbeddingResponseDTO embeddingResponseDTO =
-        new ObjectMapper().readValue(embeddingResponse, EinsteinEmbeddingResponseDTO.class);
+    AgentforceEmbeddingResponseDTO embeddingResponseDTO =
+        new ObjectMapper().readValue(embeddingResponse, AgentforceEmbeddingResponseDTO.class);
 
     return embeddingResponseDTO.getEmbeddings().get(0).getEmbedding();
   }
@@ -216,12 +216,12 @@ public class PayloadHelper {
     return Collections.emptyList();
   }
 
-  private String executeEinsteinRequest(OAuthResponseDTO accessTokenDTO, String payload, String modelName,
-                                        String resource)
+  private String executeAgentforceRequest(OAuthResponseDTO accessTokenDTO, String payload, String modelName,
+                                          String resource)
       throws IOException {
 
     String urlString = accessTokenDTO.getApiInstanceUrl() + URI_MODELS_API + modelName + resource;
-    log.debug("Einstein Request URL: {}", urlString);
+    log.debug("Agentforce Request URL: {}", urlString);
 
     return executeREST(accessTokenDTO.getAccessToken(), payload, urlString);
   }

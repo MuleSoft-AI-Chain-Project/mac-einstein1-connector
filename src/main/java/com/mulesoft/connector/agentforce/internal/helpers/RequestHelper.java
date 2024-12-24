@@ -41,7 +41,7 @@ public class RequestHelper {
     int responseCode = httpConnection.getResponseCode();
     if (responseCode == HttpURLConnection.HTTP_OK) {
       if (httpConnection.getInputStream() == null) {
-        return "Error: No response received from Einstein";
+        return "Error: No response received from Agentforce";
       }
       return readResponse(httpConnection.getInputStream());
     } else {
@@ -120,7 +120,7 @@ public class RequestHelper {
       return errorResponse.toString();
     } catch (IOException e) {
       log.debug("Error reading error stream", e);
-      return "Unable to get response from Einstein. Could not read reading error details as well.";
+      return "Unable to get response from Agentforce. Could not read reading error details as well.";
     }
   }
 }

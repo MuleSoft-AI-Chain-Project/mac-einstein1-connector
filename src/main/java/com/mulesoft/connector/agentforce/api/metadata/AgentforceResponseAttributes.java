@@ -2,7 +2,7 @@ package com.mulesoft.connector.agentforce.api.metadata;
 
 import com.mulesoft.connector.agentforce.api.metadata.quality.ContentQuality;
 
-public class EinsteinResponseAttributes {
+public class AgentforceResponseAttributes {
 
   private final String responseId;
   private final String generationId;
@@ -10,8 +10,8 @@ public class EinsteinResponseAttributes {
   private final GenerationParameters generationParameters;
   private final ResponseParameters responseParameters;
 
-  public EinsteinResponseAttributes(String responseId, String generationId, ContentQuality contentQuality,
-                                    GenerationParameters generationParameters, ResponseParameters responseParameters) {
+  public AgentforceResponseAttributes(String responseId, String generationId, ContentQuality contentQuality,
+                                      GenerationParameters generationParameters, ResponseParameters responseParameters) {
     this.responseId = responseId;
     this.generationId = generationId;
     this.contentQuality = contentQuality;
