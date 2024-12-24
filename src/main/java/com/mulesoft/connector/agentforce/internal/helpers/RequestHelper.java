@@ -5,13 +5,30 @@ import com.mulesoft.connector.agentforce.internal.dto.OAuthResponseDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.*;
-
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.AI_PLATFORM_MODELS_CONNECTED_APP;
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.AUTHORIZATION;
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.CONNECTION_TIMEOUT;
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.CONTENT_TYPE_APPLICATION_JSON;
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.EINSTEIN_GPT;
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.GRANT_TYPE_CLIENT_CREDENTIALS;
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.HTTP_METHOD_POST;
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.QUERY_PARAM_CLIENT_ID;
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.QUERY_PARAM_CLIENT_SECRET;
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.QUERY_PARAM_GRANT_TYPE;
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.READ_TIMEOUT;
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.URI_HTTPS_PREFIX;
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.URI_OAUTH_TOKEN;
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.X_CLIENT_FEATURE_ID;
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.X_SFDC_APP_CONTEXT;
 
 
 public class RequestHelper {

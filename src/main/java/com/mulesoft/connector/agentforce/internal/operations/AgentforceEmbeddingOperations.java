@@ -25,7 +25,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 
-import static com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType.*;
+import static com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType.EMBEDDING_OPERATIONS_FAILURE;
+import static com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType.RAG_FAILURE;
+import static com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType.TOOLS_OPERATION_FAILURE;
 import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.MODELAPI_OPENAI_ADA_002;
 import static java.lang.String.format;
 import static org.mule.runtime.extension.api.annotation.param.MediaType.APPLICATION_JSON;

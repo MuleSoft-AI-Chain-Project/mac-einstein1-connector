@@ -6,7 +6,9 @@ import org.mule.runtime.extension.api.error.ErrorTypeDefinition;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType.*;
+import static com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType.EMBEDDING_OPERATIONS_FAILURE;
+import static com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType.RAG_FAILURE;
+import static com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType.TOOLS_OPERATION_FAILURE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
 

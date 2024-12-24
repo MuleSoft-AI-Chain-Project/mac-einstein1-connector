@@ -41,7 +41,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.*;
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.URI_MODELS_API;
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.URI_MODELS_API_CHAT_GENERATIONS;
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.URI_MODELS_API_EMBEDDINGS;
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.URI_MODELS_API_GENERATIONS;
 import static com.mulesoft.connector.agentforce.internal.helpers.RequestHelper.executeREST;
 
 public class PayloadHelper {
