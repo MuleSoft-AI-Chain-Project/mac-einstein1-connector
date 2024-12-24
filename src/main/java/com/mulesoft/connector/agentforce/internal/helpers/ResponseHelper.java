@@ -82,13 +82,13 @@ public class ResponseHelper {
   private static AgentforceResponseAttributes mapResponseAttributes(AgentforceGenerationResponseDTO responseDTO) {
 
     return new AgentforceResponseAttributes(
-                                          responseDTO.getId(),
-                                          responseDTO.getGeneration() != null ? responseDTO.getGeneration().getId() : null,
-                                          responseDTO.getGeneration() != null ? responseDTO.getGeneration().getContentQuality()
-                                              : null,
-                                          responseDTO.getGeneration() != null ? responseDTO.getGeneration().getParameters()
-                                              : null,
-                                          responseDTO.getParameters());
+                                            responseDTO.getId(),
+                                            responseDTO.getGeneration() != null ? responseDTO.getGeneration().getId() : null,
+                                            responseDTO.getGeneration() != null ? responseDTO.getGeneration().getContentQuality()
+                                                : null,
+                                            responseDTO.getGeneration() != null ? responseDTO.getGeneration().getParameters()
+                                                : null,
+                                            responseDTO.getParameters());
   }
 
   private static ResponseParameters mapEmbeddingResponseAttributes(AgentforceEmbeddingResponseDTO responseDTO) {

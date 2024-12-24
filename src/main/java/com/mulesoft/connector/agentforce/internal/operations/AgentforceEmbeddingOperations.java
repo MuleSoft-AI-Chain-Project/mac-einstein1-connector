@@ -116,7 +116,7 @@ public class AgentforceEmbeddingOperations {
   public Result<InputStream, AgentforceResponseAttributes> ragOnFiles(@Content String prompt, String filePath,
                                                                       @Connection AgentforceConnection connection,
                                                                       @ParameterGroup(
-                                                                        name = "Additional properties") RAGParamsModelDetails paramDetails) {
+                                                                          name = "Additional properties") RAGParamsModelDetails paramDetails) {
     log.info("Executing rag adhoc load document.");
     try {
 
@@ -144,7 +144,7 @@ public class AgentforceEmbeddingOperations {
   public Result<InputStream, AgentforceResponseAttributes> executeTools(@Content String prompt, String toolsConfig,
                                                                         @Connection AgentforceConnection connection,
                                                                         @ParameterGroup(
-                                                                          name = "Additional properties") ParamsModelDetails paramDetails) {
+                                                                            name = "Additional properties") ParamsModelDetails paramDetails) {
     log.info("Executing AI service tools operation.");
     try {
 

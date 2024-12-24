@@ -74,7 +74,8 @@ public class PayloadHelper {
                                      ParamsEmbeddingDocumentDetails embeddingDocumentDetails)
       throws IOException, SAXException, TikaException {
 
-    List<String> corpus = createCorpusList(filePath, embeddingDocumentDetails.getFileType(), embeddingDocumentDetails.getOptionType());
+    List<String> corpus =
+        createCorpusList(filePath, embeddingDocumentDetails.getFileType(), embeddingDocumentDetails.getOptionType());
     OAuthResponseDTO accessTokeDTO = connection.getoAuthResponseDTO();
     return new JSONArray(
                          getCorpusEmbeddings(embeddingDocumentDetails.getModelApiName(), corpus, accessTokeDTO));
@@ -108,7 +109,8 @@ public class PayloadHelper {
       response = getAttributes(findURL.get(0), filePath, extractPayload(ePayload));
       String finalPayload = constructJsonPayload("data: " + response + ", question: " + originalPrompt, paramDetails.getLocale(),
                                                  paramDetails.getProbability());
-      response = executeAgentforceRequest(accessTokeDTO, finalPayload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
+      response =
+          executeAgentforceRequest(accessTokeDTO, finalPayload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
 
     }
     return response;

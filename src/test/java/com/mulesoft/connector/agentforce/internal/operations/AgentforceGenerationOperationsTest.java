@@ -54,8 +54,8 @@ public class AgentforceGenerationOperationsTest {
 
     ModuleException exception = assertThrows(ModuleException.class,
                                              () -> agentforceGenerationOperations.definePromptTemplate(template, instructions,
-                                                                                                     dataset, connectionMock,
-                                                                                                     paramDetailsMock));
+                                                                                                       dataset, connectionMock,
+                                                                                                       paramDetailsMock));
 
     assertEquals("Error while generating prompt from template Template, instructions Instructions, dataset Dataset",
                  exception.getMessage());

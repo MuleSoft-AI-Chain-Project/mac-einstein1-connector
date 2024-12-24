@@ -54,7 +54,7 @@ public class AgentforceGenerationOperations {
                                                                                 @Content String dataset,
                                                                                 @Connection AgentforceConnection connection,
                                                                                 @ParameterGroup(
-                                                                                  name = "Additional properties") ParamsModelDetails paramDetails) {
+                                                                                    name = "Additional properties") ParamsModelDetails paramDetails) {
     log.info("Executing agent defined prompt template operation.");
     try {
       String finalPromptTemplate = PromptTemplateHelper.definePromptTemplate(template, instructions, dataset);
@@ -78,7 +78,7 @@ public class AgentforceGenerationOperations {
   public Result<InputStream, AgentforceResponseAttributes> generateText(@Content String prompt,
                                                                         @Connection AgentforceConnection connection,
                                                                         @ParameterGroup(
-                                                                          name = "Additional properties") ParamsModelDetails paramDetails) {
+                                                                            name = "Additional properties") ParamsModelDetails paramDetails) {
     log.info("Executing chat answer prompt operation.");
     try {
       String response = payloadHelper.executeGenerateText(prompt, connection, paramDetails);
@@ -103,7 +103,7 @@ public class AgentforceGenerationOperations {
                                                                               Integer keepLastMessages,
                                                                               @Connection AgentforceConnection connection,
                                                                               @ParameterGroup(
-                                                                                name = "Additional properties") ParamsModelDetails paramDetails) {
+                                                                                  name = "Additional properties") ParamsModelDetails paramDetails) {
     log.info("Executing chat answer prompt with memory operation.");
     try {
 
@@ -124,7 +124,8 @@ public class AgentforceGenerationOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("CHAT-generate-from-messages")
   @Throws(ChatErrorTypeProvider.class)
-  public Result<InputStream, ResponseParameters> generateChat(@Content String messages, @Connection AgentforceConnection connection,
+  public Result<InputStream, ResponseParameters> generateChat(@Content String messages,
+                                                              @Connection AgentforceConnection connection,
                                                               @ParameterGroup(
                                                                   name = "Additional properties") ParamsModelDetails paramDetails) {
     log.info("Executing chat generate from message operation.");
