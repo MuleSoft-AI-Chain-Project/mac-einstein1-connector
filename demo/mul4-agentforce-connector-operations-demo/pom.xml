@@ -2,12 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.mycompany</groupId>
-	<artifactId>einstein2</artifactId>
+	<groupId>com.mulesoft.connectors.examples</groupId>
+	<artifactId>agentforce-operations-demo</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>mule-application</packaging>
 
-	<name>einstein2</name>
+	<name>agentforce-operations-demo</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -48,7 +48,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.mulesoft.connectors</groupId>
-			<artifactId>mule4-einstein-connector</artifactId>
+			<artifactId>mule4-agentforce-connector</artifactId>
 			<version>0.2.21-SNAPSHOT</version>
 			<classifier>mule-plugin</classifier>
 		</dependency>
