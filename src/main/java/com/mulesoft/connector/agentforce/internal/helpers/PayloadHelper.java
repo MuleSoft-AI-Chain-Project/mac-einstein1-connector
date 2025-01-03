@@ -140,12 +140,12 @@ public class PayloadHelper {
     return new JSONArray(results);
   }
 
-  public String createSession(String agentId, AgentforceConnection agentforceConnection) throws IOException {
+  public String startSession(String agentId, AgentforceConnection agentforceConnection) throws IOException {
     String externalSessionKey = UUID.randomUUID().toString();
     String forceConfigEndpoint = ConstantUtil.URI_HTTPS_PREFIX + agentforceConnection.getSalesforceOrg();
-    String payload = constructJsonPayloadForAgentCreateSession(externalSessionKey, forceConfigEndpoint);
+    String payload = constructJsonPayloadForAgentStartSession(externalSessionKey, forceConfigEndpoint);
 
-    String response = executeAgentforceCopilotAgentRequest(agentforceConnection.getoAuthResponseDTO(),
+    String response = executeAgentforceCopilotStartSession(agentforceConnection.getoAuthResponseDTO(),
                                                            payload, agentId, "sessions");
     System.out.println("response = " + response);
     return response;
@@ -162,7 +162,8 @@ public class PayloadHelper {
     Map<String, String> map = new HashMap<>();
     for (BotRecord botRecord : agentMetadataResponse.getRecords()) {
       if (botRecord.getStatus().equals("Active")) {
-        String botUrl = botRecord.getAttributes().getUrl();
+        String botUrl = botRecord.getBotDefinition().getAttributes().getUrl();
+        System.out.println("botUrl = " + botUrl);
         String[] parts = botUrl.split("/");
         String botId = parts[parts.length - 1];
         System.out.println("Extracted ID: " + botId);
@@ -175,18 +176,21 @@ public class PayloadHelper {
 
   public String continueSession(String body, String sessionId, AgentforceConnection agentforceConnection) throws IOException {
     String url = constructUrlPayloadForAgentContinueSession(body, sessionId);
-
+    String xorgId = agentforceConnection.getoAuthResponseDTO().getXorgId();
+    xorgId = "00DdL00000DEu66UAD";
     String response = executeContinueSession(agentforceConnection.getoAuthResponseDTO().getAccessToken(),
-                                             body, agentforceConnection.getoAuthResponseDTO().getXorgId(), url);
+                                             body, xorgId, url);
     System.out.println("response = " + response);
     return response;
   }
 
-  public String deleteSession(String sessionId, AgentforceConnection connection) throws IOException {
+  public String endSession(String sessionId, AgentforceConnection agentforceConnection) throws IOException {
     String url = "https://runtime-api-na-west.prod.chatbots.sfdc.sh/v5.1.0/sessions/" + sessionId;
     System.out.println("url = " + url);
+    String xorgId = agentforceConnection.getoAuthResponseDTO().getXorgId();
+    xorgId = "00DdL00000DEu66UAD";
     String response =
-        executeEndSession(connection.getoAuthResponseDTO().getAccessToken(), connection.getoAuthResponseDTO().getXorgId(), url);
+        executeEndSession(agentforceConnection.getoAuthResponseDTO().getAccessToken(), xorgId, url);
     System.out.println("response = " + response);
     return response;
   }
@@ -198,7 +202,7 @@ public class PayloadHelper {
     return urlString;
   }
 
-  private String executeAgentforceCopilotAgentRequest(OAuthResponseDTO accessTokenDTO, String payload, String agentId,
+  private String executeAgentforceCopilotStartSession(OAuthResponseDTO accessTokenDTO, String payload, String agentId,
                                                       String sessions)
       throws IOException {
     String urlString = "https://runtime-api-na-west.prod.chatbots.sfdc.sh/v5.1.0/bots/" + agentId + "/" + sessions;
@@ -206,7 +210,7 @@ public class PayloadHelper {
     System.out.println("urlString = " + urlString);
     String xorgId = accessTokenDTO.getXorgId();
     xorgId = "00DdL00000DEu66UAD";
-    return executeREST2(accessTokenDTO.getAccessToken(), payload, xorgId, urlString);
+    return executeStartSession(accessTokenDTO.getAccessToken(), payload, xorgId, urlString);
   }
 
   private List<List<Double>> getCorpusEmbeddings(String modelName, List<String> corpus, OAuthResponseDTO accessTokeDTO)
@@ -432,7 +436,7 @@ public class PayloadHelper {
     return jsonPayload.toString();
   }
 
-  private String constructJsonPayloadForAgentCreateSession(String externalSessionKey, String forceConfigEndpoint) {
+  private String constructJsonPayloadForAgentStartSession(String externalSessionKey, String forceConfigEndpoint) {
     JSONObject body = new JSONObject();
     body.put("externalSessionKey", externalSessionKey);
     JSONObject forceConfig = new JSONObject();

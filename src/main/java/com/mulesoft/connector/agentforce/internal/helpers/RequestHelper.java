@@ -2,7 +2,6 @@ package com.mulesoft.connector.agentforce.internal.helpers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mulesoft.connector.agentforce.internal.dto.OAuthResponseDTO;
-import okhttp3.internal.http.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +55,7 @@ public class RequestHelper {
       os.write(input, 0, input.length);
     }
     log.info("Executing rest {} ", urlString);
+    System.out.println("Executing rest " + urlString);
     int responseCode = httpConnection.getResponseCode();
     if (responseCode == HttpURLConnection.HTTP_OK) {
       if (httpConnection.getInputStream() == null) {
@@ -69,7 +69,8 @@ public class RequestHelper {
     }
   }
 
-  public static String executeREST2(String accessToken, String payload, String xorgId, String urlString) throws IOException {
+  public static String executeStartSession(String accessToken, String payload, String xorgId, String urlString)
+      throws IOException {
 
     HttpURLConnection httpConnection = creteURLConnection(urlString);
     populateConnectionObject2(httpConnection, accessToken, xorgId);
@@ -78,6 +79,7 @@ public class RequestHelper {
       os.write(input, 0, input.length);
     }
     log.info("Executing rest {} ", urlString);
+    System.out.println("Executing rest " + urlString);
     int responseCode = httpConnection.getResponseCode();
     if (responseCode == HttpURLConnection.HTTP_OK) {
       if (httpConnection.getInputStream() == null) {
