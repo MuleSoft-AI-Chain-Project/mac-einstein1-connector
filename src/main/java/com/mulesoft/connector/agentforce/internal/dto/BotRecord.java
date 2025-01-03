@@ -12,6 +12,9 @@ public class BotRecord {
   @JsonProperty("BotDefinition")
   private BotDefinition botDefinition;
 
+  @JsonProperty("BotDefinitionId")
+  private String botDefinitionId;
+
   @JsonProperty("attributes")
   private Attributes attributes;
 
@@ -37,5 +40,13 @@ public class BotRecord {
 
   public void setAttributes(Attributes attributes) {
     this.attributes = attributes;
+  }
+
+  public String getBotDefinitionId() {
+    return botDefinitionId;
+  }
+
+  public void setBotDefinitionId(String botDefinitionId) {
+    this.botDefinitionId = botDefinitionId;
   }
 }

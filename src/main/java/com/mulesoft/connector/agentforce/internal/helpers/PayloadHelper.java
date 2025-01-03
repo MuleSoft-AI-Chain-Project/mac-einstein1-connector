@@ -153,7 +153,7 @@ public class PayloadHelper {
 
   public Map<String, String> getAgentMetadata(AgentforceConnection agentforceConnection) throws IOException {
     String url = ConstantUtil.URI_HTTPS_PREFIX + agentforceConnection.getSalesforceOrg()
-        + "/services/data/v62.0/query?q=select%20Status%2CBotDefinition.MasterLabel%20from%20BotVersion";
+        + "/services/data/v62.0/query?q=select%20Status%2CBotDefinitionId%2CBotDefinition.MasterLabel%20from%20BotVersion";
     System.out.println("URL= " + url);
     String jsonResponse = getAgentList(agentforceConnection.getoAuthResponseDTO().getAccessToken(), url);
     System.out.println("jsonResponse= " + jsonResponse);
@@ -162,11 +162,16 @@ public class PayloadHelper {
     Map<String, String> map = new HashMap<>();
     for (BotRecord botRecord : agentMetadataResponse.getRecords()) {
       if (botRecord.getStatus().equals("Active")) {
+        /*
         String botUrl = botRecord.getBotDefinition().getAttributes().getUrl();
         System.out.println("botUrl = " + botUrl);
         String[] parts = botUrl.split("/");
         String botId = parts[parts.length - 1];
         System.out.println("Extracted ID: " + botId);
+        String botName = botRecord.getBotDefinition().getMasterLabel();
+         */
+        String botId = botRecord.getBotDefinitionId();
+        System.out.println("botId = " + botId);
         String botName = botRecord.getBotDefinition().getMasterLabel();
         map.put(botName, botId);
       }
