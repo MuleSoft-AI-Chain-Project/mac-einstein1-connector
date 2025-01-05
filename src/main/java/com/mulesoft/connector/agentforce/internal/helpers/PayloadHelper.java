@@ -181,7 +181,7 @@ public class PayloadHelper {
 
   public String continueSession(String body, String sessionId, AgentforceConnection agentforceConnection) throws IOException {
     String url = constructUrlPayloadForAgentContinueSession(body, sessionId);
-    String xorgId = agentforceConnection.getoAuthResponseDTO().getXorgId();
+    String xorgId = agentforceConnection.getoAuthResponseDTO().getOrgId();
     xorgId = "00DdL00000DEu66UAD";
     String response = executeContinueSession(agentforceConnection.getoAuthResponseDTO().getAccessToken(),
                                              body, xorgId, url);
@@ -192,7 +192,7 @@ public class PayloadHelper {
   public String endSession(String sessionId, AgentforceConnection agentforceConnection) throws IOException {
     String url = "https://runtime-api-na-west.prod.chatbots.sfdc.sh/v5.1.0/sessions/" + sessionId;
     System.out.println("url = " + url);
-    String xorgId = agentforceConnection.getoAuthResponseDTO().getXorgId();
+    String xorgId = agentforceConnection.getoAuthResponseDTO().getOrgId();
     xorgId = "00DdL00000DEu66UAD";
     String response =
         executeEndSession(agentforceConnection.getoAuthResponseDTO().getAccessToken(), xorgId, url);
@@ -213,7 +213,7 @@ public class PayloadHelper {
     String urlString = "https://runtime-api-na-west.prod.chatbots.sfdc.sh/v5.1.0/bots/" + agentId + "/" + sessions;
     log.debug("Agentforce Request URL: {}", urlString);
     System.out.println("urlString = " + urlString);
-    String xorgId = accessTokenDTO.getXorgId();
+    String xorgId = accessTokenDTO.getOrgId();
     xorgId = "00DdL00000DEu66UAD";
     return executeStartSession(accessTokenDTO.getAccessToken(), payload, xorgId, urlString);
   }

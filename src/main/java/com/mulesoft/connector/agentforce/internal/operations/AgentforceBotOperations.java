@@ -19,16 +19,16 @@ import java.util.Map;
 import static java.lang.String.format;
 import static org.mule.runtime.extension.api.annotation.param.MediaType.APPLICATION_JSON;
 
-public class AgentforceCopilotAgentOperations {
+public class AgentforceBotOperations {
 
-  private static final Logger log = LoggerFactory.getLogger(AgentforceCopilotAgentOperations.class);
+  private static final Logger log = LoggerFactory.getLogger(AgentforceBotOperations.class);
 
   PayloadHelper payloadHelper = new PayloadHelper();
 
   @MediaType(value = APPLICATION_JSON, strict = false)
-  @Alias("copilot-start-session")
+  @Alias("Invoke Agent")
   @Throws(ChatErrorTypeProvider.class)
-  public String startSession(@Connection AgentforceConnection connection,
+  public String startConversation(@Connection AgentforceConnection connection,
                              @ParameterGroup(name = "Additional properties") CopilotAgentDetails copilotAgentDetails)
       throws IOException {
 
@@ -41,9 +41,9 @@ public class AgentforceCopilotAgentOperations {
   }
 
   @MediaType(value = APPLICATION_JSON, strict = false)
-  @Alias("copilot-continue-session")
+  @Alias("Continue agent conversation")
   @Throws(ChatErrorTypeProvider.class)
-  public String continueSession(@Content(primary = true) String body, @Content String sessionId,
+  public String continueConversation(@Content(primary = true) String body, @Content String sessionId,
                                 @Connection AgentforceConnection connection)
       throws IOException {
 
@@ -53,9 +53,9 @@ public class AgentforceCopilotAgentOperations {
   }
 
   @MediaType(value = APPLICATION_JSON, strict = false)
-  @Alias("copilot-end-session")
+  @Alias("End agent conversation")
   @Throws(ChatErrorTypeProvider.class)
-  public String endSession(@Content String sessionId, @Connection AgentforceConnection connection)
+  public String endConversation(@Content String sessionId, @Connection AgentforceConnection connection)
       throws IOException {
 
     return payloadHelper.endSession(sessionId, connection);

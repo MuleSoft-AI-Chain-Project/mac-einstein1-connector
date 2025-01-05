@@ -12,18 +12,13 @@ public class OAuthResponseDTO {
 
   private final String accessToken;
   private final String apiInstanceUrl;
-  private String xorgId;
+  private String orgId;
 
-  @ConstructorProperties({"accessToken", "apiInstanceUrl"})
-  public OAuthResponseDTO(String accessToken, String apiInstanceUrl) {
+  @ConstructorProperties({"accessToken", "apiInstanceUrl","id"})
+  public OAuthResponseDTO(String accessToken, String apiInstanceUrl, String id) {
     this.accessToken = accessToken;
     this.apiInstanceUrl = apiInstanceUrl;
-  }
-
-  public OAuthResponseDTO(String accessToken, String apiInstanceUrl, String xorgId) {
-    this.accessToken = accessToken;
-    this.apiInstanceUrl = apiInstanceUrl;
-    this.xorgId = xorgId;
+    this.orgId = parseOrgId(id);
   }
 
   public String getAccessToken() {
@@ -34,7 +29,12 @@ public class OAuthResponseDTO {
     return apiInstanceUrl;
   }
 
-  public String getXorgId() {
-    return xorgId;
+  public String getOrgId() {
+    return orgId;
+  }
+
+  private String parseOrgId(String id) {
+    int lastIndex = id.lastIndexOf("/");
+    return id.substring(lastIndex+1);
   }
 }
