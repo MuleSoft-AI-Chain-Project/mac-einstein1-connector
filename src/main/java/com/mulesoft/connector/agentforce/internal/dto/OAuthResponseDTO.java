@@ -12,9 +12,9 @@ public class OAuthResponseDTO {
 
   private final String accessToken;
   private final String apiInstanceUrl;
-  private String orgId;
+  private final String orgId;
 
-  @ConstructorProperties({"accessToken", "apiInstanceUrl","id"})
+  @ConstructorProperties({"accessToken", "apiInstanceUrl", "id"})
   public OAuthResponseDTO(String accessToken, String apiInstanceUrl, String id) {
     this.accessToken = accessToken;
     this.apiInstanceUrl = apiInstanceUrl;
@@ -35,6 +35,6 @@ public class OAuthResponseDTO {
 
   private String parseOrgId(String id) {
     int lastIndex = id.lastIndexOf("/");
-    return id.substring(lastIndex+1);
+    return id.substring(lastIndex + 1);
   }
 }

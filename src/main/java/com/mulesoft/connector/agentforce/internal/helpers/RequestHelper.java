@@ -45,7 +45,6 @@ public class RequestHelper {
         + "&" + QUERY_PARAM_CLIENT_SECRET + "=" + clientSecret;
   }
 
-
   public static String executeREST(String accessToken, String payload, String urlString) throws IOException {
 
     HttpURLConnection httpConnection = creteURLConnection(urlString);
@@ -80,24 +79,6 @@ public class RequestHelper {
     }
     log.info("Executing rest {} ", urlString);
     System.out.println("Executing rest " + urlString);
-    int responseCode = httpConnection.getResponseCode();
-    if (responseCode == HttpURLConnection.HTTP_OK) {
-      if (httpConnection.getInputStream() == null) {
-        return "Error: No response received from Agentforce";
-      }
-      return readResponse(httpConnection.getInputStream());
-    } else {
-      String errorMessage = readErrorStream(httpConnection.getErrorStream());
-      log.debug("Error response code: {}, message: {}", responseCode, errorMessage);
-      System.out.println("Error response code: responseCode = " + responseCode + ", errorMessage = " + errorMessage);
-      return String.format("Error: %d", responseCode);
-    }
-  }
-
-  public static String getAgentList(String accessToken, String urlString) throws IOException {
-    HttpURLConnection httpConnection = creteURLConnection2(urlString);
-    populateConnectionObject3(httpConnection, accessToken);
-    log.info("Executing rest {} ", urlString);
     int responseCode = httpConnection.getResponseCode();
     if (responseCode == HttpURLConnection.HTTP_OK) {
       if (httpConnection.getInputStream() == null) {
@@ -203,15 +184,6 @@ public class RequestHelper {
     return conn;
   }
 
-  private static HttpURLConnection creteURLConnection2(String urlString) throws IOException {
-    URL url = new URL(urlString);
-    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-    conn.setConnectTimeout(CONNECTION_TIMEOUT);
-    conn.setReadTimeout(READ_TIMEOUT);
-    conn.setDoOutput(true);
-    return conn;
-  }
-
   private static HttpURLConnection creteURLConnectionForDelete(String urlString) throws IOException {
     URL url = new URL(urlString);
     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -244,11 +216,6 @@ public class RequestHelper {
     conn.setRequestProperty("X-Org-Id", xorgId);
     conn.setRequestProperty("Accept", "application/json");
     conn.setRequestProperty("X-Session-End-Reason", "UserRequest");
-  }
-
-  private static void populateConnectionObject3(HttpURLConnection conn, String accessToken) throws IOException {
-    conn.setRequestProperty(AUTHORIZATION, "Bearer " + accessToken);
-    conn.setRequestProperty("Content-Type", "application/json;charset=utf-8");
   }
 
   private static String readErrorStream(InputStream errorStream) {
