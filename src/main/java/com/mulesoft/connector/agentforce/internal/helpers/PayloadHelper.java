@@ -22,7 +22,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
@@ -36,7 +41,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.*;
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.URI_MODELS_API;
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.URI_MODELS_API_CHAT_GENERATIONS;
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.URI_MODELS_API_EMBEDDINGS;
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.URI_MODELS_API_GENERATIONS;
 import static com.mulesoft.connector.agentforce.internal.helpers.RequestHelper.executeREST;
 
 public class PayloadHelper {
