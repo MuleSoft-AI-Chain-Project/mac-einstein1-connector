@@ -47,8 +47,9 @@ public class RequestHelper {
 
   public static String executeREST(String accessToken, String payload, String urlString) throws IOException {
 
-    HttpURLConnection httpConnection = creteURLConnection(urlString);
+    HttpURLConnection httpConnection = createURLConnection(urlString, HTTP_METHOD_POST);
     populateConnectionObject(httpConnection, accessToken);
+
     try (OutputStream os = httpConnection.getOutputStream()) {
       byte[] input = payload.getBytes(StandardCharsets.UTF_8);
       os.write(input, 0, input.length);
@@ -64,73 +65,6 @@ public class RequestHelper {
     } else {
       String errorMessage = readErrorStream(httpConnection.getErrorStream());
       log.debug("Error response code: {}, message: {}", responseCode, errorMessage);
-      return String.format("Error: %d", responseCode);
-    }
-  }
-
-  public static String executeStartSession(String accessToken, String payload, String xorgId, String urlString)
-      throws IOException {
-
-    HttpURLConnection httpConnection = creteURLConnection(urlString);
-    populateConnectionObject2(httpConnection, accessToken, xorgId);
-    try (OutputStream os = httpConnection.getOutputStream()) {
-      byte[] input = payload.getBytes(StandardCharsets.UTF_8);
-      os.write(input, 0, input.length);
-    }
-    log.info("Executing rest {} ", urlString);
-    System.out.println("Executing rest " + urlString);
-    int responseCode = httpConnection.getResponseCode();
-    if (responseCode == HttpURLConnection.HTTP_OK) {
-      if (httpConnection.getInputStream() == null) {
-        return "Error: No response received from Agentforce";
-      }
-      return readResponse(httpConnection.getInputStream());
-    } else {
-      String errorMessage = readErrorStream(httpConnection.getErrorStream());
-      log.debug("Error response code: {}, message: {}", responseCode, errorMessage);
-      System.out.println("Error response code: responseCode = " + responseCode + ", errorMessage = " + errorMessage);
-      return String.format("Error: %d", responseCode);
-    }
-  }
-
-  public static String executeContinueSession(String accessToken, String payload, String xorgId, String urlString)
-      throws IOException {
-    HttpURLConnection httpConnection = creteURLConnection(urlString);
-    populateConnectionObject2(httpConnection, accessToken, xorgId);
-    try (OutputStream os = httpConnection.getOutputStream()) {
-      byte[] input = payload.getBytes(StandardCharsets.UTF_8);
-      os.write(input, 0, input.length);
-    }
-    log.info("Executing rest {} ", urlString);
-    int responseCode = httpConnection.getResponseCode();
-    if (responseCode == HttpURLConnection.HTTP_OK) {
-      if (httpConnection.getInputStream() == null) {
-        return "Error: No response received from Agentforce";
-      }
-      return readResponse(httpConnection.getInputStream());
-    } else {
-      String errorMessage = readErrorStream(httpConnection.getErrorStream());
-      log.debug("Error response code: {}, message: {}", responseCode, errorMessage);
-      System.out.println("Error response code: responseCode = " + responseCode + ", errorMessage = " + errorMessage);
-      return String.format("Error: %d", responseCode);
-    }
-  }
-
-  public static String executeEndSession(String accessToken, String xorgId, String urlString)
-      throws IOException {
-    HttpURLConnection httpConnection = creteURLConnectionForDelete(urlString);
-    populateConnectionObjectForEndSession(httpConnection, accessToken, xorgId);
-    log.info("Executing rest {} ", urlString);
-    int responseCode = httpConnection.getResponseCode();
-    if (responseCode == HttpURLConnection.HTTP_OK) {
-      if (httpConnection.getInputStream() == null) {
-        return "Error: No response received from Agentforce";
-      }
-      return readResponse(httpConnection.getInputStream());
-    } else {
-      String errorMessage = readErrorStream(httpConnection.getErrorStream());
-      log.debug("Error response code: {}, message: {}", responseCode, errorMessage);
-      System.out.println("Error response code: responseCode = " + responseCode + ", errorMessage = " + errorMessage);
       return String.format("Error: %d", responseCode);
     }
   }
@@ -142,12 +76,10 @@ public class RequestHelper {
 
     String urlString = RequestHelper.getOAuthURL(salesforceOrg);
     String urlParameters = RequestHelper.getOAuthParams(clientId, clientSecret);
-    HttpURLConnection httpConnection = creteURLConnection(urlString);
+    HttpURLConnection httpConnection = createURLConnection(urlString, HTTP_METHOD_POST);
 
-    try (OutputStream os = httpConnection.getOutputStream()) {
-      byte[] input = urlParameters.getBytes(StandardCharsets.UTF_8);
-      os.write(input, 0, input.length);
-    }
+    writePayloadToConnStream(httpConnection, urlParameters);
+
     log.info("Executing rest {} ", urlString);
     int responseCode = httpConnection.getResponseCode();
     log.debug("Response code for connection request:{}", responseCode);
@@ -161,7 +93,7 @@ public class RequestHelper {
     return null;
   }
 
-  private static String readResponse(InputStream inputStream) throws IOException {
+  public static String readResponse(InputStream inputStream) throws IOException {
     try (java.io.BufferedReader br = new java.io.BufferedReader(
                                                                 new java.io.InputStreamReader(inputStream,
                                                                                               StandardCharsets.UTF_8))) {
@@ -174,51 +106,17 @@ public class RequestHelper {
     }
   }
 
-  private static HttpURLConnection creteURLConnection(String urlString) throws IOException {
+  public static HttpURLConnection createURLConnection(String urlString, String httpMethod) throws IOException {
     URL url = new URL(urlString);
     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-    conn.setRequestMethod(HTTP_METHOD_POST);
+    conn.setRequestMethod(httpMethod);
     conn.setConnectTimeout(CONNECTION_TIMEOUT);
     conn.setReadTimeout(READ_TIMEOUT);
     conn.setDoOutput(true);
     return conn;
   }
 
-  private static HttpURLConnection creteURLConnectionForDelete(String urlString) throws IOException {
-    URL url = new URL(urlString);
-    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-    conn.setRequestMethod("DELETE");
-    conn.setConnectTimeout(CONNECTION_TIMEOUT);
-    conn.setReadTimeout(READ_TIMEOUT);
-    conn.setDoOutput(true);
-    return conn;
-  }
-
-  private static void populateConnectionObject(HttpURLConnection conn, String accessToken) throws IOException {
-    conn.setRequestProperty(AUTHORIZATION, "Bearer " + accessToken);
-    conn.setRequestProperty(X_SFDC_APP_CONTEXT, EINSTEIN_GPT);
-    conn.setRequestProperty(X_CLIENT_FEATURE_ID, AI_PLATFORM_MODELS_CONNECTED_APP);
-    conn.setRequestProperty(ConstantUtil.CONTENT_TYPE_STRING, CONTENT_TYPE_APPLICATION_JSON);
-  }
-
-
-  private static void populateConnectionObject2(HttpURLConnection conn, String accessToken, String xorgId)
-      throws IOException {
-    conn.setRequestProperty(AUTHORIZATION, "Bearer " + accessToken);
-    conn.setRequestProperty("X-Org-Id", xorgId);
-    conn.setRequestProperty("Content-Type", "application/json;charset=utf-8");
-    conn.setRequestProperty("Accept", "application/json");
-  }
-
-  private static void populateConnectionObjectForEndSession(HttpURLConnection conn, String accessToken, String xorgId)
-      throws IOException {
-    conn.setRequestProperty(AUTHORIZATION, "Bearer " + accessToken);
-    conn.setRequestProperty("X-Org-Id", xorgId);
-    conn.setRequestProperty("Accept", "application/json");
-    conn.setRequestProperty("X-Session-End-Reason", "UserRequest");
-  }
-
-  private static String readErrorStream(InputStream errorStream) {
+  public static String readErrorStream(InputStream errorStream) {
     if (errorStream == null) {
       return "No error details available.";
     }
@@ -234,4 +132,21 @@ public class RequestHelper {
       return "Unable to get response from Agentforce. Could not read reading error details as well.";
     }
   }
+
+  public static void writePayloadToConnStream(HttpURLConnection httpConnection, String payload) throws IOException {
+    try (OutputStream os = httpConnection.getOutputStream()) {
+      byte[] input = payload.getBytes(StandardCharsets.UTF_8);
+      os.write(input, 0, input.length);
+      os.flush();
+    }
+  }
+
+  private static void populateConnectionObject(HttpURLConnection conn, String accessToken) {
+    conn.setRequestProperty(AUTHORIZATION, "Bearer " + accessToken);
+    conn.setRequestProperty(X_SFDC_APP_CONTEXT, EINSTEIN_GPT);
+    conn.setRequestProperty(X_CLIENT_FEATURE_ID, AI_PLATFORM_MODELS_CONNECTED_APP);
+    conn.setRequestProperty(ConstantUtil.CONTENT_TYPE_STRING, CONTENT_TYPE_APPLICATION_JSON);
+  }
+
+
 }

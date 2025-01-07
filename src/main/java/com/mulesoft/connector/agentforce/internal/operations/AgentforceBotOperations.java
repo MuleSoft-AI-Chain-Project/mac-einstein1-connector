@@ -26,8 +26,8 @@ public class AgentforceBotOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("Invoke-Agent")
   @Throws(ChatErrorTypeProvider.class)
-  public String startConversation(@Connection AgentforceConnection connection,
-                                  @ParameterGroup(name = "Agent") @MetadataKeyId BotAgentParameterGroup parameterGroup)
+  public String invokeAgentConversation(@Connection AgentforceConnection connection,
+                                        @ParameterGroup(name = "Agent") @MetadataKeyId BotAgentParameterGroup parameterGroup)
       throws IOException {
 
     return requestHelper.startSession(parameterGroup.getAgent(), connection);
@@ -36,12 +36,12 @@ public class AgentforceBotOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("Continue-agent-conversation")
   @Throws(ChatErrorTypeProvider.class)
-  public String continueConversation(@Content(primary = true) String body,
+  public String continueConversation(@Content(primary = true) String message,
                                      @Content String sessionId,
                                      @Connection AgentforceConnection connection)
       throws IOException {
 
-    return requestHelper.continueSession(body, sessionId, connection);
+    return requestHelper.continueSession(message, sessionId, connection);
   }
 
   @MediaType(value = APPLICATION_JSON, strict = false)

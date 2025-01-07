@@ -11,7 +11,9 @@ public class ConstantUtil {
   public static final String URI_BOT_API_METADATA =
       "/services/data/v62.0/query?q=select%20Status%2CBotDefinitionId%2CBotDefinition.MasterLabel%20from%20BotVersion";
 
+  public static final String HTTP_METHOD_DELETE = "DELETE";
   public static final String HTTP_METHOD_POST = "POST";
+  public static final String HTTP_METHOD_GET = "GET";
 
   public static final String CONTENT_TYPE_STRING = "Content-Type";
   public static final String CONTENT_TYPE_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
