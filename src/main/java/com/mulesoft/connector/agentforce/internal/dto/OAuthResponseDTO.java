@@ -34,7 +34,7 @@ public class OAuthResponseDTO {
   }
 
   private String parseOrgId(String id) {
-    int lastIndex = id.lastIndexOf("/");
-    return id.substring(lastIndex + 1);
+    String[] idArr = id.split("/");
+    return idArr[idArr.length - 2];
   }
 }
