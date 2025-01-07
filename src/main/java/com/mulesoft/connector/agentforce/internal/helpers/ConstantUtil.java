@@ -8,8 +8,12 @@ public class ConstantUtil {
   public static final String URI_MODELS_API_EMBEDDINGS = "/embeddings";
   public static final String URI_MODELS_API_GENERATIONS = "/generations";
   public static final String URI_MODELS_API_CHAT_GENERATIONS = "/chat-generations";
+  public static final String URI_BOT_API_METADATA =
+      "/services/data/v62.0/query?q=select%20Status%2CBotDefinitionId%2CBotDefinition.MasterLabel%20from%20BotVersion";
 
+  public static final String HTTP_METHOD_DELETE = "DELETE";
   public static final String HTTP_METHOD_POST = "POST";
+  public static final String HTTP_METHOD_GET = "GET";
 
   public static final String CONTENT_TYPE_STRING = "Content-Type";
   public static final String CONTENT_TYPE_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
@@ -23,10 +27,13 @@ public class ConstantUtil {
   public static final String ACCESS_TOKEN = "access_token";
   public static final String AUTHORIZATION = "Authorization";
 
+  public static final String X_SESSION_END_REASON = "x-session-end-reason";
   public static final String X_SFDC_APP_CONTEXT = "x-sfdc-app-context";
   public static final String X_CLIENT_FEATURE_ID = "x-client-feature-id";
+  public static final String X_ORG_ID = "X-Org-Id";
   public static final String AI_PLATFORM_MODELS_CONNECTED_APP = "ai-platform-models-connected-app";
   public static final String EINSTEIN_GPT = "EinsteinGPT";
+  public static final String SESSION_END_REASON_USERREQUEST = "UserRequest";
 
   public static final Integer CONNECTION_TIMEOUT = 15000;
   public static final Integer READ_TIMEOUT = 20000;
