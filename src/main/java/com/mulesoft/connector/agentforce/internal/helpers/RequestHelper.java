@@ -55,7 +55,6 @@ public class RequestHelper {
       os.write(input, 0, input.length);
     }
     log.info("Executing rest {} ", urlString);
-    System.out.println("Executing rest " + urlString);
     int responseCode = httpConnection.getResponseCode();
     if (responseCode == HttpURLConnection.HTTP_OK) {
       if (httpConnection.getInputStream() == null) {
