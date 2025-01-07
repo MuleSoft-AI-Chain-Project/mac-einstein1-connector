@@ -2,6 +2,8 @@ package com.mulesoft.connector.agentforce.internal.helpers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mulesoft.connector.agentforce.internal.dto.OAuthResponseDTO;
+import com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType;
+import org.mule.runtime.extension.api.exception.ModuleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,6 +102,25 @@ public class CommonRequestHelper {
     } catch (IOException e) {
       log.debug("Error reading error stream", e);
       return "Unable to get response from Agentforce. Could not read reading error details as well.";
+    }
+  }
+
+  public static String handleHttpResponse(HttpURLConnection httpConnection, AgentforceErrorType errorType) throws IOException {
+    int responseCode = httpConnection.getResponseCode();
+
+    if (responseCode == HttpURLConnection.HTTP_OK) {
+      if (httpConnection.getInputStream() == null) {
+        throw new ModuleException(
+                                  "Error: No response received from Agentforce", errorType);
+      }
+      return readResponseStream(httpConnection.getInputStream());
+    } else {
+      String errorMessage = readErrorStream(httpConnection.getErrorStream());
+      log.info("Error in HTTP request. Response code: {}, message: {}", responseCode, errorMessage);
+      throw new ModuleException(
+                                String.format("Error in HTTP request. ErrorCode: %d ," +
+                                    " ErrorMessage: %s", responseCode, errorMessage),
+                                errorType);
     }
   }
 

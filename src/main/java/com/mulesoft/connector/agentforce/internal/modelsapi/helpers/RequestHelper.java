@@ -44,6 +44,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.createURLConnection;
+import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.readErrorStream;
+import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.readResponseStream;
+import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.writePayloadToConnStream;
 import static com.mulesoft.connector.agentforce.internal.modelsapi.helpers.ConstantUtil.AI_PLATFORM_MODELS_CONNECTED_APP;
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.AUTHORIZATION;
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.CONTENT_TYPE_APPLICATION_JSON;
@@ -52,9 +56,6 @@ import static com.mulesoft.connector.agentforce.internal.modelsapi.helpers.Const
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.HTTP_METHOD_POST;
 import static com.mulesoft.connector.agentforce.internal.modelsapi.helpers.ConstantUtil.X_CLIENT_FEATURE_ID;
 import static com.mulesoft.connector.agentforce.internal.modelsapi.helpers.ConstantUtil.X_SFDC_APP_CONTEXT;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.createURLConnection;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.readErrorStream;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.readResponseStream;
 import static com.mulesoft.connector.agentforce.internal.modelsapi.helpers.ConstantUtil.URI_MODELS_API;
 import static com.mulesoft.connector.agentforce.internal.modelsapi.helpers.ConstantUtil.URI_MODELS_API_CHAT_GENERATIONS;
 import static com.mulesoft.connector.agentforce.internal.modelsapi.helpers.ConstantUtil.URI_MODELS_API_EMBEDDINGS;
@@ -241,18 +242,10 @@ public class RequestHelper {
     String urlString = accessTokenDTO.getApiInstanceUrl() + URI_MODELS_API + modelName + resource;
     log.debug("Agentforce Request URL: {}", urlString);
 
-    return executeREST(accessTokenDTO.getAccessToken(), payload, urlString);
-  }
-
-  private String executeREST(String accessToken, String payload, String urlString) throws IOException {
-
     HttpURLConnection httpConnection = createURLConnection(urlString, HTTP_METHOD_POST);
-    addConnectionHeaders(httpConnection, accessToken);
+    addConnectionHeaders(httpConnection, accessTokenDTO.getAccessToken());
+    writePayloadToConnStream(httpConnection, payload);
 
-    try (OutputStream os = httpConnection.getOutputStream()) {
-      byte[] input = payload.getBytes(StandardCharsets.UTF_8);
-      os.write(input, 0, input.length);
-    }
     log.info("Executing rest {} ", urlString);
     int responseCode = httpConnection.getResponseCode();
     if (responseCode == HttpURLConnection.HTTP_OK) {

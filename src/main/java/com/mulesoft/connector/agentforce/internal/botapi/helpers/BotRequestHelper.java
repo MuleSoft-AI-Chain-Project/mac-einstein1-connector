@@ -5,7 +5,6 @@ import com.mulesoft.connector.agentforce.internal.botapi.dto.BotSessionRequestDT
 import com.mulesoft.connector.agentforce.internal.botapi.dto.ForceConfigDTO;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
 import com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType;
-import org.mule.runtime.extension.api.exception.ModuleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,8 +24,7 @@ import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantU
 import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.X_ORG_ID;
 import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.X_SESSION_END_REASON;
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.createURLConnection;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.readErrorStream;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.readResponseStream;
+import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.handleHttpResponse;
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.writePayloadToConnStream;
 
 public class BotRequestHelper {
@@ -108,25 +106,6 @@ public class BotRequestHelper {
   private static void addConnectionHeadersForEndSession(HttpURLConnection conn, String accessToken, String orgId) {
     addConnectionHeaders(conn, accessToken, orgId);
     conn.setRequestProperty(X_SESSION_END_REASON, SESSION_END_REASON_USERREQUEST);
-  }
-
-  private String handleHttpResponse(HttpURLConnection httpConnection, AgentforceErrorType errorType) throws IOException {
-    int responseCode = httpConnection.getResponseCode();
-
-    if (responseCode == HttpURLConnection.HTTP_OK) {
-      if (httpConnection.getInputStream() == null) {
-        throw new ModuleException(
-                                  "Error: No response received from Agentforce", errorType);
-      }
-      return readResponseStream(httpConnection.getInputStream());
-    } else {
-      String errorMessage = readErrorStream(httpConnection.getErrorStream());
-      log.info("Error in HTTP request. Response code: {}, message: {}", responseCode, errorMessage);
-      throw new ModuleException(
-                                String.format("Error in HTTP request. ErrorCode: %d ," +
-                                    " ErrorMessage: %s", responseCode, errorMessage),
-                                errorType);
-    }
   }
 
   private BotSessionRequestDTO createStartSessionRequestPayload(String externalSessionKey, String forceConfigEndpoint) {
