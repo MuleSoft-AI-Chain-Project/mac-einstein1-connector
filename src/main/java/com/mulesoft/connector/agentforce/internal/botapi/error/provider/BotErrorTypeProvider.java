@@ -6,7 +6,8 @@ import org.mule.runtime.extension.api.error.ErrorTypeDefinition;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType.*;
+import static com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType.AGENT_METADATA_FAILURE;
+import static com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType.AGENT_OPERATIONS_FAILURE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
 
