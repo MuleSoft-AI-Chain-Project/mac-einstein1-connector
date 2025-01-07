@@ -1,9 +1,9 @@
-package com.mulesoft.connector.agentforce.internal.helpers;
+package com.mulesoft.connector.agentforce.internal.bot.helpers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
-import com.mulesoft.connector.agentforce.internal.dto.AgentMetadataResponse;
-import com.mulesoft.connector.agentforce.internal.dto.BotRecord;
+import com.mulesoft.connector.agentforce.internal.bot.dto.AgentMetadataResponse;
+import com.mulesoft.connector.agentforce.internal.bot.dto.BotRecord;
 import com.mulesoft.connector.agentforce.internal.dto.OAuthResponseDTO;
 import org.json.JSONObject;
 import org.slf4j.Logger;

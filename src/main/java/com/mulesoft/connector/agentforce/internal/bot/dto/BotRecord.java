@@ -1,4 +1,4 @@
-package com.mulesoft.connector.agentforce.internal.dto;
+package com.mulesoft.connector.agentforce.internal.bot.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

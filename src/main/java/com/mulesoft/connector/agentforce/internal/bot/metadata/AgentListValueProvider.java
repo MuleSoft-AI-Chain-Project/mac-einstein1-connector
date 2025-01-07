@@ -3,12 +3,12 @@
  * published under the terms of the Commercial Free Software license V.1, a copy of which
  * has been included with this distribution in the LICENSE.md file.
  */
-package com.mulesoft.connector.agentforce.internal.metadata;
+package com.mulesoft.connector.agentforce.internal.bot.metadata;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
-import com.mulesoft.connector.agentforce.internal.dto.AgentMetadataResponse;
-import com.mulesoft.connector.agentforce.internal.helpers.BotRequestHelper;
+import com.mulesoft.connector.agentforce.internal.bot.dto.AgentMetadataResponse;
+import com.mulesoft.connector.agentforce.internal.bot.helpers.BotRequestHelper;
 import org.mule.runtime.api.value.Value;
 import org.mule.runtime.extension.api.annotation.param.Connection;
 import org.mule.runtime.extension.api.values.ValueBuilder;
@@ -33,18 +33,19 @@ public class AgentListValueProvider implements ValueProvider {
   @Override
   public Set<Value> resolve() throws ValueResolvingException {
     try {
-      BotRequestHelper requestHelper = new BotRequestHelper();
-      String agentListResponse = requestHelper.getAgentList(connection);
-      AgentMetadataResponse agentMetadataResponse = new ObjectMapper()
-          .readValue(agentListResponse, AgentMetadataResponse.class);
+
+      String agentListResponse = new BotRequestHelper().getAgentList(connection);
+
+      AgentMetadataResponse agentMetadataResponse = new ObjectMapper().readValue(
+                                                                                 agentListResponse,
+                                                                                 AgentMetadataResponse.class);
 
       return agentMetadataResponse.getRecords()
           .stream()
           .filter(agent -> agent.getStatus().equals("Active"))
           .map(agent -> ValueBuilder
               .newValue(agent.getBotDefinitionId())
-              .withDisplayName(agent.getBotDefinition()
-                  .getMasterLabel())
+              .withDisplayName(agent.getBotDefinition().getMasterLabel())
               .build())
           .collect(Collectors.toSet());
     } catch (IOException e) {

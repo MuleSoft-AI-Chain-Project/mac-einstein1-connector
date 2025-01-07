@@ -1,6 +1,6 @@
-package com.mulesoft.connector.agentforce.internal.models;
+package com.mulesoft.connector.agentforce.internal.bot.models;
 
-import com.mulesoft.connector.agentforce.internal.metadata.AgentListValueProvider;
+import com.mulesoft.connector.agentforce.internal.bot.metadata.AgentListValueProvider;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
 import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
 import org.mule.runtime.extension.api.annotation.param.display.Placement;
