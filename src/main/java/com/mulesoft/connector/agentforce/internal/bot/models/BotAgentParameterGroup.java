@@ -22,10 +22,4 @@ public class BotAgentParameterGroup {
     this.agent = agentValue;
   }
 
-  @Override
-  public String toString() {
-    return "BotAgentDetails{" +
-        "agent='" + agent + '\'' +
-        '}';
-  }
 }

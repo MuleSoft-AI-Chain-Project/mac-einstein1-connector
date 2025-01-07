@@ -1,9 +1,9 @@
 package com.mulesoft.connector.agentforce.internal.operations;
 
-import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
-import com.mulesoft.connector.agentforce.internal.error.provider.ChatErrorTypeProvider;
+import com.mulesoft.connector.agentforce.internal.bot.error.provider.BotErrorTypeProvider;
 import com.mulesoft.connector.agentforce.internal.bot.helpers.BotRequestHelper;
 import com.mulesoft.connector.agentforce.internal.bot.models.BotAgentParameterGroup;
+import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.error.Throws;
 import org.mule.runtime.extension.api.annotation.metadata.MetadataKeyId;
@@ -25,7 +25,7 @@ public class AgentforceBotOperations {
 
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("Invoke-Agent")
-  @Throws(ChatErrorTypeProvider.class)
+  @Throws(BotErrorTypeProvider.class)
   public String invokeAgentConversation(@Connection AgentforceConnection connection,
                                         @ParameterGroup(name = "Agent") @MetadataKeyId BotAgentParameterGroup parameterGroup)
       throws IOException {
@@ -35,7 +35,7 @@ public class AgentforceBotOperations {
 
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("Continue-agent-conversation")
-  @Throws(ChatErrorTypeProvider.class)
+  @Throws(BotErrorTypeProvider.class)
   public String continueConversation(@Content(primary = true) String message,
                                      @Content String sessionId,
                                      @Connection AgentforceConnection connection)
@@ -46,7 +46,7 @@ public class AgentforceBotOperations {
 
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("End-agent-conversation")
-  @Throws(ChatErrorTypeProvider.class)
+  @Throws(BotErrorTypeProvider.class)
   public String endConversation(@Content String sessionId, @Connection AgentforceConnection connection)
       throws IOException {
 

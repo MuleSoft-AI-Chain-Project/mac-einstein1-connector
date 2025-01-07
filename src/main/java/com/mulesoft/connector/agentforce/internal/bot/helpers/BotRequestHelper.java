@@ -14,11 +14,16 @@ import java.net.HttpURLConnection;
 import java.util.UUID;
 
 import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.AUTHORIZATION;
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.CONTENT_TYPE_APPLICATION_JSON;
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.CONTENT_TYPE_STRING;
 import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.HTTP_METHOD_DELETE;
 import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.HTTP_METHOD_GET;
 import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.HTTP_METHOD_POST;
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.SESSION_END_REASON_USERREQUEST;
 import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.URI_BOT_API_METADATA;
 import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.URI_HTTPS_PREFIX;
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.X_ORG_ID;
+import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.X_SESSION_END_REASON;
 import static com.mulesoft.connector.agentforce.internal.helpers.RequestHelper.createURLConnection;
 import static com.mulesoft.connector.agentforce.internal.helpers.RequestHelper.readErrorStream;
 import static com.mulesoft.connector.agentforce.internal.helpers.RequestHelper.readResponse;
@@ -91,18 +96,18 @@ public class BotRequestHelper {
 
   private static void addConnectionHeaders(HttpURLConnection conn, String accessToken) {
     conn.setRequestProperty(AUTHORIZATION, "Bearer " + accessToken);
-    conn.setRequestProperty("Content-Type", "application/json;charset=utf-8");
+    conn.setRequestProperty(CONTENT_TYPE_STRING, CONTENT_TYPE_APPLICATION_JSON);
   }
 
   private static void addConnectionHeaders(HttpURLConnection conn, String accessToken, String orgId) {
     addConnectionHeaders(conn, accessToken);
-    conn.setRequestProperty("X-Org-Id", orgId);
+    conn.setRequestProperty(X_ORG_ID, orgId);
     conn.setRequestProperty("Accept", "application/json");
   }
 
   private static void addConnectionHeadersForEndSession(HttpURLConnection conn, String accessToken, String orgId) {
     addConnectionHeaders(conn, accessToken, orgId);
-    conn.setRequestProperty("X-Session-End-Reason", "UserRequest");
+    conn.setRequestProperty(X_SESSION_END_REASON, SESSION_END_REASON_USERREQUEST);
   }
 
   private String handleHttpResponse(HttpURLConnection httpConnection, AgentforceErrorType errorType) throws IOException {
