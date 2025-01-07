@@ -24,7 +24,9 @@ import static org.mule.sdk.api.meta.JavaVersion.JAVA_8;
 @Xml(prefix = "ms-agentforce")
 @Extension(name = "Anypoint Agentforce")
 @ErrorTypes(AgentforceErrorType.class)
-@Operations({AgentforceEmbeddingOperations.class, AgentforceGenerationOperations.class, AgentforceBotOperations.class})
+@Operations({AgentforceEmbeddingOperations.class,
+    AgentforceGenerationOperations.class,
+    AgentforceBotOperations.class})
 @ConnectionProviders(AgentforceConnectionProvider.class)
 @RequiresEnterpriseLicense(allowEvaluationLicense = true)
 @JavaVersionSupport({JAVA_8, JAVA_11, JAVA_17})

@@ -1,9 +1,9 @@
 package com.mulesoft.connector.agentforce.internal.operations;
 
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
-import com.mulesoft.connector.agentforce.internal.helpers.PayloadHelper;
-import com.mulesoft.connector.agentforce.internal.helpers.chatmemory.ChatMemoryHelper;
-import com.mulesoft.connector.agentforce.internal.models.ParamsModelDetails;
+import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.RequestHelper;
+import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.chatmemory.ChatMemoryHelper;
+import com.mulesoft.connector.agentforce.internal.modelsapi.models.ParamsModelDetails;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +27,7 @@ public class AgentforceGenerationOperationsTest {
   private AgentforceGenerationOperations agentforceGenerationOperations;
 
   @Mock
-  private PayloadHelper payloadHelperMock;
+  private RequestHelper requestHelperMock;
 
   @Mock
   private ChatMemoryHelper chatMemoryHelperMock;
@@ -40,7 +40,7 @@ public class AgentforceGenerationOperationsTest {
 
   @BeforeEach
   void setUp() {
-    agentforceGenerationOperations.setPayloadHelper(payloadHelperMock);
+    agentforceGenerationOperations.setPayloadHelper(requestHelperMock);
     agentforceGenerationOperations.setChatMemoryHelper(chatMemoryHelperMock);
   }
 
@@ -49,7 +49,7 @@ public class AgentforceGenerationOperationsTest {
     String template = "Template";
     String instructions = "Instructions";
     String dataset = "Dataset";
-    when(payloadHelperMock.executeGenerateText(anyString(), any(), any()))
+    when(requestHelperMock.executeGenerateText(anyString(), any(), any()))
         .thenThrow(new RuntimeException("Test exception"));
 
     ModuleException exception = assertThrows(ModuleException.class,
@@ -66,7 +66,7 @@ public class AgentforceGenerationOperationsTest {
   public void testGenerateTextFailure() throws IOException, ConnectionException {
     String prompt = "Test Prompt";
 
-    when(payloadHelperMock.executeGenerateText(anyString(), any(), any()))
+    when(requestHelperMock.executeGenerateText(anyString(), any(), any()))
         .thenThrow(new RuntimeException("Test exception"));
 
     ModuleException exception =
@@ -102,7 +102,7 @@ public class AgentforceGenerationOperationsTest {
   public void testGenerateChatFailure() throws IOException, ConnectionException {
     String messages = "Test Messages";
 
-    when(payloadHelperMock.executeGenerateChat(anyString(), any(), any()))
+    when(requestHelperMock.executeGenerateChat(anyString(), any(), any()))
         .thenThrow(new RuntimeException("Test exception"));
 
     ModuleException exception =

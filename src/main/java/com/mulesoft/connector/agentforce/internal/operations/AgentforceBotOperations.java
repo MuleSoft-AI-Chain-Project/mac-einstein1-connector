@@ -1,8 +1,8 @@
 package com.mulesoft.connector.agentforce.internal.operations;
 
-import com.mulesoft.connector.agentforce.internal.bot.error.provider.BotErrorTypeProvider;
-import com.mulesoft.connector.agentforce.internal.bot.helpers.BotRequestHelper;
-import com.mulesoft.connector.agentforce.internal.bot.models.BotAgentParameterGroup;
+import com.mulesoft.connector.agentforce.internal.botapi.error.provider.BotErrorTypeProvider;
+import com.mulesoft.connector.agentforce.internal.botapi.helpers.BotRequestHelper;
+import com.mulesoft.connector.agentforce.internal.botapi.models.BotAgentParameterGroup;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.error.Throws;

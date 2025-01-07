@@ -1,7 +1,7 @@
 package com.mulesoft.connector.agentforce.internal.connection;
 
 import com.mulesoft.connector.agentforce.internal.dto.OAuthResponseDTO;
-import com.mulesoft.connector.agentforce.internal.helpers.RequestHelper;
+import com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper;
 import org.mule.runtime.api.connection.ConnectionException;
 import org.mule.runtime.api.connection.ConnectionProvider;
 import org.mule.runtime.api.connection.ConnectionValidationResult;
@@ -40,7 +40,7 @@ public class AgentforceConnectionProvider implements ConnectionProvider<Agentfor
   public AgentforceConnection connect() throws ConnectionException {
     log.debug("Executing connect method call");
     try {
-      OAuthResponseDTO oAuthResponseDTO = RequestHelper.getOAuthResponseDTO(salesforceOrg, clientId, clientSecret);
+      OAuthResponseDTO oAuthResponseDTO = CommonRequestHelper.getOAuthResponseDTO(salesforceOrg, clientId, clientSecret);
       if (oAuthResponseDTO != null) {
         return new AgentforceConnection(salesforceOrg, clientId, clientSecret, oAuthResponseDTO);
       } else {
@@ -67,8 +67,8 @@ public class AgentforceConnectionProvider implements ConnectionProvider<Agentfor
     log.debug("Executing validate method call");
     try {
       OAuthResponseDTO oAuthResponseDTO =
-          RequestHelper.getOAuthResponseDTO(agentforceConnection.getSalesforceOrg(), agentforceConnection.getClientId(),
-                                            agentforceConnection.getClientSecret());
+          CommonRequestHelper.getOAuthResponseDTO(agentforceConnection.getSalesforceOrg(), agentforceConnection.getClientId(),
+                                                  agentforceConnection.getClientSecret());
       if (oAuthResponseDTO != null) {
         return ConnectionValidationResult.success();
       } else {
