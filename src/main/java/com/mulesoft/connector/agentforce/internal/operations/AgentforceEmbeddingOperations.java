@@ -3,13 +3,13 @@ package com.mulesoft.connector.agentforce.internal.operations;
 import com.mulesoft.connector.agentforce.api.metadata.AgentforceResponseAttributes;
 import com.mulesoft.connector.agentforce.api.metadata.ResponseParameters;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
-import com.mulesoft.connector.agentforce.internal.error.provider.EmbeddingErrorTypeProvider;
-import com.mulesoft.connector.agentforce.internal.helpers.PayloadHelper;
-import com.mulesoft.connector.agentforce.internal.helpers.ResponseHelper;
-import com.mulesoft.connector.agentforce.internal.models.ParamsEmbeddingDocumentDetails;
-import com.mulesoft.connector.agentforce.internal.models.ParamsEmbeddingModelDetails;
-import com.mulesoft.connector.agentforce.internal.models.ParamsModelDetails;
-import com.mulesoft.connector.agentforce.internal.models.RAGParamsModelDetails;
+import com.mulesoft.connector.agentforce.internal.modelsapi.error.provider.EmbeddingErrorTypeProvider;
+import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.RequestHelper;
+import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.ResponseHelper;
+import com.mulesoft.connector.agentforce.internal.modelsapi.models.ParamsEmbeddingDocumentDetails;
+import com.mulesoft.connector.agentforce.internal.modelsapi.models.ParamsEmbeddingModelDetails;
+import com.mulesoft.connector.agentforce.internal.modelsapi.models.ParamsModelDetails;
+import com.mulesoft.connector.agentforce.internal.modelsapi.models.RAGParamsModelDetails;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mule.runtime.extension.api.annotation.Alias;
@@ -28,7 +28,7 @@ import java.io.InputStream;
 import static com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType.EMBEDDING_OPERATIONS_FAILURE;
 import static com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType.RAG_FAILURE;
 import static com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType.TOOLS_OPERATION_FAILURE;
-import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.MODELAPI_OPENAI_ADA_002;
+import static com.mulesoft.connector.agentforce.internal.modelsapi.helpers.ConstantUtil.MODELAPI_OPENAI_ADA_002;
 import static java.lang.String.format;
 import static org.mule.runtime.extension.api.annotation.param.MediaType.APPLICATION_JSON;
 
@@ -39,7 +39,7 @@ import static org.mule.runtime.extension.api.annotation.param.MediaType.APPLICAT
 public class AgentforceEmbeddingOperations {
 
   private static final Logger log = LoggerFactory.getLogger(AgentforceEmbeddingOperations.class);
-  PayloadHelper payloadHelper = new PayloadHelper();
+  RequestHelper requestHelper = new RequestHelper();
 
   /**
    * Create an embedding vector representing the input text.
@@ -52,7 +52,7 @@ public class AgentforceEmbeddingOperations {
                                                                            @ParameterGroup(
                                                                                name = "Additional properties") ParamsEmbeddingModelDetails paramDetails) {
     try {
-      String response = payloadHelper.executeGenerateEmbedding(text, connection, paramDetails);
+      String response = requestHelper.executeGenerateEmbedding(text, connection, paramDetails);
 
       return ResponseHelper.createAgentforceEmbeddingResponse(response);
     } catch (Exception e) {
@@ -71,7 +71,7 @@ public class AgentforceEmbeddingOperations {
                                                              @ParameterGroup(
                                                                  name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails) {
     try {
-      JSONArray response = payloadHelper.embeddingFromFile(filePath, connection, paramDetails);
+      JSONArray response = requestHelper.embeddingFromFile(filePath, connection, paramDetails);
 
       JSONObject jsonObject = new JSONObject();
       jsonObject.put("result", response);
@@ -95,7 +95,7 @@ public class AgentforceEmbeddingOperations {
                                                              name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails) {
     log.info("Executing embedding adhoc file query operation.");
     try {
-      JSONArray response = payloadHelper.embeddingFileQuery(prompt, filePath, connection, paramDetails.getModelApiName(),
+      JSONArray response = requestHelper.embeddingFileQuery(prompt, filePath, connection, paramDetails.getModelApiName(),
                                                             paramDetails.getFileType(), paramDetails.getOptionType());
 
       JSONObject jsonObject = new JSONObject();
@@ -122,10 +122,10 @@ public class AgentforceEmbeddingOperations {
     log.info("Executing rag adhoc load document.");
     try {
 
-      String content = payloadHelper.embeddingFileQuery(prompt, filePath, connection, paramDetails.getEmbeddingName(),
+      String content = requestHelper.embeddingFileQuery(prompt, filePath, connection, paramDetails.getEmbeddingName(),
                                                         paramDetails.getFileType(), paramDetails.getOptionType())
           .toString();
-      String response = payloadHelper.executeRAG("data: " + content + ", question: " + prompt, connection,
+      String response = requestHelper.executeRAG("data: " + content + ", question: " + prompt, connection,
                                                  paramDetails);
 
       return ResponseHelper.createAgentforceFormattedResponse(response);
@@ -151,9 +151,9 @@ public class AgentforceEmbeddingOperations {
     try {
 
       String content =
-          payloadHelper.embeddingFileQuery(prompt, toolsConfig, connection, MODELAPI_OPENAI_ADA_002, "text", "FULL")
+          requestHelper.embeddingFileQuery(prompt, toolsConfig, connection, MODELAPI_OPENAI_ADA_002, "text", "FULL")
               .toString();
-      String response = payloadHelper.executeTools(prompt, "data: " + content + ", question: " + prompt,
+      String response = requestHelper.executeTools(prompt, "data: " + content + ", question: " + prompt,
                                                    toolsConfig, connection, paramDetails);
 
       return ResponseHelper.createAgentforceFormattedResponse(response);

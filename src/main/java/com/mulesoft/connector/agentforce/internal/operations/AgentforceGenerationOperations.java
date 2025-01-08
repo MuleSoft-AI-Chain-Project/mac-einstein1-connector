@@ -3,12 +3,12 @@ package com.mulesoft.connector.agentforce.internal.operations;
 import com.mulesoft.connector.agentforce.api.metadata.AgentforceResponseAttributes;
 import com.mulesoft.connector.agentforce.api.metadata.ResponseParameters;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
-import com.mulesoft.connector.agentforce.internal.error.provider.ChatErrorTypeProvider;
-import com.mulesoft.connector.agentforce.internal.helpers.PayloadHelper;
-import com.mulesoft.connector.agentforce.internal.helpers.PromptTemplateHelper;
-import com.mulesoft.connector.agentforce.internal.helpers.ResponseHelper;
-import com.mulesoft.connector.agentforce.internal.helpers.chatmemory.ChatMemoryHelper;
-import com.mulesoft.connector.agentforce.internal.models.ParamsModelDetails;
+import com.mulesoft.connector.agentforce.internal.modelsapi.error.provider.ChatErrorTypeProvider;
+import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.RequestHelper;
+import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.PromptTemplateHelper;
+import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.ResponseHelper;
+import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.chatmemory.ChatMemoryHelper;
+import com.mulesoft.connector.agentforce.internal.modelsapi.models.ParamsModelDetails;
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.error.Throws;
 import org.mule.runtime.extension.api.annotation.param.Connection;
@@ -32,11 +32,11 @@ import static org.mule.runtime.extension.api.annotation.param.MediaType.APPLICAT
 public class AgentforceGenerationOperations {
 
   private static final Logger log = LoggerFactory.getLogger(AgentforceGenerationOperations.class);
-  PayloadHelper payloadHelper = new PayloadHelper();
+  RequestHelper requestHelper = new RequestHelper();
   ChatMemoryHelper chatMemoryHelper = new ChatMemoryHelper();
 
-  public void setPayloadHelper(PayloadHelper payloadHelper) {
-    this.payloadHelper = payloadHelper;
+  public void setPayloadHelper(RequestHelper requestHelper) {
+    this.requestHelper = requestHelper;
   }
 
   public void setChatMemoryHelper(ChatMemoryHelper chatMemoryHelper) {
@@ -58,7 +58,7 @@ public class AgentforceGenerationOperations {
     log.info("Executing agent defined prompt template operation.");
     try {
       String finalPromptTemplate = PromptTemplateHelper.definePromptTemplate(template, instructions, dataset);
-      String response = payloadHelper.executeGenerateText(finalPromptTemplate, connection, paramDetails);
+      String response = requestHelper.executeGenerateText(finalPromptTemplate, connection, paramDetails);
 
       return ResponseHelper.createAgentforceFormattedResponse(response);
     } catch (Exception e) {
@@ -81,7 +81,7 @@ public class AgentforceGenerationOperations {
                                                                             name = "Additional properties") ParamsModelDetails paramDetails) {
     log.info("Executing chat answer prompt operation.");
     try {
-      String response = payloadHelper.executeGenerateText(prompt, connection, paramDetails);
+      String response = requestHelper.executeGenerateText(prompt, connection, paramDetails);
 
       return ResponseHelper.createAgentforceFormattedResponse(response);
     } catch (Exception e) {
@@ -108,7 +108,7 @@ public class AgentforceGenerationOperations {
     try {
 
       String response = chatMemoryHelper.chatWithMemory(prompt, memoryPath, memoryName, keepLastMessages,
-                                                        connection, paramDetails, payloadHelper);
+                                                        connection, paramDetails, requestHelper);
 
       return ResponseHelper.createAgentforceFormattedResponse(response);
     } catch (Exception e) {
@@ -131,7 +131,7 @@ public class AgentforceGenerationOperations {
     log.info("Executing chat generate from message operation.");
     try {
 
-      String response = payloadHelper.executeGenerateChat(messages, connection, paramDetails);
+      String response = requestHelper.executeGenerateChat(messages, connection, paramDetails);
 
       return ResponseHelper.createAgentforceChatFromMessagesResponse(response);
     } catch (Exception e) {
