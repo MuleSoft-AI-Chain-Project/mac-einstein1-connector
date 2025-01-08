@@ -1,5 +1,7 @@
 package com.mulesoft.connector.agentforce.internal.operations;
 
+import com.mulesoft.connector.agentforce.api.metadata.InvokeAgentResponseAttributes;
+import com.mulesoft.connector.agentforce.internal.botapi.dto.AgentStartSessionResponseDTO;
 import com.mulesoft.connector.agentforce.internal.botapi.error.provider.BotErrorTypeProvider;
 import com.mulesoft.connector.agentforce.internal.botapi.helpers.BotRequestHelper;
 import com.mulesoft.connector.agentforce.internal.botapi.models.BotAgentParameterGroup;
@@ -11,10 +13,13 @@ import org.mule.runtime.extension.api.annotation.param.Connection;
 import org.mule.runtime.extension.api.annotation.param.Content;
 import org.mule.runtime.extension.api.annotation.param.MediaType;
 import org.mule.runtime.extension.api.annotation.param.ParameterGroup;
+import org.mule.runtime.extension.api.runtime.operation.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
+
 import static org.mule.runtime.extension.api.annotation.param.MediaType.APPLICATION_JSON;
 
 public class AgentforceBotOperations {
@@ -26,11 +31,20 @@ public class AgentforceBotOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("Invoke-Agent")
   @Throws(BotErrorTypeProvider.class)
-  public String invokeAgentConversation(@Connection AgentforceConnection connection,
-                                        @ParameterGroup(name = "Agent") @MetadataKeyId BotAgentParameterGroup parameterGroup)
+  public Result<InputStream, InvokeAgentResponseAttributes> invokeAgentConversation(@Connection AgentforceConnection connection,
+                                                                                    @Content InputStream agentPrompt,
+                                                                                    @ParameterGroup(
+                                                                                        name = "Agent") @MetadataKeyId BotAgentParameterGroup parameterGroup)
       throws IOException {
 
-    return requestHelper.startSession(parameterGroup.getAgent(), connection);
+    AgentStartSessionResponseDTO responseDTO = requestHelper.startSession(connection, parameterGroup.getAgent(), agentPrompt);
+
+    return Result.<InputStream, InvokeAgentResponseAttributes>builder()
+        .output(responseDTO.getTextInputStream())
+        .attributes(responseDTO.getResponseAttributes())
+        .attributesMediaType(org.mule.runtime.api.metadata.MediaType.APPLICATION_JSON)
+        .mediaType(org.mule.runtime.api.metadata.MediaType.APPLICATION_JSON)
+        .build();
   }
 
   @MediaType(value = APPLICATION_JSON, strict = false)
