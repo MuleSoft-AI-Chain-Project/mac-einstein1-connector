@@ -1,8 +1,9 @@
 package com.mulesoft.connector.agentforce.api.metadata;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class InvokeAgentResponseAttributes {
+public class InvokeAgentResponseAttributes implements Serializable {
 
   private String sessionId;
   private String botVersion;
@@ -41,7 +42,7 @@ public class InvokeAgentResponseAttributes {
     this.processedSequenceIds = processedSequenceIds;
   }
 
-  public static class Message {
+  public static class Message implements Serializable {
 
     private String id;
     private Schedule schedule;
@@ -73,7 +74,7 @@ public class InvokeAgentResponseAttributes {
 
   }
 
-  public static class Schedule {
+  public static class Schedule implements Serializable {
 
     private int responseDelayMilliseconds;
 
