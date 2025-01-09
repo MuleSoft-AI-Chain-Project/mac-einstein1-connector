@@ -4,7 +4,7 @@ import com.mulesoft.connector.agentforce.api.metadata.InvokeAgentResponseAttribu
 
 import java.io.InputStream;
 
-public class AgentStartSessionResponseDTO {
+public class AgentConversationResponseDTO {
 
   private InvokeAgentResponseAttributes responseAttributes;
   private InputStream textInputStream;
