@@ -7,13 +7,11 @@ public class BotSessionRequestDTO {
 
   private final String externalSessionKey;
   private final ForceConfigDTO forceConfig;
-  private final Message message;
 
-  public BotSessionRequestDTO(String externalSessionKey, ForceConfigDTO forceConfig, Message message) {
+  public BotSessionRequestDTO(String externalSessionKey, ForceConfigDTO forceConfig) {
 
     this.externalSessionKey = externalSessionKey;
     this.forceConfig = forceConfig;
-    this.message = message;
   }
 
   public String getExternalSessionKey() {
@@ -24,20 +22,4 @@ public class BotSessionRequestDTO {
     return forceConfig;
   }
 
-  public Message getMessage() {
-    return message;
-  }
-
-  public static class Message {
-
-    private final String text;
-
-    public Message(String text) {
-      this.text = text;
-    }
-
-    public String getText() {
-      return text;
-    }
-  }
 }

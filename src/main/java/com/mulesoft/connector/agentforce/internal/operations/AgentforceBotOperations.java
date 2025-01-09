@@ -32,12 +32,11 @@ public class AgentforceBotOperations {
   @Alias("Invoke-Agent")
   @Throws(BotErrorTypeProvider.class)
   public Result<InputStream, InvokeAgentResponseAttributes> invokeAgentConversation(@Connection AgentforceConnection connection,
-                                                                                    @Content InputStream agentPrompt,
                                                                                     @ParameterGroup(
                                                                                         name = "Agent") @MetadataKeyId BotAgentParameterGroup parameterGroup)
       throws IOException {
 
-    AgentStartSessionResponseDTO responseDTO = requestHelper.startSession(connection, parameterGroup.getAgent(), agentPrompt);
+    AgentStartSessionResponseDTO responseDTO = requestHelper.startSession(connection, parameterGroup.getAgent());
 
     return Result.<InputStream, InvokeAgentResponseAttributes>builder()
         .output(responseDTO.getTextInputStream())

@@ -11,7 +11,7 @@ import com.mulesoft.connector.agentforce.internal.botapi.dto.ForceConfigDTO;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
 import com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType;
 import com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper;
-import org.mule.runtime.core.api.util.IOUtils;
+import org.jetbrains.annotations.NotNull;
 import org.mule.runtime.extension.api.exception.ModuleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,8 +63,7 @@ public class BotRequestHelper {
     return "https://runtime-api-na-west.prod.chatbots.sfdc.sh";
   }
 
-  public AgentStartSessionResponseDTO startSession(AgentforceConnection agentforceConnection, String agentId,
-                                                   InputStream initialPrompt)
+  public AgentStartSessionResponseDTO startSession(AgentforceConnection agentforceConnection, String agentId)
       throws IOException {
 
     String startSessionUrl = fetchRuntimeBaseUrl() + "/v5.3.0/bots/" + agentId + "/sessions";
@@ -72,8 +71,7 @@ public class BotRequestHelper {
     String forceConfigEndpoint = URI_HTTPS_PREFIX + agentforceConnection.getSalesforceOrg();
     String orgId = agentforceConnection.getoAuthResponseDTO().getOrgId();
     BotSessionRequestDTO payload = createStartSessionRequestPayload(
-                                                                    externalSessionKey, forceConfigEndpoint,
-                                                                    IOUtils.toString(initialPrompt, StandardCharsets.UTF_8));
+                                                                    externalSessionKey, forceConfigEndpoint);
 
     log.debug("Agentforce start session details. Request URL: {}, externnal Session Key:{}," +
         " forceConfigEndpoint: {}, OrgId: {}",
@@ -85,59 +83,7 @@ public class BotRequestHelper {
 
     InputStream responseStream = handleHttpResponse(httpConnection, AgentforceErrorType.AGENT_OPERATIONS_FAILURE);
 
-    return parseStartSessionStreamResposne(responseStream);
-  }
-
-  private AgentStartSessionResponseDTO parseStartSessionStreamResposne(InputStream responseStream) throws IOException {
-
-    AgentStartSessionResponseDTO responseDTO = new AgentStartSessionResponseDTO();
-    JsonFactory jsonFactory = new JsonFactory();
-
-    try (JsonParser jsonParser = jsonFactory.createParser(responseStream)) {
-
-      InvokeAgentResponseAttributes responseAttributes = new InvokeAgentResponseAttributes();
-
-      while (!jsonParser.isClosed()) {
-        JsonToken token = jsonParser.nextToken();
-        if (JsonToken.FIELD_NAME.equals(token)) {
-          String fieldName = jsonParser.currentName();
-          token = jsonParser.nextToken(); // Move to the value
-
-          switch (fieldName) {
-            case "sessionId":
-              responseAttributes.setSessionId(jsonParser.getText());
-              break;
-            case "botVersion":
-              responseAttributes.setBotVersion(jsonParser.getText());
-              break;
-            case "messages":
-              if (JsonToken.START_ARRAY.equals(token)) {
-                List<InvokeAgentResponseAttributes.Message> messages = new ArrayList<>();
-                while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
-                  messages.add(parseMessage(jsonParser, responseDTO));
-                }
-                responseAttributes.setMessages(messages);
-              }
-              break;
-            case "processedSequenceIds":
-              List<Integer> sequenceIds = new ArrayList<>();
-              if (JsonToken.START_ARRAY.equals(token)) {
-                while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
-                  sequenceIds.add(jsonParser.getIntValue());
-                }
-              }
-              responseAttributes.setProcessedSequenceIds(sequenceIds);
-              break;
-            default:
-              // Skip unknown fields
-              jsonParser.skipChildren();
-              break;
-          }
-        }
-      }
-      responseDTO.setResponseAttributes(responseAttributes);
-    }
-    return responseDTO;
+    return parseStartSessionStreamResponse(responseStream);
   }
 
   public String continueSession(String message, String sessionId, AgentforceConnection agentforceConnection) throws IOException {
@@ -180,13 +126,11 @@ public class BotRequestHelper {
   }
 
   private BotSessionRequestDTO createStartSessionRequestPayload(String externalSessionKey,
-                                                                String forceConfigEndpoint,
-                                                                String initialPrompt) {
+                                                                String forceConfigEndpoint) {
 
     ForceConfigDTO forceConfigDTO = new ForceConfigDTO();
     forceConfigDTO.setEndpoint(forceConfigEndpoint);
-    BotSessionRequestDTO.Message message = new BotSessionRequestDTO.Message(initialPrompt);
-    return new BotSessionRequestDTO(externalSessionKey, forceConfigDTO, message);
+    return new BotSessionRequestDTO(externalSessionKey, forceConfigDTO);
   }
 
   public static InputStream handleHttpResponse(HttpURLConnection httpConnection, AgentforceErrorType errorType)
@@ -241,5 +185,61 @@ public class BotRequestHelper {
     return message;
   }
 
+  private AgentStartSessionResponseDTO parseStartSessionStreamResponse(InputStream responseStream) throws IOException {
+
+    AgentStartSessionResponseDTO responseDTO = new AgentStartSessionResponseDTO();
+    JsonFactory jsonFactory = new JsonFactory();
+
+    try (JsonParser jsonParser = jsonFactory.createParser(responseStream)) {
+
+      InvokeAgentResponseAttributes responseAttributes = new InvokeAgentResponseAttributes();
+
+      while (!jsonParser.isClosed()) {
+        JsonToken token = jsonParser.nextToken();
+        if (JsonToken.FIELD_NAME.equals(token)) {
+          String fieldName = jsonParser.currentName();
+          token = jsonParser.nextToken(); // Move to the value
+
+          switch (fieldName) {
+            case "sessionId":
+              responseAttributes.setSessionId(jsonParser.getText());
+              break;
+            case "botVersion":
+              responseAttributes.setBotVersion(jsonParser.getText());
+              break;
+            case "messages":
+              if (JsonToken.START_ARRAY.equals(token)) {
+                List<InvokeAgentResponseAttributes.Message> messages = new ArrayList<>();
+                while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
+                  messages.add(parseMessage(jsonParser, responseDTO));
+                }
+                responseAttributes.setMessages(messages);
+              }
+              break;
+            case "processedSequenceIds":
+              responseAttributes.setProcessedSequenceIds(parseProcessedSeqIds(token, jsonParser));
+              break;
+            default:
+              // Skip unknown fields
+              jsonParser.skipChildren();
+              break;
+          }
+        }
+      }
+      responseDTO.setResponseAttributes(responseAttributes);
+    }
+    return responseDTO;
+  }
+
+  @NotNull
+  private List<Integer> parseProcessedSeqIds(JsonToken token, JsonParser jsonParser) throws IOException {
+    List<Integer> sequenceIds = new ArrayList<>();
+    if (JsonToken.START_ARRAY.equals(token)) {
+      while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
+        sequenceIds.add(jsonParser.getIntValue());
+      }
+    }
+    return sequenceIds;
+  }
 
 }
