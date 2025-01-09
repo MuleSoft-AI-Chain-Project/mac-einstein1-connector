@@ -5,13 +5,9 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mulesoft.connector.agentforce.api.metadata.InvokeAgentResponseAttributes;
-import com.mulesoft.connector.agentforce.internal.botapi.dto.AgentConversationResponseDTO;
-import com.mulesoft.connector.agentforce.internal.botapi.dto.BotContinueSessionRequestDTO;
-import com.mulesoft.connector.agentforce.internal.botapi.dto.BotSessionRequestDTO;
-import com.mulesoft.connector.agentforce.internal.botapi.dto.ForceConfigDTO;
+import com.mulesoft.connector.agentforce.internal.botapi.dto.*;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
 import com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType;
-import com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper;
 import org.jetbrains.annotations.NotNull;
 import org.mule.runtime.core.api.util.IOUtils;
 import org.mule.runtime.extension.api.exception.ModuleException;
@@ -43,15 +39,15 @@ import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantU
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.HTTP_METHOD_GET;
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.HTTP_METHOD_POST;
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.URI_HTTPS_PREFIX;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.createURLConnection;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.readErrorStream;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.writePayloadToConnStream;
+import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.*;
 
 public class BotRequestHelper {
 
   private static final Logger log = LoggerFactory.getLogger(BotRequestHelper.class);
 
-  public String getAgentList(AgentforceConnection connection) throws IOException {
+  ObjectMapper objectMapper = new ObjectMapper();
+
+  public List<BotRecord> getAgentList(AgentforceConnection connection) throws IOException {
 
     String metadataUrl = URI_HTTPS_PREFIX + connection.getSalesforceOrg()
         + URI_BOT_API_METADATA;
@@ -60,8 +56,11 @@ public class BotRequestHelper {
     addConnectionHeaders(httpConnection, connection.getoAuthResponseDTO().getAccessToken());
 
     log.debug("Executing getAgentList request with URL: {} ", metadataUrl);
+    InputStream responseStream = handleHttpResponse(httpConnection,
+                                                    AgentforceErrorType.AGENT_METADATA_FAILURE);
+    AgentMetadataResponseDTO agentMetadataResponse = objectMapper.readValue(responseStream, AgentMetadataResponseDTO.class);
 
-    return CommonRequestHelper.handleHttpResponse(httpConnection, AgentforceErrorType.AGENT_METADATA_FAILURE);
+    return agentMetadataResponse.getRecords();
   }
 
   //TODO: implement API call to get the runtime-base-url for connecting to agent
@@ -86,7 +85,7 @@ public class BotRequestHelper {
 
     HttpURLConnection httpConnection = createURLConnection(startSessionUrl, HTTP_METHOD_POST);
     addConnectionHeaders(httpConnection, agentforceConnection.getoAuthResponseDTO().getAccessToken(), orgId);
-    writePayloadToConnStream(httpConnection, new ObjectMapper().writeValueAsString(payload));
+    writePayloadToConnStream(httpConnection, objectMapper.writeValueAsString(payload));
 
     return getParsedHttpResponse(httpConnection);
   }
@@ -106,7 +105,7 @@ public class BotRequestHelper {
               continueSessionUrl, sessionId, orgId, inReplyToMessageId);
     HttpURLConnection httpConnection = createURLConnection(continueSessionUrl, HTTP_METHOD_POST);
     addConnectionHeaders(httpConnection, agentforceConnection.getoAuthResponseDTO().getAccessToken(), orgId);
-    writePayloadToConnStream(httpConnection, new ObjectMapper().writeValueAsString(payload));
+    writePayloadToConnStream(httpConnection, objectMapper.writeValueAsString(payload));
 
     return getParsedHttpResponse(httpConnection);
   }
@@ -159,26 +158,6 @@ public class BotRequestHelper {
     messageDTO.setType(CONTINUE_SESSION_MESSAGE_TYPE_TEXT);
 
     return new BotContinueSessionRequestDTO(messageDTO);
-  }
-
-  public static InputStream handleHttpResponse(HttpURLConnection httpConnection, AgentforceErrorType errorType)
-      throws IOException {
-    int responseCode = httpConnection.getResponseCode();
-
-    if (responseCode == HttpURLConnection.HTTP_OK) {
-      if (httpConnection.getInputStream() == null) {
-        throw new ModuleException(
-                                  "Error: No response received from Agentforce", errorType);
-      }
-      return httpConnection.getInputStream();
-    } else {
-      String errorMessage = readErrorStream(httpConnection.getErrorStream());
-      log.info("Error in HTTP request. Response code: {}, message: {}", responseCode, errorMessage);
-      throw new ModuleException(
-                                String.format("Error in HTTP request. ErrorCode: %d ," +
-                                    " ErrorMessage: %s", responseCode, errorMessage),
-                                errorType);
-    }
   }
 
   private static InvokeAgentResponseAttributes.Message parseMessage(JsonParser parser,

@@ -105,7 +105,8 @@ public class CommonRequestHelper {
     }
   }
 
-  public static String handleHttpResponse(HttpURLConnection httpConnection, AgentforceErrorType errorType) throws IOException {
+  public static InputStream handleHttpResponse(HttpURLConnection httpConnection, AgentforceErrorType errorType)
+      throws IOException {
     int responseCode = httpConnection.getResponseCode();
 
     if (responseCode == HttpURLConnection.HTTP_OK) {
@@ -113,7 +114,7 @@ public class CommonRequestHelper {
         throw new ModuleException(
                                   "Error: No response received from Agentforce", errorType);
       }
-      return readResponseStream(httpConnection.getInputStream());
+      return httpConnection.getInputStream();
     } else {
       String errorMessage = readErrorStream(httpConnection.getErrorStream());
       log.info("Error in HTTP request. Response code: {}, message: {}", responseCode, errorMessage);

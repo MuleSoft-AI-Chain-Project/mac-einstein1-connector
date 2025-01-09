@@ -34,12 +34,7 @@ public class AgentListValueProvider implements ValueProvider {
   public Set<Value> resolve() throws ValueResolvingException {
     try {
 
-      String agentListResponse = new BotRequestHelper().getAgentList(connection);
-
-      AgentMetadataResponseDTO agentMetadataResponse = new ObjectMapper().readValue(
-                                                                                    agentListResponse,
-                                                                                    AgentMetadataResponseDTO.class);
-      return agentMetadataResponse.getRecords()
+      return new BotRequestHelper().getAgentList(connection)
           .stream()
           .filter(agent -> agent.getStatus().equals("Active"))
           .map(agent -> ValueBuilder
