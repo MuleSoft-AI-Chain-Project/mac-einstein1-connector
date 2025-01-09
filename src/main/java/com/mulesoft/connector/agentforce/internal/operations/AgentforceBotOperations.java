@@ -41,7 +41,7 @@ public class AgentforceBotOperations {
     return Result.<InputStream, InvokeAgentResponseAttributes>builder()
         .output(responseDTO.getTextInputStream())
         .attributes(responseDTO.getResponseAttributes())
-        .attributesMediaType(org.mule.runtime.api.metadata.MediaType.APPLICATION_JSON)
+        .attributesMediaType(org.mule.runtime.api.metadata.MediaType.APPLICATION_JAVA)
         .mediaType(org.mule.runtime.api.metadata.MediaType.APPLICATION_JSON)
         .build();
   }

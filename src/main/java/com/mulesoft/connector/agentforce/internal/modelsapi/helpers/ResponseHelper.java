@@ -40,7 +40,7 @@ public class ResponseHelper {
     return Result.<InputStream, AgentforceResponseAttributes>builder()
         .output(toInputStream(jsonObject.toString(), StandardCharsets.UTF_8))
         .attributes(mapResponseAttributes(responseDTO))
-        .attributesMediaType(MediaType.APPLICATION_JSON)
+        .attributesMediaType(MediaType.APPLICATION_JAVA)
         .mediaType(MediaType.APPLICATION_JSON)
         .build();
   }
@@ -57,7 +57,7 @@ public class ResponseHelper {
     return Result.<InputStream, ResponseParameters>builder()
         .output(toInputStream(jsonObject.toString(), StandardCharsets.UTF_8))
         .attributes(responseDTO.getGenerationDetails().getParameters())
-        .attributesMediaType(MediaType.APPLICATION_JSON)
+        .attributesMediaType(MediaType.APPLICATION_JAVA)
         .mediaType(MediaType.APPLICATION_JSON)
         .build();
   }
@@ -74,7 +74,7 @@ public class ResponseHelper {
     return Result.<InputStream, ResponseParameters>builder()
         .output(toInputStream(jsonObject.toString(), StandardCharsets.UTF_8))
         .attributes(mapEmbeddingResponseAttributes(responseDTO))
-        .attributesMediaType(MediaType.APPLICATION_JSON)
+        .attributesMediaType(MediaType.APPLICATION_JAVA)
         .mediaType(MediaType.APPLICATION_JSON)
         .build();
   }
