@@ -34,8 +34,8 @@
             <logger message="Test Generate-Embedding-from-file started" level="INFO"/>
             <ms-agentforce:embedding-generate-from-file doc:name="Embedding generate fromfile"
                                                     doc:id="5f8c7c79-dffe-4331-a5b4-30375baa66bd"
-                                                    filePath='${app.home}/embeddingaddfiletest/embedtest.pdf'
-                                                    optionType="SENTENCES"
+                                                    filePath='/Users/vishwas.tyagi/salesforceDocs/einstein'
+                                                    optionType="PARAGRAPH"
                                                     config-ref="Agentforce_Config">
             </ms-agentforce:embedding-generate-from-file>
         </munit:execution>

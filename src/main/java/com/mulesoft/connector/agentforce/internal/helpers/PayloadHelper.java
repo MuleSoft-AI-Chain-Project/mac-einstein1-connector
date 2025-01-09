@@ -20,6 +20,8 @@ import org.apache.tika.sax.BodyContentHandler;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.mule.weave.v2.runtime.DataWeaveScriptingEngine;
+import org.mule.weave.v2.runtime.ScriptingBindings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -39,6 +41,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+
 
 import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.URI_MODELS_API;
 import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.URI_MODELS_API_CHAT_GENERATIONS;
@@ -189,6 +193,56 @@ public class PayloadHelper {
     return response;
   }
 
+  public JSONArray embeddingFromFileInputStream(InputStream inputStream, AgentforceConnection connection,
+                                                ParamsEmbeddingDocumentDetails embeddingDocumentDetails)
+      throws IOException {
+
+    OAuthResponseDTO accessTokeDTO = connection.getoAuthResponseDTO();
+    return new JSONArray(
+                         getCorpusEmbeddingsInputStream(embeddingDocumentDetails.getModelApiName(), inputStream, accessTokeDTO));
+  }
+
+  public JSONArray generateEmbeddingFromFileStream(InputStream inputStream, AgentforceConnection connection,
+                                                   ParamsEmbeddingDocumentDetails embeddingDocumentDetails)
+      throws IOException {
+
+    String script = "output json --- {\"(payload)\": upper(payload), \"vars\": vars }";
+
+    DataWeaveScriptingEngine scriptingEngine = new DataWeaveScriptingEngine();
+    //new ScriptingBindings().addBinding();
+
+
+    OAuthResponseDTO accessTokeDTO = connection.getoAuthResponseDTO();
+    return new JSONArray(
+                         getCorpusEmbeddingsInputStream(embeddingDocumentDetails.getModelApiName(), inputStream, accessTokeDTO));
+  }
+
+  private List<Double> getCorpusEmbeddingsInputStream(String modelName, InputStream inputStream, OAuthResponseDTO accessTokeDTO)
+      throws IOException {
+
+    String embeddingResponse;
+    embeddingResponse =
+        executeAgentforceRequestWIthInpuStream(accessTokeDTO, inputStream, modelName, URI_MODELS_API_EMBEDDINGS);
+
+    System.out.println("embeddingResponse = " + embeddingResponse);
+    AgentforceEmbeddingResponseDTO embeddingResponseDTO =
+        new ObjectMapper().readValue(embeddingResponse, AgentforceEmbeddingResponseDTO.class);
+
+    return embeddingResponseDTO.getEmbeddings().get(0).getEmbedding();
+
+  }
+
+  private String executeAgentforceRequestWIthInpuStream(OAuthResponseDTO accessTokenDTO, InputStream inputStream,
+                                                        String modelName,
+                                                        String resource)
+      throws IOException {
+
+    String urlString = accessTokenDTO.getApiInstanceUrl() + URI_MODELS_API + modelName + resource;
+    log.debug("Agentforce Request URL: {}", urlString);
+    System.out.println("urlString = " + urlString);
+    return executeRESTForInputStream(accessTokenDTO.getAccessToken(), inputStream, urlString);
+  }
+
   public String endSession(String sessionId, AgentforceConnection agentforceConnection) throws IOException {
     String url = "https://runtime-api-na-west.prod.chatbots.sfdc.sh/v5.1.0/sessions/" + sessionId;
     System.out.println("url = " + url);
@@ -227,13 +281,15 @@ public class PayloadHelper {
     List<List<Double>> corpusEmbeddings = new ArrayList<>();
 
     for (String text : corpus) {
+      System.out.println("Text : " + text);
 
       corpusBody = constructEmbeddingJSON(text);
+      System.out.println("Json body : " + corpusBody);
 
       if (text != null && !text.isEmpty()) {
         embeddingResponse =
             executeAgentforceRequest(accessTokeDTO, constructEmbeddingJSON(corpusBody), modelName, URI_MODELS_API_EMBEDDINGS);
-
+        System.out.println("Embedding response:- " + embeddingResponse);
         AgentforceEmbeddingResponseDTO embeddingResponseDTO =
             new ObjectMapper().readValue(embeddingResponse, AgentforceEmbeddingResponseDTO.class);
 

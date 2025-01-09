@@ -13,6 +13,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
 
 import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.AI_PLATFORM_MODELS_CONNECTED_APP;
 import static com.mulesoft.connector.agentforce.internal.helpers.ConstantUtil.AUTHORIZATION;
@@ -48,6 +49,7 @@ public class RequestHelper {
 
   public static String executeREST(String accessToken, String payload, String urlString) throws IOException {
 
+    System.out.println("payload123 = " + payload);
     HttpURLConnection httpConnection = creteURLConnection(urlString);
     populateConnectionObject(httpConnection, accessToken);
     try (OutputStream os = httpConnection.getOutputStream()) {
@@ -178,6 +180,57 @@ public class RequestHelper {
       return new ObjectMapper().readValue(response, OAuthResponseDTO.class);
     }
     return null;
+  }
+
+  public static String executeRESTForInputStream(String accessToken, InputStream inputStream, String urlString)
+      throws IOException {
+
+    //String text =
+    //  new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"));
+    //System.out.println("inputStream = " + text);
+    HttpURLConnection httpConnection = creteURLConnection(urlString);
+    populateConnectionObject(httpConnection, accessToken);
+    httpConnection.setDoOutput(true);
+    httpConnection.setDoInput(true);
+    // httpConnection.setRequestProperty("Content-Type", "application/octet-stream");
+
+    /*
+    try (OutputStream outputStream = httpConnection.getOutputStream()) {
+      byte[] buffer = new byte[4096];
+      int bytesRead;
+      while ((bytesRead = inputStream.read(buffer)) != -1) {
+        outputStream.write(buffer, 0, bytesRead);
+      }
+      outputStream.flush();
+    
+    }
+    */
+    try (OutputStream outputStream = httpConnection.getOutputStream();
+        InputStream inputStream1 = inputStream) { // Ensure inputStream is closed after use
+      byte[] buffer = new byte[4096];
+      int bytesRead;
+      while ((bytesRead = inputStream1.read(buffer)) != -1) {
+        outputStream.write(buffer, 0, bytesRead);
+      }
+      outputStream.flush();
+    } catch (IOException e) {
+      // Handle exception
+      throw new IOException("Error writing to output stream", e);
+    }
+
+    log.info("Executing rest {} ", urlString);
+    int responseCode = httpConnection.getResponseCode();
+    if (responseCode == HttpURLConnection.HTTP_OK) {
+      if (httpConnection.getInputStream() == null) {
+        return "Error: No response received from Agentforce";
+      }
+      return readResponse(httpConnection.getInputStream());
+    } else {
+      String errorMessage = readErrorStream(httpConnection.getErrorStream());
+      log.debug("Error response code: {}, message: {}", responseCode, errorMessage);
+      System.out.println("Error response code: " + responseCode + ", message:  " + errorMessage);
+      return String.format("Error: %d", responseCode);
+    }
   }
 
   private static String readResponse(InputStream inputStream) throws IOException {

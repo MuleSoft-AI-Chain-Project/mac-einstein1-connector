@@ -23,6 +23,7 @@ import org.mule.runtime.extension.api.runtime.operation.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import static com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType.EMBEDDING_OPERATIONS_FAILURE;
@@ -162,6 +163,50 @@ public class AgentforceEmbeddingOperations {
       log.error(format("Exception occurred while executing AI service tools operation %s", e.getMessage()), e);
       throw new ModuleException("Error while executing AI service tools with provided config " + toolsConfig + ", for prompt "
           + prompt, TOOLS_OPERATION_FAILURE, e);
+    }
+  }
+
+  @MediaType(value = APPLICATION_JSON, strict = false)
+  @Alias("EMBEDDING-generate-from-file-stream")
+  @Throws(EmbeddingErrorTypeProvider.class)
+  public Result<InputStream, Void> generateEmbeddingFromFileStream(InputStream inputStream,
+                                                                   @Connection AgentforceConnection connection,
+                                                                   @ParameterGroup(
+                                                                       name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails) {
+    try {
+
+      JSONArray response = payloadHelper.embeddingFromFileInputStream(inputStream, connection, paramDetails);
+
+      System.out.println("JSONArray = " + response);
+      JSONObject jsonObject = new JSONObject();
+      jsonObject.put("result", response);
+
+      return ResponseHelper.createAgentforceDefaultResponse(jsonObject.toString());
+    } catch (Exception e) {
+      throw new ModuleException("Error while executing embedding generate from file operation",
+                                EMBEDDING_OPERATIONS_FAILURE, e);
+    }
+  }
+
+  @MediaType(value = APPLICATION_JSON, strict = false)
+  @Alias("EMBEDDING-generate-from-file-stream-using-dataweave")
+  @Throws(EmbeddingErrorTypeProvider.class)
+  public Result<InputStream, Void> generateEmbeddingFromFileStreamUsingDataWeave(InputStream inputStream,
+                                                                                 @Connection AgentforceConnection connection,
+                                                                                 @ParameterGroup(
+                                                                                     name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails) {
+    try {
+
+      JSONArray response = payloadHelper.generateEmbeddingFromFileStream(inputStream, connection, paramDetails);
+
+      System.out.println("JSONArray = " + response);
+      JSONObject jsonObject = new JSONObject();
+      jsonObject.put("result", response);
+
+      return ResponseHelper.createAgentforceDefaultResponse(jsonObject.toString());
+    } catch (Exception e) {
+      throw new ModuleException("Error while executing embedding generate from file operation",
+                                EMBEDDING_OPERATIONS_FAILURE, e);
     }
   }
 }
