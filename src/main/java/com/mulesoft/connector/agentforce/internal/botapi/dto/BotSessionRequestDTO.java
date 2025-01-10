@@ -9,6 +9,7 @@ public class BotSessionRequestDTO {
   private final ForceConfigDTO forceConfig;
 
   public BotSessionRequestDTO(String externalSessionKey, ForceConfigDTO forceConfig) {
+
     this.externalSessionKey = externalSessionKey;
     this.forceConfig = forceConfig;
   }
@@ -20,4 +21,5 @@ public class BotSessionRequestDTO {
   public ForceConfigDTO getForceConfig() {
     return forceConfig;
   }
+
 }

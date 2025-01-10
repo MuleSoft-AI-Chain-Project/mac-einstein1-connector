@@ -1,6 +1,8 @@
 package com.mulesoft.connector.agentforce.api.metadata.quality;
 
-public class Categories {
+import java.io.Serializable;
+
+public class Categories implements Serializable {
 
   private String categoryName;
   private String score;

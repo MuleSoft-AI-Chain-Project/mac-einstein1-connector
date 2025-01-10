@@ -7,7 +7,7 @@ package com.mulesoft.connector.agentforce.internal.botapi.metadata;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
-import com.mulesoft.connector.agentforce.internal.botapi.dto.AgentMetadataResponse;
+import com.mulesoft.connector.agentforce.internal.botapi.dto.AgentMetadataResponseDTO;
 import com.mulesoft.connector.agentforce.internal.botapi.helpers.BotRequestHelper;
 import org.mule.runtime.api.value.Value;
 import org.mule.runtime.extension.api.annotation.param.Connection;
@@ -34,12 +34,7 @@ public class AgentListValueProvider implements ValueProvider {
   public Set<Value> resolve() throws ValueResolvingException {
     try {
 
-      String agentListResponse = new BotRequestHelper().getAgentList(connection);
-
-      AgentMetadataResponse agentMetadataResponse = new ObjectMapper().readValue(
-                                                                                 agentListResponse,
-                                                                                 AgentMetadataResponse.class);
-      return agentMetadataResponse.getRecords()
+      return new BotRequestHelper().getAgentList(connection)
           .stream()
           .filter(agent -> agent.getStatus().equals("Active"))
           .map(agent -> ValueBuilder

@@ -5,10 +5,11 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import java.beans.ConstructorProperties;
+import java.io.Serializable;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TokenUsage {
+public class TokenUsage implements Serializable {
 
   private final int inputCount;
   private final int outputCount;

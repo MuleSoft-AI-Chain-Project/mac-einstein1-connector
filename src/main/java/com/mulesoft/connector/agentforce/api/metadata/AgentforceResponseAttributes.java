@@ -2,7 +2,9 @@ package com.mulesoft.connector.agentforce.api.metadata;
 
 import com.mulesoft.connector.agentforce.api.metadata.quality.ContentQuality;
 
-public class AgentforceResponseAttributes {
+import java.io.Serializable;
+
+public class AgentforceResponseAttributes implements Serializable {
 
   private final String responseId;
   private final String generationId;
