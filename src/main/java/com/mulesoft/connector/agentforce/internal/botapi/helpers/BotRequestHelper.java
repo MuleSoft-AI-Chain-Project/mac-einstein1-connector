@@ -54,7 +54,7 @@ public class BotRequestHelper {
   private static final Logger log = LoggerFactory.getLogger(BotRequestHelper.class);
 
   ObjectMapper objectMapper = new ObjectMapper();
-  HashMap<String, String> runTimeBaseUrlMap = new HashMap<>();
+  HashMap<String, String> runTimeBaseUrlMap = new HashMap<>(); //Storing runtimebase URL for an org, to limit number of API calls
 
   public List<BotRecord> getAgentList(AgentforceConnection connection) throws IOException {
 
