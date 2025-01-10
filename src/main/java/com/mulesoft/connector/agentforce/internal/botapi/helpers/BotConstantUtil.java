@@ -2,9 +2,12 @@ package com.mulesoft.connector.agentforce.internal.botapi.helpers;
 
 public class BotConstantUtil {
 
-  public static final String URI_BOT_API_METADATA =
-      "/services/data/v62.0/query?q=select%20Status%2CBotDefinitionId%2CBotDefinition.MasterLabel%20from%20BotVersion";
-
+  public static final String URI_BOT_API_METADATA_SERVICES_V_62 =
+      "/services/data/v62.0";
+  public static final String URI_BOT_API_METADATA_AGENTLIST =
+      "/query?q=select%20Status%2CBotDefinitionId%2CBotDefinition.MasterLabel%20from%20BotVersion";
+  public static final String URI_BOT_API_METADATA_RUNTIMEURL =
+      "/connect/bots/api-info";
   public static final String URI_BOT_API_VERSION = "/v5.3.0";
   public static final String URI_BOT_API_BOTS = "/bots/";
   public static final String URI_BOT_API_SESSIONS = "/sessions/";
