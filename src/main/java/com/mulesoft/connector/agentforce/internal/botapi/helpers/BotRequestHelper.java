@@ -47,7 +47,9 @@ import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantU
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.HTTP_METHOD_GET;
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.HTTP_METHOD_POST;
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.URI_HTTPS_PREFIX;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.*;
+import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.createURLConnection;
+import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.handleHttpResponse;
+import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.writePayloadToConnStream;
 
 public class BotRequestHelper {
 
@@ -224,7 +226,7 @@ public class BotRequestHelper {
 
           switch (fieldName) {
             case "sessionId":
-              responseAttributes.setSessionId(jsonParser.getText());
+              responseDTO.setSessionId(jsonParser.getText());
               break;
             case "botVersion":
               responseAttributes.setBotVersion(jsonParser.getText());

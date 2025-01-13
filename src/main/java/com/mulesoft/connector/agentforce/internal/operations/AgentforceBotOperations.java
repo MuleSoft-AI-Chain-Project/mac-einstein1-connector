@@ -7,6 +7,7 @@ import com.mulesoft.connector.agentforce.internal.botapi.group.BotMessageParamet
 import com.mulesoft.connector.agentforce.internal.botapi.helpers.BotRequestHelper;
 import com.mulesoft.connector.agentforce.internal.botapi.group.BotAgentParameterGroup;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
+import org.json.JSONObject;
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.error.Throws;
 import org.mule.runtime.extension.api.annotation.metadata.MetadataKeyId;
@@ -18,7 +19,9 @@ import org.mule.runtime.extension.api.runtime.operation.Result;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
+import static org.apache.commons.io.IOUtils.toInputStream;
 import static org.mule.runtime.extension.api.annotation.param.MediaType.APPLICATION_JSON;
 
 public class AgentforceBotOperations {
@@ -35,8 +38,11 @@ public class AgentforceBotOperations {
 
     AgentConversationResponseDTO responseDTO = requestHelper.startSession(connection, parameterGroup.getAgent());
 
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put("sessionId", responseDTO.getSessionId());
+
     return Result.<InputStream, InvokeAgentResponseAttributes>builder()
-        .output(responseDTO.getTextInputStream())
+        .output(toInputStream(jsonObject.toString(), StandardCharsets.UTF_8))
         .attributes(responseDTO.getResponseAttributes())
         .attributesMediaType(org.mule.runtime.api.metadata.MediaType.APPLICATION_JAVA)
         .mediaType(org.mule.runtime.api.metadata.MediaType.APPLICATION_JSON)
@@ -57,13 +63,11 @@ public class AgentforceBotOperations {
                                                                              messageParameterGroup.getMessageSequenceNumber(),
                                                                              messageParameterGroup.getInReplyToMessageId(),
                                                                              connection);
-    responseDTO.getResponseAttributes().setSessionId(sessionId);
-
     return Result.<InputStream, InvokeAgentResponseAttributes>builder()
         .output(responseDTO.getTextInputStream())
         .attributes(responseDTO.getResponseAttributes())
         .attributesMediaType(org.mule.runtime.api.metadata.MediaType.APPLICATION_JAVA)
-        .mediaType(org.mule.runtime.api.metadata.MediaType.APPLICATION_JSON)
+        .mediaType(org.mule.runtime.api.metadata.MediaType.TEXT)
         .build();
   }
 
