@@ -11,6 +11,7 @@ import org.json.JSONObject;
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.error.Throws;
 import org.mule.runtime.extension.api.annotation.metadata.MetadataKeyId;
+import org.mule.runtime.extension.api.annotation.metadata.fixed.OutputJsonType;
 import org.mule.runtime.extension.api.annotation.param.Connection;
 import org.mule.runtime.extension.api.annotation.param.Content;
 import org.mule.runtime.extension.api.annotation.param.MediaType;
@@ -23,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.apache.commons.io.IOUtils.toInputStream;
 import static org.mule.runtime.extension.api.annotation.param.MediaType.APPLICATION_JSON;
+import static org.mule.runtime.extension.api.annotation.param.MediaType.TEXT_PLAIN;
 
 public class AgentforceBotOperations {
 
@@ -31,6 +33,7 @@ public class AgentforceBotOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("Invoke-Agent")
   @Throws(BotErrorTypeProvider.class)
+  @OutputJsonType(schema = "api/response/Response.json")
   public Result<InputStream, InvokeAgentResponseAttributes> invokeAgentConversation(@Connection AgentforceConnection connection,
                                                                                     @ParameterGroup(
                                                                                         name = "Agent") @MetadataKeyId BotAgentParameterGroup parameterGroup)
@@ -49,7 +52,7 @@ public class AgentforceBotOperations {
         .build();
   }
 
-  @MediaType(value = APPLICATION_JSON, strict = false)
+  @MediaType(value = TEXT_PLAIN, strict = false)
   @Alias("Continue-agent-conversation")
   @Throws(BotErrorTypeProvider.class)
   public Result<InputStream, InvokeAgentResponseAttributes> continueConversation(@Content String sessionId,
