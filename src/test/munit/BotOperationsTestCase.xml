@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:ms-agentforce="http://www.mulesoft.org/schema/mule/ms-agentforce"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+      xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/ms-agentforce http://www.mulesoft.org/schema/mule/ms-agentforce/current/mule-ms-agentforce.xsd">
+
+    <munit:config name="BotOperationsTestCase.xml"/>
+
+    <munit:before-test name="TestOperationBefore_Test" doc:id="be3f67e1-e8d7-4d88-963a-81057974c9d7" >
+        <ms-agentforce:invoke-agent agent="0Xx5b0000008ObjCAE" doc:name="Invoke agent" doc:id="9b81ccfe-df4d-4e58-bf0a-75eec9fe3679" config-ref="Agentforce_Config" />
+        <set-variable value="#[output application/java&#10;---&#10;payload.sessionId]" doc:name="Set Variable" doc:id="a81d4da9-331b-40fc-9cd4-e7930570d780" variableName="sessId" />
+    </munit:before-test>
+    <munit:test name="TestOperationTest" doc:id="a7a7b3c8-bbca-4e75-915f-4c9637c48f6a" >
+        <munit:execution >
+            <ms-agentforce:continue-agent-conversation doc:name="Continue agent conversation" doc:id="3040a1b1-e1ed-4832-a406-fa12218250a7" config-ref="Agentforce_Config" messageSequenceNumber="1">
+                <ms-agentforce:session-id ><![CDATA[#[vars.sessId]]]></ms-agentforce:session-id>
+                <ms-agentforce:message ><![CDATA[How are you]]></ms-agentforce:message>
+            </ms-agentforce:continue-agent-conversation>
+        </munit:execution>
+        <munit:validation >
+            <munit-tools:assert-that doc:name="Assert that" doc:id="d17a18cd-da3a-4064-af44-e4553fd8b95b" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+        </munit:validation>
+    </munit:test>
+    <munit:after-test name="TestOperationAfter_Test" doc:id="a18aeb95-427d-4bc9-816d-d68c803ed5c6" >
+        <ms-agentforce:end-agent-conversation doc:name="End agent conversation" doc:id="003b5bf5-6baa-4540-9529-148e50e256ec" config-ref="Agentforce_Config">
+            <ms-agentforce:session-id ><![CDATA[#[vars.sessId]]]></ms-agentforce:session-id>
+        </ms-agentforce:end-agent-conversation>
+    </munit:after-test>
+</mule>
