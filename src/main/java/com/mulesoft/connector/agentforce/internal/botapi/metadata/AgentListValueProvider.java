@@ -5,9 +5,8 @@
  */
 package com.mulesoft.connector.agentforce.internal.botapi.metadata;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mulesoft.connector.agentforce.internal.botapi.dto.BotRecord;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
-import com.mulesoft.connector.agentforce.internal.botapi.dto.AgentMetadataResponseDTO;
 import com.mulesoft.connector.agentforce.internal.botapi.helpers.BotRequestHelper;
 import org.mule.runtime.api.value.Value;
 import org.mule.runtime.extension.api.annotation.param.Connection;
@@ -39,11 +38,15 @@ public class AgentListValueProvider implements ValueProvider {
           .filter(agent -> agent.getStatus().equals("Active"))
           .map(agent -> ValueBuilder
               .newValue(agent.getBotDefinitionId())
-              .withDisplayName(agent.getBotDefinition().getMasterLabel())
+              .withDisplayName(constructDisplayName(agent))
               .build())
           .collect(Collectors.toSet());
     } catch (IOException e) {
       throw new ValueResolvingException(format(AGENT_LIST_ERR_MSG), CONNECTION_FAILURE, e);
     }
+  }
+
+  private static String constructDisplayName(BotRecord agent) {
+    return agent.getBotDefinition().getMasterLabel() + " [" + agent.getBotDefinitionId() + "]";
   }
 }
