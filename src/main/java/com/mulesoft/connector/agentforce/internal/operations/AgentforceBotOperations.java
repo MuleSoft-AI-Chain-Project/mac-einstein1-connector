@@ -33,7 +33,7 @@ public class AgentforceBotOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("Invoke-Agent")
   @Throws(BotErrorTypeProvider.class)
-  @OutputJsonType(schema = "api/response/Response.json")
+  @OutputJsonType(schema = "api/response/InvokeAgentResponse.json")
   public Result<InputStream, InvokeAgentResponseAttributes> invokeAgentConversation(@Connection AgentforceConnection connection,
                                                                                     @ParameterGroup(
                                                                                         name = "Agent") @MetadataKeyId BotAgentParameterGroup parameterGroup)
