@@ -14,6 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.error.Throws;
+import org.mule.runtime.extension.api.annotation.metadata.fixed.OutputJsonType;
 import org.mule.runtime.extension.api.annotation.param.Connection;
 import org.mule.runtime.extension.api.annotation.param.Content;
 import org.mule.runtime.extension.api.annotation.param.MediaType;
@@ -47,6 +48,7 @@ public class AgentforceEmbeddingOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("EMBEDDING-generate-from-text")
   @Throws(EmbeddingErrorTypeProvider.class)
+  @OutputJsonType(schema = "api/response/AgentForceEmbeddingResponse.json")
   public Result<InputStream, ResponseParameters> generateEmbeddingFromText(@Content String text,
                                                                            @Connection AgentforceConnection connection,
                                                                            @ParameterGroup(
@@ -67,6 +69,7 @@ public class AgentforceEmbeddingOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("EMBEDDING-generate-from-file")
   @Throws(EmbeddingErrorTypeProvider.class)
+  @OutputJsonType(schema = "api/response/AgentForceFileEmbeddingResponse.json")
   public Result<InputStream, Void> generateEmbeddingFromFile(String filePath, @Connection AgentforceConnection connection,
                                                              @ParameterGroup(
                                                                  name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails) {
@@ -89,6 +92,7 @@ public class AgentforceEmbeddingOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("EMBEDDING-adhoc-file-query")
   @Throws(EmbeddingErrorTypeProvider.class)
+  @OutputJsonType(schema = "api/response/AgentForceFileEmbeddingResponse.json")
   public Result<InputStream, Void> queryEmbeddingOnFiles(@Content String prompt, String filePath,
                                                          @Connection AgentforceConnection connection,
                                                          @ParameterGroup(
@@ -115,6 +119,7 @@ public class AgentforceEmbeddingOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("RAG-adhoc-load-document")
   @Throws(EmbeddingErrorTypeProvider.class)
+  @OutputJsonType(schema = "api/response/AgentForceOperationResponse.json")
   public Result<InputStream, AgentforceResponseAttributes> ragOnFiles(@Content String prompt, String filePath,
                                                                       @Connection AgentforceConnection connection,
                                                                       @ParameterGroup(
@@ -143,6 +148,7 @@ public class AgentforceEmbeddingOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("Tools-use-ai-service")
   @Throws(EmbeddingErrorTypeProvider.class)
+  @OutputJsonType(schema = "api/response/AgentForceOperationResponse.json")
   public Result<InputStream, AgentforceResponseAttributes> executeTools(@Content String prompt, String toolsConfig,
                                                                         @Connection AgentforceConnection connection,
                                                                         @ParameterGroup(

@@ -11,6 +11,7 @@ import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.chatmemory.C
 import com.mulesoft.connector.agentforce.internal.modelsapi.models.ParamsModelDetails;
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.error.Throws;
+import org.mule.runtime.extension.api.annotation.metadata.fixed.OutputJsonType;
 import org.mule.runtime.extension.api.annotation.param.Connection;
 import org.mule.runtime.extension.api.annotation.param.Content;
 import org.mule.runtime.extension.api.annotation.param.MediaType;
@@ -49,6 +50,7 @@ public class AgentforceGenerationOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("AGENT-define-prompt-template")
   @Throws(ChatErrorTypeProvider.class)
+  @OutputJsonType(schema = "api/response/AgentForceOperationResponse.json")
   public Result<InputStream, AgentforceResponseAttributes> definePromptTemplate(@Content(primary = true) String template,
                                                                                 @Content String instructions,
                                                                                 @Content String dataset,
@@ -75,6 +77,7 @@ public class AgentforceGenerationOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("CHAT-answer-prompt")
   @Throws(ChatErrorTypeProvider.class)
+  @OutputJsonType(schema = "api/response/AgentForceOperationResponse.json")
   public Result<InputStream, AgentforceResponseAttributes> generateText(@Content String prompt,
                                                                         @Connection AgentforceConnection connection,
                                                                         @ParameterGroup(
@@ -97,6 +100,7 @@ public class AgentforceGenerationOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("CHAT-answer-prompt-with-memory")
   @Throws(ChatErrorTypeProvider.class)
+  @OutputJsonType(schema = "api/response/AgentForceOperationResponse.json")
   public Result<InputStream, AgentforceResponseAttributes> generateTextMemory(@Content(primary = true) String prompt,
                                                                               String memoryPath,
                                                                               String memoryName,
@@ -124,10 +128,11 @@ public class AgentforceGenerationOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("CHAT-generate-from-messages")
   @Throws(ChatErrorTypeProvider.class)
-  public Result<InputStream, ResponseParameters> generateChat(@Content String messages,
-                                                              @Connection AgentforceConnection connection,
-                                                              @ParameterGroup(
-                                                                  name = "Additional properties") ParamsModelDetails paramDetails) {
+  @OutputJsonType(schema = "api/response/AgentForceChatFromMessagesResponse.json")
+  public Result<InputStream, ResponseParameters> generateChatFromMessages(@Content String messages,
+                                                                          @Connection AgentforceConnection connection,
+                                                                          @ParameterGroup(
+                                                                              name = "Additional properties") ParamsModelDetails paramDetails) {
     log.info("Executing chat generate from message operation.");
     try {
 
