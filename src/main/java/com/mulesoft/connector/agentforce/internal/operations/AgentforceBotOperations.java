@@ -31,12 +31,12 @@ public class AgentforceBotOperations {
   BotRequestHelper requestHelper = new BotRequestHelper();
 
   @MediaType(value = APPLICATION_JSON, strict = false)
-  @Alias("Invoke-Agent")
+  @Alias("Start-agent-conversation")
   @Throws(BotErrorTypeProvider.class)
-  @OutputJsonType(schema = "api/response/InvokeAgentResponse.json")
-  public Result<InputStream, InvokeAgentResponseAttributes> invokeAgentConversation(@Connection AgentforceConnection connection,
-                                                                                    @ParameterGroup(
-                                                                                        name = "Agent") @MetadataKeyId BotAgentParameterGroup parameterGroup)
+  @OutputJsonType(schema = "api/response/StartAgentConversationResponse.json")
+  public Result<InputStream, InvokeAgentResponseAttributes> startAgentConversation(@Connection AgentforceConnection connection,
+                                                                                   @ParameterGroup(
+                                                                                       name = "Agent") @MetadataKeyId BotAgentParameterGroup parameterGroup)
       throws IOException {
 
     AgentConversationResponseDTO responseDTO = requestHelper.startSession(connection, parameterGroup.getAgent());
