@@ -21,7 +21,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class AgentforceGenerationOperationsTest {
+class AgentforceGenerationOperationsTest {
 
   @InjectMocks
   private AgentforceGenerationOperations agentforceGenerationOperations;
@@ -45,7 +45,7 @@ public class AgentforceGenerationOperationsTest {
   }
 
   @Test
-  public void testDefinePromptTemplateFailure() throws IOException, ConnectionException {
+  void testDefinePromptTemplateFailure() throws IOException {
     String template = "Template";
     String instructions = "Instructions";
     String dataset = "Dataset";
@@ -63,7 +63,7 @@ public class AgentforceGenerationOperationsTest {
   }
 
   @Test
-  public void testGenerateTextFailure() throws IOException, ConnectionException {
+  void testGenerateTextFailure() throws IOException {
     String prompt = "Test Prompt";
 
     when(requestHelperMock.executeGenerateText(anyString(), any(), any()))
@@ -80,7 +80,7 @@ public class AgentforceGenerationOperationsTest {
   }
 
   @Test
-  public void testGenerateTextMemoryFailure() throws IOException, ConnectionException {
+  void testGenerateTextMemoryFailure() throws IOException, ConnectionException {
     String prompt = "Test";
     String memoryPath = "src/resources/testdb";
     String memoryName = "vt";
@@ -99,7 +99,7 @@ public class AgentforceGenerationOperationsTest {
   }
 
   @Test
-  public void testGenerateChatFailure() throws IOException, ConnectionException {
+  void testGenerateChatFailure() throws IOException {
     String messages = "Test Messages";
 
     when(requestHelperMock.executeGenerateChat(anyString(), any(), any()))
@@ -107,7 +107,7 @@ public class AgentforceGenerationOperationsTest {
 
     ModuleException exception =
         assertThrows(ModuleException.class,
-                     () -> agentforceGenerationOperations.generateChat(messages, connectionMock, paramDetailsMock));
+                     () -> agentforceGenerationOperations.generateChatFromMessages(messages, connectionMock, paramDetailsMock));
 
     assertEquals(
                  "Error while generating the chat from messages Test Messages",
