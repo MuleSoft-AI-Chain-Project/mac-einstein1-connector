@@ -13,9 +13,9 @@
 
     <munit:config name="BotInvokeAgentOperationTestCase.xml"/>
 
-    <munit:test name="InvokeAgentTest">
+    <munit:test name="StartAgentTest">
         <munit:execution>
-            <ms-agentforce:invoke-agent doc:name="Invoke agent" doc:id="cfe4865c-2280-4e0d-8bd2-da6c2e034f4f" config-ref="Agentforce_Config" agent="0Xx5b0000008ObjCAE"/>
+            <ms-agentforce:start-agent-conversation doc:name="Start agent" doc:id="cfe4865c-2280-4e0d-8bd2-da6c2e034f4f" config-ref="Agentforce_Config" agent="0Xx5b0000008ObjCAE"/>
         </munit:execution>
         <munit:validation>
             <munit-tools:assert-that is="#[MunitTools::notNullValue()]" expression="#[payload.sessionId]"/>
