@@ -5,18 +5,9 @@ import java.util.List;
 
 public class InvokeAgentResponseAttributes implements Serializable {
 
-  private String sessionId;
   private String botVersion;
   private List<Message> messages;
   private List<Integer> processedSequenceIds;
-
-  public String getSessionId() {
-    return sessionId;
-  }
-
-  public void setSessionId(String sessionId) {
-    this.sessionId = sessionId;
-  }
 
   public String getBotVersion() {
     return botVersion;

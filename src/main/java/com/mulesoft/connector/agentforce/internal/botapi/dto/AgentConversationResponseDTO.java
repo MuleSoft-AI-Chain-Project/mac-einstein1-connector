@@ -8,6 +8,7 @@ public class AgentConversationResponseDTO {
 
   private InvokeAgentResponseAttributes responseAttributes;
   private InputStream textInputStream;
+  private String sessionId;
 
   public InvokeAgentResponseAttributes getResponseAttributes() {
     return responseAttributes;
@@ -23,5 +24,13 @@ public class AgentConversationResponseDTO {
 
   public void setTextInputStream(InputStream textInputStream) {
     this.textInputStream = textInputStream;
+  }
+
+  public String getSessionId() {
+    return sessionId;
+  }
+
+  public void setSessionId(String sessionId) {
+    this.sessionId = sessionId;
   }
 }
