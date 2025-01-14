@@ -1,7 +1,7 @@
 package com.mulesoft.connector.agentforce.internal.operations;
 
 import com.mulesoft.connector.agentforce.internal.botapi.error.provider.BotErrorTypeProvider;
-import com.mulesoft.connector.agentforce.internal.botapi.helpers.BotRequestHelper;
+import com.mulesoft.connector.agentforce.internal.botapi.helpers.BotRequestHelperImpl;
 import com.mulesoft.connector.agentforce.internal.botapi.models.BotAgentParameterGroup;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
 import org.mule.runtime.extension.api.annotation.Alias;
@@ -21,8 +21,6 @@ public class AgentforceBotOperations {
 
   private static final Logger log = LoggerFactory.getLogger(AgentforceBotOperations.class);
 
-  BotRequestHelper requestHelper = new BotRequestHelper();
-
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("Invoke-Agent")
   @Throws(BotErrorTypeProvider.class)
@@ -30,7 +28,7 @@ public class AgentforceBotOperations {
                                         @ParameterGroup(name = "Agent") @MetadataKeyId BotAgentParameterGroup parameterGroup)
       throws IOException {
 
-    return requestHelper.startSession(parameterGroup.getAgent(), connection);
+    return connection.getBotRequestHelper().startSession(parameterGroup.getAgent());
   }
 
   @MediaType(value = APPLICATION_JSON, strict = false)
@@ -41,7 +39,7 @@ public class AgentforceBotOperations {
                                      @Connection AgentforceConnection connection)
       throws IOException {
 
-    return requestHelper.continueSession(message, sessionId, connection);
+    return connection.getBotRequestHelper().continueSession(message, sessionId);
   }
 
   @MediaType(value = APPLICATION_JSON, strict = false)
@@ -50,6 +48,6 @@ public class AgentforceBotOperations {
   public String endConversation(@Content String sessionId, @Connection AgentforceConnection connection)
       throws IOException {
 
-    return requestHelper.endSession(sessionId, connection);
+    return connection.getBotRequestHelper().endSession(sessionId);
   }
 }

@@ -1,41 +1,23 @@
 package com.mulesoft.connector.agentforce.internal.connection;
 
+import com.mulesoft.connector.agentforce.internal.botapi.helpers.BotRequestHelper;
 import com.mulesoft.connector.agentforce.internal.dto.OAuthResponseDTO;
+import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.RequestHelper;
+import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.chatmemory.ChatMemoryHelper;
+import com.mulesoft.connectors.commons.template.connection.ConnectorConnection;
 
 /**
  * This class represents a connection to the external system.
  */
-public class AgentforceConnection {
+//In future if we are adding new connection types, then common parameters of connection types will go here
+public interface AgentforceConnection extends ConnectorConnection {
+  abstract OAuthResponseDTO getoAuthResponseDTO();
 
-  private final String salesforceOrg;
-  private final String clientId;
-  private final String clientSecret;
-  private final OAuthResponseDTO oAuthResponseDTO;
+  abstract String getSalesforceOrg();
 
-  public AgentforceConnection(String salesforceOrg, String clientId, String clientSecret, OAuthResponseDTO oAuthResponseDTO) {
-    this.salesforceOrg = salesforceOrg;
-    this.clientId = clientId;
-    this.clientSecret = clientSecret;
-    this.oAuthResponseDTO = oAuthResponseDTO;
-  }
+  abstract RequestHelper getRequestHelper();
 
-  public String getSalesforceOrg() {
-    return salesforceOrg;
-  }
+  abstract ChatMemoryHelper getChatMemoryHelper();
 
-  public String getClientId() {
-    return clientId;
-  }
-
-  public String getClientSecret() {
-    return clientSecret;
-  }
-
-  public OAuthResponseDTO getoAuthResponseDTO() {
-    return oAuthResponseDTO;
-  }
-
-  public void invalidate() {
-    // Add logic to invalidate the connection if necessary
-  }
+  abstract BotRequestHelper getBotRequestHelper();
 }

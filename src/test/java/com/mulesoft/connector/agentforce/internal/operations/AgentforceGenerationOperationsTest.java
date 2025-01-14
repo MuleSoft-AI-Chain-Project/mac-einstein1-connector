@@ -38,18 +38,18 @@ public class AgentforceGenerationOperationsTest {
   @Mock
   private ParamsModelDetails paramDetailsMock;
 
-  @BeforeEach
+  /* @BeforeEach
   void setUp() {
     agentforceGenerationOperations.setPayloadHelper(requestHelperMock);
     agentforceGenerationOperations.setChatMemoryHelper(chatMemoryHelperMock);
-  }
+  }*/
 
   @Test
   public void testDefinePromptTemplateFailure() throws IOException, ConnectionException {
     String template = "Template";
     String instructions = "Instructions";
     String dataset = "Dataset";
-    when(requestHelperMock.executeGenerateText(anyString(), any(), any()))
+    when(requestHelperMock.executeGenerateText(anyString(), any()))
         .thenThrow(new RuntimeException("Test exception"));
 
     ModuleException exception = assertThrows(ModuleException.class,
@@ -66,7 +66,7 @@ public class AgentforceGenerationOperationsTest {
   public void testGenerateTextFailure() throws IOException, ConnectionException {
     String prompt = "Test Prompt";
 
-    when(requestHelperMock.executeGenerateText(anyString(), any(), any()))
+    when(requestHelperMock.executeGenerateText(anyString(), any()))
         .thenThrow(new RuntimeException("Test exception"));
 
     ModuleException exception =
@@ -86,7 +86,7 @@ public class AgentforceGenerationOperationsTest {
     String memoryName = "vt";
     Integer keepLastMessages = 10;
 
-    when(chatMemoryHelperMock.chatWithMemory(anyString(), anyString(), anyString(), anyInt(), any(), any(), any()))
+    when(chatMemoryHelperMock.chatWithMemory(anyString(), anyString(), anyString(), anyInt(), any()))
         .thenThrow(new RuntimeException("Test exception"));
 
     ModuleException exception = assertThrows(ModuleException.class, () -> agentforceGenerationOperations
@@ -102,7 +102,7 @@ public class AgentforceGenerationOperationsTest {
   public void testGenerateChatFailure() throws IOException, ConnectionException {
     String messages = "Test Messages";
 
-    when(requestHelperMock.executeGenerateChat(anyString(), any(), any()))
+    when(requestHelperMock.executeGenerateChat(anyString(), any()))
         .thenThrow(new RuntimeException("Test exception"));
 
     ModuleException exception =

@@ -44,17 +44,17 @@ public class CommonRequestHelper {
   public static OAuthResponseDTO getOAuthResponseDTO(String salesforceOrg, String clientId, String clientSecret)
       throws IOException {
 
-    log.debug("Preparing request for connection for salesforce org:{}", salesforceOrg);
+    log.debug("Preparing request for connecti on for salesforce org:{}", salesforceOrg);
 
     String urlString = CommonRequestHelper.getOAuthURL(salesforceOrg);
     String urlParameters = CommonRequestHelper.getOAuthParams(clientId, clientSecret);
     HttpURLConnection httpConnection = createURLConnection(urlString, HTTP_METHOD_POST);
-
     writePayloadToConnStream(httpConnection, urlParameters);
 
     log.info("Executing rest {} ", urlString);
     int responseCode = httpConnection.getResponseCode();
     log.debug("Response code for connection request:{}", responseCode);
+
     if (responseCode == HttpURLConnection.HTTP_OK) {
       if (httpConnection.getInputStream() == null) {
         return null;
