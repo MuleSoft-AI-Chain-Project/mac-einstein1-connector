@@ -165,7 +165,7 @@ public class BotRequestHelper {
   private AgentConversationResponseDTO parseResponse(HttpURLConnection httpConnection) throws IOException {
 
     InputStream responseStream = handleHttpResponse(httpConnection,
-                                                    AgentforceErrorType.AGENT_OPERATIONS_FAILURE);
+                                                    AgentforceErrorType.AGENT_API_ERROR);
 
     AgentConversationResponseDTO responseDTO = new AgentConversationResponseDTO();
 

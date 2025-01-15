@@ -30,10 +30,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -46,7 +44,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.createURLConnection;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.readErrorStream;
+import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.handleHttpResponse;
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.readResponseStream;
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.writePayloadToConnStream;
 import static com.mulesoft.connector.agentforce.internal.modelsapi.helpers.ConstantUtil.AI_PLATFORM_MODELS_CONNECTED_APP;
@@ -247,18 +245,9 @@ public class RequestHelper {
     addConnectionHeaders(httpConnection, accessTokenDTO.getAccessToken());
     writePayloadToConnStream(httpConnection, payload);
 
-    log.info("Executing rest {} ", urlString);
-    int responseCode = httpConnection.getResponseCode();
-    if (responseCode == HttpURLConnection.HTTP_OK) {
-      if (httpConnection.getInputStream() == null) {
-        return "Error: No response received from Agentforce";
-      }
-      return readResponseStream(httpConnection.getInputStream());
-    } else {
-      String errorMessage = readErrorStream(httpConnection.getErrorStream());
-      log.debug("Error response code: {}, message: {}", responseCode, errorMessage);
-      return String.format("Error: %d", responseCode);
-    }
+    InputStream responseStream = handleHttpResponse(httpConnection, AgentforceErrorType.MODELS_API_ERROR);
+
+    return readResponseStream(responseStream);
   }
 
   private String getContentFromUrl(String urlString) throws IOException, SAXException, TikaException {
