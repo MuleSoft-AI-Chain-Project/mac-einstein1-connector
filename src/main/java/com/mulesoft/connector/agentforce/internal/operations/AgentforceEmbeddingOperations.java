@@ -4,7 +4,6 @@ import com.mulesoft.connector.agentforce.api.metadata.AgentforceResponseAttribut
 import com.mulesoft.connector.agentforce.api.metadata.ResponseParameters;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
 import com.mulesoft.connector.agentforce.internal.modelsapi.error.provider.EmbeddingErrorTypeProvider;
-import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.RequestHelper;
 import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.ResponseHelper;
 import com.mulesoft.connector.agentforce.internal.modelsapi.models.ParamsEmbeddingDocumentDetails;
 import com.mulesoft.connector.agentforce.internal.modelsapi.models.ParamsEmbeddingModelDetails;

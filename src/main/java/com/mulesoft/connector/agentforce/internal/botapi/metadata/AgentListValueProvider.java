@@ -7,7 +7,7 @@ package com.mulesoft.connector.agentforce.internal.botapi.metadata;
 
 import com.mulesoft.connector.agentforce.internal.botapi.dto.BotRecord;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
-import com.mulesoft.connector.agentforce.internal.botapi.helpers.BotRequestHelperImpl;
+import com.mulesoft.connector.agentforce.internal.botapi.helpers.BotRequestHelper;
 import org.mule.runtime.api.value.Value;
 import org.mule.runtime.extension.api.annotation.param.Connection;
 import org.mule.runtime.extension.api.values.ValueBuilder;
@@ -33,7 +33,7 @@ public class AgentListValueProvider implements ValueProvider {
   public Set<Value> resolve() throws ValueResolvingException {
     try {
 
-      return new BotRequestHelperImpl(connection).getAgentList()
+      return new BotRequestHelper(connection).getAgentList()
           .stream()
           .filter(agent -> agent.getStatus().equals("Active"))
           .map(agent -> ValueBuilder

@@ -1,14 +1,9 @@
 package com.mulesoft.connector.agentforce.internal.connection;
 
 import com.mulesoft.connector.agentforce.internal.botapi.helpers.BotRequestHelper;
-import com.mulesoft.connector.agentforce.internal.botapi.helpers.BotRequestHelperImpl;
 import com.mulesoft.connector.agentforce.internal.dto.OAuthResponseDTO;
-import com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper;
 import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.RequestHelper;
-import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.RequestHelperImpl;
 import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.chatmemory.ChatMemoryHelper;
-import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.chatmemory.ChatMemoryHelperImpl;
-import org.mule.runtime.extension.api.annotation.connectivity.oauth.ClientCredentials;
 import org.mule.runtime.extension.api.connectivity.oauth.ClientCredentialsState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,9 +27,9 @@ public class CustomOAuthClientCredentialsConnection implements AgentforceConnect
     this.salesforceOrg = salesforceOrg;
     this.oAuthResponseDTO = oAuthResponseDTO;
     this.clientCredentialsState = clientCredentialsState;
-    this.requestHelper = new RequestHelperImpl(this);
-    this.chatMemoryHelper = new ChatMemoryHelperImpl(requestHelper);
-    this.botRequestHelper = new BotRequestHelperImpl(this);
+    this.requestHelper = new RequestHelper(this);
+    this.chatMemoryHelper = new ChatMemoryHelper(requestHelper);
+    this.botRequestHelper = new BotRequestHelper(this);
   }
 
   @Override

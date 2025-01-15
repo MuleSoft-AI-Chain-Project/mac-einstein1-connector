@@ -4,10 +4,8 @@ import com.mulesoft.connector.agentforce.api.metadata.AgentforceResponseAttribut
 import com.mulesoft.connector.agentforce.api.metadata.ResponseParameters;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
 import com.mulesoft.connector.agentforce.internal.modelsapi.error.provider.ChatErrorTypeProvider;
-import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.RequestHelper;
 import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.PromptTemplateHelper;
 import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.ResponseHelper;
-import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.chatmemory.ChatMemoryHelper;
 import com.mulesoft.connector.agentforce.internal.modelsapi.models.ParamsModelDetails;
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.error.Throws;

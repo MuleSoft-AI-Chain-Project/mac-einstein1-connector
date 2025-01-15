@@ -10,7 +10,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mule.runtime.api.connection.ConnectionException;
 import org.mule.runtime.extension.api.exception.ModuleException;
 
 import java.io.IOException;
