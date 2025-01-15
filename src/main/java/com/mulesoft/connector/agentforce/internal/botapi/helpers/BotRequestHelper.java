@@ -174,7 +174,7 @@ public class BotRequestHelper {
     responseDTO.setResponseAttributes(
                                       objectMapper.treeToValue(
                                                                rootNode, InvokeAgentResponseAttributes.class));
-    responseDTO.setSessionId(rootNode.get("sessionId").asText());
+    responseDTO.setSessionId(getTextValue(rootNode, "sessionId"));
     responseDTO.setText(getMessageText(rootNode));
 
     return responseDTO;
@@ -183,12 +183,16 @@ public class BotRequestHelper {
   private String getMessageText(JsonNode rootNode) {
     JsonNode messagesNode = rootNode.get("messages");
     StringBuilder text = new StringBuilder();
-    if (messagesNode.isArray()) {
+    if (messagesNode != null && messagesNode.isArray()) {
       for (JsonNode messageNode : messagesNode) {
-        text.append(messageNode.get("text").asText()).append(" ");
+        text.append(getTextValue(messageNode, "text")).append(" ");
       }
     }
     return text.toString();
+  }
+
+  private static String getTextValue(JsonNode node, String keyName) {
+    return node != null && node.get(keyName) != null ? node.get(keyName).asText() : null;
   }
 
   private String findRuntimeBaseUrl(AgentforceConnection connection) throws IOException {
