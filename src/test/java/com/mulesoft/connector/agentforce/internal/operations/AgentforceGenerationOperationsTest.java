@@ -37,11 +37,13 @@ class AgentforceGenerationOperationsTest {
   @Mock
   private ParamsModelDetails paramDetailsMock;
   private AutoCloseable closeable;
+
   @BeforeEach
   void setUp() {
     closeable = MockitoAnnotations.openMocks(this);
     agentforceGenerationOperations = new AgentforceGenerationOperations();
   }
+
   @AfterEach
   void tearDown() throws Exception {
     closeable.close(); // Close the resource to avoid resource leaks
@@ -72,11 +74,11 @@ class AgentforceGenerationOperationsTest {
     when(connectionMock.getRequestHelper()).thenReturn(requestHelperMock);
     when(requestHelperMock.executeGenerateText(anyString(), any()))
         .thenThrow(new RuntimeException("Test exception"));
-  
+
     ModuleException exception =
         assertThrows(ModuleException.class,
                      () -> agentforceGenerationOperations.generateText(prompt, connectionMock, paramDetailsMock));
-  
+
     assertEquals(
                  "Error while generating text for prompt Test Prompt",
                  exception.getMessage());
@@ -94,10 +96,10 @@ class AgentforceGenerationOperationsTest {
     when(connectionMock.getChatMemoryHelper()).thenReturn(chatMemoryHelperMock);
     when(chatMemoryHelperMock.chatWithMemory(anyString(), anyString(), anyString(), anyInt(), any()))
         .thenThrow(new RuntimeException("Test exception"));
-  
+
     ModuleException exception = assertThrows(ModuleException.class, () -> agentforceGenerationOperations
         .generateTextMemory(prompt, memoryPath, memoryName, keepLastMessages, connectionMock, paramDetailsMock));
-  
+
     assertEquals(
                  "Error while generating text from memory path src/resources/testdb, memory name vt, for prompt Test",
                  exception.getMessage());
@@ -110,11 +112,11 @@ class AgentforceGenerationOperationsTest {
     when(connectionMock.getRequestHelper()).thenReturn(requestHelperMock);
     when(requestHelperMock.executeGenerateChat(anyString(), any()))
         .thenThrow(new RuntimeException("Test exception"));
-  
+
     ModuleException exception =
         assertThrows(ModuleException.class,
                      () -> agentforceGenerationOperations.generateChatFromMessages(messages, connectionMock, paramDetailsMock));
-  
+
     assertEquals(
                  "Error while generating the chat from messages Test Messages",
                  exception.getMessage());

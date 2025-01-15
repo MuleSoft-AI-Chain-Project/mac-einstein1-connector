@@ -46,7 +46,6 @@ public class AgentforceGenerationOperations {
                                                                                 @ParameterGroup(
                                                                                     name = "Additional properties") ParamsModelDetails paramDetails) {
     log.info("Executing agent defined prompt template operation.");
-    System.out.println("Executing agent defined prompt template operation.");
     try {
       String finalPromptTemplate = PromptTemplateHelper.definePromptTemplate(template, instructions, dataset);
       String response = connection.getRequestHelper().executeGenerateText(finalPromptTemplate, paramDetails);

@@ -35,12 +35,13 @@ public class CustomOAuthClientCredentialsConnection implements AgentforceConnect
   @Override
   public void disconnect() {
     // Nothing to dispose
-    System.out.println("Inside disconnect");
+    logger.info("Inside CustomOAuthClientCredentialsConnection disconnect");
   }
 
   @Override
   public void validate() {
     try {
+      logger.info("Inside CustomOAuthClientCredentialsConnection validate, salesforceOrg {}", salesforceOrg);
       botRequestHelper.getAgentList();
     } catch (IOException e) {
       throw new RuntimeException(e);

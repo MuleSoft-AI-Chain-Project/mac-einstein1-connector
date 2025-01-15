@@ -41,23 +41,20 @@ public class AgentforceBotOperations {
       throws IOException {
 
     try {
-      System.out.println("startAgentConversation => parameterGroup.getAgent() = " + parameterGroup.getAgent());
       AgentConversationResponseDTO responseDTO = connection.getBotRequestHelper().startSession(parameterGroup.getAgent());
-      System.out.println("sessionId = " + responseDTO.getSessionId());
       JSONObject jsonObject = new JSONObject();
       jsonObject.put("sessionId", responseDTO.getSessionId());
 
       return Result.<InputStream, InvokeAgentResponseAttributes>builder()
-              .output(toInputStream(jsonObject.toString(), StandardCharsets.UTF_8))
-              .attributes(responseDTO.getResponseAttributes())
-              .attributesMediaType(org.mule.runtime.api.metadata.MediaType.APPLICATION_JAVA)
-              .mediaType(org.mule.runtime.api.metadata.MediaType.APPLICATION_JSON)
-              .build();
-    }catch (Exception e){
-      e.printStackTrace();
+          .output(toInputStream(jsonObject.toString(), StandardCharsets.UTF_8))
+          .attributes(responseDTO.getResponseAttributes())
+          .attributesMediaType(org.mule.runtime.api.metadata.MediaType.APPLICATION_JAVA)
+          .mediaType(org.mule.runtime.api.metadata.MediaType.APPLICATION_JSON)
+          .build();
+    } catch (Exception e) {
       return null;
     }
-}
+  }
 
 
   @MediaType(value = TEXT_PLAIN, strict = false)

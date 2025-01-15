@@ -30,41 +30,7 @@ import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantU
 public class CommonRequestHelper {
 
   private static final Logger log = LoggerFactory.getLogger(CommonRequestHelper.class);
-/*
-  public static String getOAuthURL(String salesforceOrg) {
-    return URI_HTTPS_PREFIX + salesforceOrg + URI_OAUTH_TOKEN;
-  }
 
-  public static String getOAuthParams(String clientId, String clientSecret) {
-    return QUERY_PARAM_GRANT_TYPE + "=" + GRANT_TYPE_CLIENT_CREDENTIALS
-        + "&" + QUERY_PARAM_CLIENT_ID + "=" + clientId
-        + "&" + QUERY_PARAM_CLIENT_SECRET + "=" + clientSecret;
-  }
-
-  public static OAuthResponseDTO getOAuthResponseDTO(String salesforceOrg, String clientId, String clientSecret)
-      throws IOException {
-
-    log.debug("Preparing request for connecti on for salesforce org:{}", salesforceOrg);
-
-    String urlString = CommonRequestHelper.getOAuthURL(salesforceOrg);
-    String urlParameters = CommonRequestHelper.getOAuthParams(clientId, clientSecret);
-    HttpURLConnection httpConnection = createURLConnection(urlString, HTTP_METHOD_POST);
-    writePayloadToConnStream(httpConnection, urlParameters);
-
-    log.info("Executing rest {} ", urlString);
-    int responseCode = httpConnection.getResponseCode();
-    log.debug("Response code for connection request:{}", responseCode);
-
-    if (responseCode == HttpURLConnection.HTTP_OK) {
-      if (httpConnection.getInputStream() == null) {
-        return null;
-      }
-      String response = readResponseStream(httpConnection.getInputStream());
-      return new ObjectMapper().readValue(response, OAuthResponseDTO.class);
-    }
-    return null;
-  }
-*/
   public static HttpURLConnection createURLConnection(String urlString, String httpMethod) throws IOException {
     URL url = new URL(urlString);
     HttpURLConnection conn = (HttpURLConnection) url.openConnection();

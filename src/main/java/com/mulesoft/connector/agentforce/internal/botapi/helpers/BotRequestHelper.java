@@ -64,16 +64,13 @@ public class BotRequestHelper {
 
   public AgentConversationResponseDTO startSession(String agentId)
       throws IOException {
-    System.out.println("getRuntimeBaseUrl = "+getRuntimeBaseUrl(agentforceConnection));
     String startSessionUrl =
         getRuntimeBaseUrl(agentforceConnection) + URI_BOT_API_VERSION + URI_BOT_API_BOTS + agentId + URI_BOT_API_SESSIONS;
     String externalSessionKey = UUID.randomUUID().toString();
-    String forceConfigEndpoint =  agentforceConnection.getSalesforceOrg();
+    String forceConfigEndpoint = agentforceConnection.getSalesforceOrg();
     String orgId = agentforceConnection.getoAuthResponseDTO().getOrgId();
     BotSessionRequestDTO payload = createStartSessionRequestPayload(
                                                                     externalSessionKey, forceConfigEndpoint);
-    System.out.println("startSessionUrl = "+startSessionUrl+", externalSessionKey = "+externalSessionKey
-            +", forceConfigEndpoint = "+forceConfigEndpoint+", orgId ="+orgId);
     log.debug("Agentforce start session details. Request URL: {}, external Session Key:{}," +
         " forceConfigEndpoint: {}, OrgId: {}",
               startSessionUrl, externalSessionKey, forceConfigEndpoint, orgId);

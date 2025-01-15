@@ -38,9 +38,9 @@
     </developers>
 
     <parent>
-        <groupId>com.mulesoft.connectors</groupId>
-        <artifactId>mule4-connectors-parent</artifactId>
-        <version>6.0.0</version>
+        <groupId>org.mule.extensions</groupId>
+        <artifactId>mule-modules-parent</artifactId>
+        <version>1.6.9</version>
     </parent>
 
     <properties>
@@ -58,7 +58,6 @@
         <maven.surefire.version>2.22.2</maven.surefire.version>
         <munit.version>3.3.1</munit.version>
         <runtimeProduct>MULE_EE</runtimeProduct>
-        <skipVerifications>true</skipVerifications>
     </properties>
 
     <dependencyManagement>
@@ -74,6 +73,11 @@
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>com.mulesoft.connectors</groupId>
+            <artifactId>mule-connector-commons</artifactId>
+            <version>2.1.1</version>
+        </dependency>
         <dependency>
             <groupId>org.mule.sdk</groupId>
             <artifactId>mule-sdk-api</artifactId>
@@ -151,36 +155,10 @@
             <version>3.12.4</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.mulesoft.connectors</groupId>
-            <artifactId>mule-connector-commons</artifactId>
-        </dependency>
    </dependencies>
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>connector-analyze</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>analyze-only</goal>
-                        </goals>
-                        <configuration combine.self="override">
-                            <failOnWarning>true</failOnWarning>
-                            <ignoredUsedUndeclaredDependencies>
-                                <ignoredUsedUndeclaredDependency>*</ignoredUsedUndeclaredDependency>
-                            </ignoredUsedUndeclaredDependencies>
-                            <ignoredUnusedDeclaredDependencies>
-                                <ignoredUnusedDeclaredDependency>*</ignoredUnusedDeclaredDependency>
-                            </ignoredUnusedDeclaredDependencies>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jdeps-plugin</artifactId>
@@ -305,4 +283,29 @@
             <url>https://repository-master.mulesoft.org/nexus/content/repositories/releases/</url>
         </repository>
     </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>mulesoft-releases</id>
+            <name>mulesoft release repository</name>
+            <layout>default</layout>
+            <url>https://repository.mulesoft.org/releases/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+    <distributionManagement>
+        <snapshotRepository>
+            <id>exchange-repository</id>
+            <name>Exchange Repository</name>
+            <url>https://maven.anypoint.mulesoft.com/api/v1/organizations/cf06d6a9-ce61-461c-b28d-047fc3ddf45b/maven</url>
+            <layout>default</layout>
+        </snapshotRepository>
+        <repository>
+            <id>exchange-repository</id>
+            <name>Exchange Repository</name>
+            <url>https://maven.anypoint.mulesoft.com/api/v1/organizations/cf06d6a9-ce61-461c-b28d-047fc3ddf45b/maven</url>
+            <layout>default</layout>
+        </repository>
+    </distributionManagement>
 </project>
