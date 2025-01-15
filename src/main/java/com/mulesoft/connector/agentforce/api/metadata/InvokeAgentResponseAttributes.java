@@ -1,8 +1,11 @@
 package com.mulesoft.connector.agentforce.api.metadata;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.io.Serializable;
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class InvokeAgentResponseAttributes implements Serializable {
 
   private String botVersion;
@@ -33,6 +36,7 @@ public class InvokeAgentResponseAttributes implements Serializable {
     this.processedSequenceIds = processedSequenceIds;
   }
 
+  @JsonIgnoreProperties(ignoreUnknown = true)
   public static class Message implements Serializable {
 
     private String id;

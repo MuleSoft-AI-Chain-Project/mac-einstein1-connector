@@ -1,30 +1,18 @@
 package com.mulesoft.connector.agentforce.internal.botapi.helpers;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mulesoft.connector.agentforce.api.metadata.InvokeAgentResponseAttributes;
-import com.mulesoft.connector.agentforce.internal.botapi.dto.AgentConversationResponseDTO;
-import com.mulesoft.connector.agentforce.internal.botapi.dto.AgentMetadataResponseDTO;
-import com.mulesoft.connector.agentforce.internal.botapi.dto.BotContinueSessionRequestDTO;
-import com.mulesoft.connector.agentforce.internal.botapi.dto.BotRecord;
-import com.mulesoft.connector.agentforce.internal.botapi.dto.BotSessionRequestDTO;
-import com.mulesoft.connector.agentforce.internal.botapi.dto.ForceConfigDTO;
+import com.mulesoft.connector.agentforce.internal.botapi.dto.*;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
 import com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType;
-import org.jetbrains.annotations.NotNull;
 import org.mule.runtime.core.api.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -101,7 +89,7 @@ public class BotRequestHelper {
     addConnectionHeaders(httpConnection, agentforceConnection.getoAuthResponseDTO().getAccessToken(), orgId);
     writePayloadToConnStream(httpConnection, objectMapper.writeValueAsString(payload));
 
-    return getParsedHttpResponse(httpConnection);
+    return parseResponse(httpConnection);
   }
 
   public AgentConversationResponseDTO continueSession(InputStream message, String sessionId, int messageSequenceNumber,
@@ -121,7 +109,7 @@ public class BotRequestHelper {
     addConnectionHeaders(httpConnection, agentforceConnection.getoAuthResponseDTO().getAccessToken(), orgId);
     writePayloadToConnStream(httpConnection, objectMapper.writeValueAsString(payload));
 
-    return getParsedHttpResponse(httpConnection);
+    return parseResponse(httpConnection);
   }
 
   public AgentConversationResponseDTO endSession(String sessionId, AgentforceConnection agentforceConnection) throws IOException {
@@ -135,7 +123,7 @@ public class BotRequestHelper {
     HttpURLConnection httpConnection = createURLConnection(endSessionUrl, HTTP_METHOD_DELETE);
     addConnectionHeadersForEndSession(httpConnection, agentforceConnection.getoAuthResponseDTO().getAccessToken(), orgId);
 
-    return getParsedHttpResponse(httpConnection);
+    return parseResponse(httpConnection);
   }
 
   private static void addConnectionHeaders(HttpURLConnection conn, String accessToken) {
@@ -174,96 +162,33 @@ public class BotRequestHelper {
     return new BotContinueSessionRequestDTO(messageDTO);
   }
 
-  private static InvokeAgentResponseAttributes.Message parseMessage(JsonParser parser,
-                                                                    AgentConversationResponseDTO responseDTO)
-      throws IOException {
-    InvokeAgentResponseAttributes.Message message = new InvokeAgentResponseAttributes.Message();
-    while (parser.nextToken() != JsonToken.END_OBJECT) {
-      String fieldName = parser.currentName();
-      parser.nextToken(); // Move to the value
-      if ("id".equals(fieldName)) {
-        message.setId(parser.getText());
-      } else if ("schedule".equals(fieldName)) {
-        InvokeAgentResponseAttributes.Schedule schedule = new InvokeAgentResponseAttributes.Schedule();
-        while (parser.nextToken() != JsonToken.END_OBJECT) {
-          String scheduleFieldName = parser.currentName();
-          parser.nextToken(); // Move to the value
-          if ("responseDelayMilliseconds".equals(scheduleFieldName)) {
-            schedule.setResponseDelayMilliseconds(parser.getIntValue());
-          } else {
-            parser.skipChildren();
-          }
-        }
-        message.setSchedule(schedule);
-      } else if ("type".equals(fieldName)) {
-        message.setType(parser.getText());
-      } else if ("text".equals(fieldName)) {
-        responseDTO.setTextInputStream(new ByteArrayInputStream(parser.getText().getBytes(StandardCharsets.UTF_8)));
-      } else {
-        parser.skipChildren();
-      }
-    }
-    return message;
-  }
-
-  private AgentConversationResponseDTO getParsedHttpResponse(HttpURLConnection httpConnection) throws IOException {
+  private AgentConversationResponseDTO parseResponse(HttpURLConnection httpConnection) throws IOException {
 
     InputStream responseStream = handleHttpResponse(httpConnection,
                                                     AgentforceErrorType.AGENT_OPERATIONS_FAILURE);
 
     AgentConversationResponseDTO responseDTO = new AgentConversationResponseDTO();
-    JsonFactory jsonFactory = new JsonFactory();
 
-    try (JsonParser jsonParser = jsonFactory.createParser(responseStream)) {
+    JsonNode rootNode = objectMapper.readTree(responseStream);
 
-      InvokeAgentResponseAttributes responseAttributes = new InvokeAgentResponseAttributes();
+    responseDTO.setResponseAttributes(
+                                      objectMapper.treeToValue(
+                                                               rootNode, InvokeAgentResponseAttributes.class));
+    responseDTO.setSessionId(rootNode.get("sessionId").asText());
+    responseDTO.setText(getMessageText(rootNode));
 
-      while (!jsonParser.isClosed()) {
-        JsonToken token = jsonParser.nextToken();
-        if (JsonToken.FIELD_NAME.equals(token)) {
-          String fieldName = jsonParser.currentName();
-          token = jsonParser.nextToken(); // Move to the value
-
-          switch (fieldName) {
-            case "sessionId":
-              responseDTO.setSessionId(jsonParser.getText());
-              break;
-            case "botVersion":
-              responseAttributes.setBotVersion(jsonParser.getText());
-              break;
-            case "messages":
-              if (JsonToken.START_ARRAY.equals(token)) {
-                List<InvokeAgentResponseAttributes.Message> messages = new ArrayList<>();
-                while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
-                  messages.add(parseMessage(jsonParser, responseDTO));
-                }
-                responseAttributes.setMessages(messages);
-              }
-              break;
-            case "processedSequenceIds":
-              responseAttributes.setProcessedSequenceIds(parseProcessedSeqIds(token, jsonParser));
-              break;
-            default:
-              // Skip unknown fields
-              jsonParser.skipChildren();
-              break;
-          }
-        }
-      }
-      responseDTO.setResponseAttributes(responseAttributes);
-    }
     return responseDTO;
   }
 
-  @NotNull
-  private List<Integer> parseProcessedSeqIds(JsonToken token, JsonParser jsonParser) throws IOException {
-    List<Integer> sequenceIds = new ArrayList<>();
-    if (JsonToken.START_ARRAY.equals(token)) {
-      while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
-        sequenceIds.add(jsonParser.getIntValue());
+  private String getMessageText(JsonNode rootNode) {
+    JsonNode messagesNode = rootNode.get("messages");
+    StringBuilder text = new StringBuilder();
+    if (messagesNode.isArray()) {
+      for (JsonNode messageNode : messagesNode) {
+        text.append(messageNode.get("text").asText()).append(" ");
       }
     }
-    return sequenceIds;
+    return text.toString();
   }
 
   private String findRuntimeBaseUrl(AgentforceConnection connection) throws IOException {
@@ -279,7 +204,6 @@ public class BotRequestHelper {
                                                     AgentforceErrorType.AGENT_METADATA_FAILURE);
     JsonNode rootNode = objectMapper.readTree(responseStream);
     String runtimeBaseURL = rootNode.get("runtimeBaseUrl").textValue();
-
 
     log.debug("Runtime base URL for connecting to agent: {} ", runtimeBaseURL);
     return runtimeBaseURL;

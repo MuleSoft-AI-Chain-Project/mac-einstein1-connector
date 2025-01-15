@@ -2,12 +2,10 @@ package com.mulesoft.connector.agentforce.internal.botapi.dto;
 
 import com.mulesoft.connector.agentforce.api.metadata.InvokeAgentResponseAttributes;
 
-import java.io.InputStream;
-
 public class AgentConversationResponseDTO {
 
   private InvokeAgentResponseAttributes responseAttributes;
-  private InputStream textInputStream;
+  private String text;
   private String sessionId;
 
   public InvokeAgentResponseAttributes getResponseAttributes() {
@@ -18,12 +16,12 @@ public class AgentConversationResponseDTO {
     this.responseAttributes = responseAttributes;
   }
 
-  public InputStream getTextInputStream() {
-    return textInputStream;
+  public String getText() {
+    return text;
   }
 
-  public void setTextInputStream(InputStream textInputStream) {
-    this.textInputStream = textInputStream;
+  public void setText(String text) {
+    this.text = text;
   }
 
   public String getSessionId() {
