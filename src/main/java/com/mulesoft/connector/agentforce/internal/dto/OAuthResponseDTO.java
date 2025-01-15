@@ -9,21 +9,15 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OAuthResponseDTO {
-  private final String accessToken;
   private final String apiInstanceUrl;
   private final String orgId;
   private final String salesforceorg;
 
-  @ConstructorProperties({"accessToken", "apiInstanceUrl", "id", "intanceUrl"})
-  public OAuthResponseDTO(String accessToken, String apiInstanceUrl, String id, String salesforceorg) {
-    this.accessToken = accessToken;
+  @ConstructorProperties({"apiInstanceUrl", "id", "intanceUrl"})
+  public OAuthResponseDTO(String apiInstanceUrl, String id, String salesforceorg) {
     this.apiInstanceUrl = apiInstanceUrl;
     this.orgId = parseOrgId(id);
     this.salesforceorg = salesforceorg;
-  }
-
-  public String getAccessToken() {
-    return accessToken;
   }
 
   public String getApiInstanceUrl() {
@@ -42,11 +36,9 @@ public class OAuthResponseDTO {
     String[] idArr = id.split("/");
     return idArr[idArr.length - 2];
   }
-
   @Override
   public String toString() {
     return "OAuthResponseDTO{" +
-            "accessToken='" + accessToken + '\'' +
             ", apiInstanceUrl='" + apiInstanceUrl + '\'' +
             ", orgId='" + orgId + '\'' +
             ", salesforceorg='" + salesforceorg + '\'' +

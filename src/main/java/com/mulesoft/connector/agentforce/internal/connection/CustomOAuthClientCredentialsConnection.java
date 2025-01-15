@@ -20,10 +20,7 @@ public class CustomOAuthClientCredentialsConnection implements AgentforceConnect
   private final static Logger logger = LoggerFactory.getLogger(AgentforceConnection.class);
 
   private ClientCredentialsState clientCredentialsState;
-
   private String salesforceOrg;
-  private String clientId;
-  private String clientSecret;
   private OAuthResponseDTO oAuthResponseDTO;
   private RequestHelper requestHelper;
   private ChatMemoryHelper chatMemoryHelper;
@@ -38,20 +35,7 @@ public class CustomOAuthClientCredentialsConnection implements AgentforceConnect
     this.requestHelper = new RequestHelperImpl(this);
     this.chatMemoryHelper = new ChatMemoryHelperImpl(requestHelper);
     this.botRequestHelper = new BotRequestHelperImpl(this);
-    System.out.println("CustomOAuthClientCredentialsConnection constructor");
   }
-
- /* public CustomOAuthClientCredentialsConnection(String salesforceOrg, String clientId, String clientSecret,
-                                                OAuthResponseDTO oAuthResponseDTO) {
-    this.salesforceOrg = salesforceOrg;
-    this.oAuthResponseDTO = oAuthResponseDTO;
-    this.clientId = clientId;
-    this.clientSecret = clientSecret;
-    this.requestHelper = new RequestHelperImpl(this);
-    this.chatMemoryHelper = new ChatMemoryHelperImpl(requestHelper);
-    this.botRequestHelper = new BotRequestHelperImpl(this);
-    System.out.println("CustomOAuthClientCredentialsConnection constructor");
-  }*/
 
   @Override
   public void disconnect() {
@@ -61,7 +45,11 @@ public class CustomOAuthClientCredentialsConnection implements AgentforceConnect
 
   @Override
   public void validate() {
-//
+      try {
+          botRequestHelper.getAgentList();
+      } catch (IOException e) {
+          throw new RuntimeException(e);
+      }
   }
 
   public OAuthResponseDTO getoAuthResponseDTO() {
@@ -72,6 +60,9 @@ public class CustomOAuthClientCredentialsConnection implements AgentforceConnect
     return salesforceOrg;
   }
 
+  public ClientCredentialsState getClientCredentialsState() {
+    return clientCredentialsState;
+  }
   @Override
   public RequestHelper getRequestHelper() {
     return requestHelper;
@@ -85,5 +76,10 @@ public class CustomOAuthClientCredentialsConnection implements AgentforceConnect
   @Override
   public BotRequestHelper getBotRequestHelper() {
     return botRequestHelper;
+  }
+
+  @Override
+  public String getAccessToken() {
+    return clientCredentialsState.getAccessToken();
   }
 }

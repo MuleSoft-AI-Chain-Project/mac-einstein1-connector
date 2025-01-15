@@ -3,6 +3,7 @@ package com.mulesoft.connector.agentforce.internal.helpers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mulesoft.connector.agentforce.internal.dto.OAuthResponseDTO;
 import com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType;
+import org.mule.runtime.extension.api.connectivity.oauth.AccessTokenExpiredException;
 import org.mule.runtime.extension.api.exception.ModuleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,6 +115,8 @@ public class CommonRequestHelper {
                                   "Error: No response received from Agentforce", errorType);
       }
       return readResponseStream(httpConnection.getInputStream());
+    } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+      throw new AccessTokenExpiredException();
     } else {
       String errorMessage = readErrorStream(httpConnection.getErrorStream());
       log.info("Error in HTTP request. Response code: {}, message: {}", responseCode, errorMessage);

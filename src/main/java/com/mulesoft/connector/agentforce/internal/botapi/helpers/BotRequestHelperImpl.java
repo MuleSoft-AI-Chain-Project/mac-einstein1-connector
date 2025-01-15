@@ -44,7 +44,7 @@ public class BotRequestHelperImpl implements BotRequestHelper {
         + URI_BOT_API_METADATA;
 
     HttpURLConnection httpConnection = createURLConnection(metadataUrl, HTTP_METHOD_GET);
-    addConnectionHeaders(httpConnection, agentforceConnection.getoAuthResponseDTO().getAccessToken());
+    addConnectionHeaders(httpConnection, agentforceConnection.getAccessToken());
 
     log.debug("Executing getAgentList request with URL: {} ", metadataUrl);
 
@@ -70,7 +70,7 @@ public class BotRequestHelperImpl implements BotRequestHelper {
               startSessionUrl, externalSessionKey, forceConfigEndpoint, orgId);
 
     HttpURLConnection httpConnection = createURLConnection(startSessionUrl, HTTP_METHOD_POST);
-    addConnectionHeaders(httpConnection, agentforceConnection.getoAuthResponseDTO().getAccessToken(), orgId);
+    addConnectionHeaders(httpConnection, agentforceConnection.getAccessToken(), orgId);
     writePayloadToConnStream(httpConnection, new ObjectMapper().writeValueAsString(payload));
 
     return handleHttpResponse(httpConnection, AgentforceErrorType.AGENT_OPERATIONS_FAILURE);
@@ -83,7 +83,7 @@ public class BotRequestHelperImpl implements BotRequestHelper {
     String orgId = agentforceConnection.getoAuthResponseDTO().getOrgId();
 
     HttpURLConnection httpConnection = createURLConnection(continueSessionUrl, HTTP_METHOD_POST);
-    addConnectionHeaders(httpConnection, agentforceConnection.getoAuthResponseDTO().getAccessToken(), orgId);
+    addConnectionHeaders(httpConnection, agentforceConnection.getAccessToken(), orgId);
     writePayloadToConnStream(httpConnection, message);
 
     return handleHttpResponse(httpConnection, AgentforceErrorType.AGENT_OPERATIONS_FAILURE);
@@ -96,7 +96,7 @@ public class BotRequestHelperImpl implements BotRequestHelper {
     String orgId = agentforceConnection.getoAuthResponseDTO().getOrgId();
 
     HttpURLConnection httpConnection = createURLConnection(endSessionUrl, HTTP_METHOD_DELETE);
-    addConnectionHeadersForEndSession(httpConnection, agentforceConnection.getoAuthResponseDTO().getAccessToken(), orgId);
+    addConnectionHeadersForEndSession(httpConnection, agentforceConnection.getAccessToken(), orgId);
 
     return handleHttpResponse(httpConnection, AgentforceErrorType.AGENT_OPERATIONS_FAILURE);
   }

@@ -242,7 +242,7 @@ public class RequestHelperImpl implements RequestHelper {
     log.debug("Agentforce Request URL: {}", urlString);
 
     HttpURLConnection httpConnection = createURLConnection(urlString, HTTP_METHOD_POST);
-    addConnectionHeaders(httpConnection, agentforceConnection.getoAuthResponseDTO().getAccessToken());
+    addConnectionHeaders(httpConnection, agentforceConnection.getAccessToken());
     writePayloadToConnStream(httpConnection, payload);
 
     log.info("Executing rest {} ", urlString);
@@ -252,6 +252,8 @@ public class RequestHelperImpl implements RequestHelper {
         return "Error: No response received from Agentforce";
       }
       return readResponseStream(httpConnection.getInputStream());
+    } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+      throw new AccessTokenExpiredException();
     } else {
       String errorMessage = readErrorStream(httpConnection.getErrorStream());
       log.debug("Error response code: {}, message: {}", responseCode, errorMessage);
