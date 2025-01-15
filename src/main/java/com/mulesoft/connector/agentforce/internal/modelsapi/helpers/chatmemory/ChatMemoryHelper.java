@@ -3,16 +3,16 @@ package com.mulesoft.connector.agentforce.internal.modelsapi.helpers.chatmemory;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
 import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.RequestHelper;
 import com.mulesoft.connector.agentforce.internal.modelsapi.models.ParamsModelDetails;
-import org.mule.runtime.api.connection.ConnectionException;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 public class ChatMemoryHelper {
 
-  public String chatWithMemory(String prompt, String memoryPath, String memoryName, Integer keepLastMessages,
-                               AgentforceConnection connection, ParamsModelDetails parameters, RequestHelper requestHelper)
-      throws IOException, ConnectionException {
+  public InputStream chatWithMemory(String prompt, String memoryPath, String memoryName, Integer keepLastMessages,
+                                    AgentforceConnection connection, ParamsModelDetails parameters, RequestHelper requestHelper)
+      throws IOException {
 
     //Chat memory initialization
     ChatMemory chatMemory = intializeChatMemory(memoryPath, memoryName);
@@ -22,7 +22,7 @@ public class ChatMemoryHelper {
     keepLastMessagesList.add(prompt);
     String memoryPrompt = formatMemoryPrompt(keepLastMessagesList);
 
-    String response = requestHelper.executeGenerateText(memoryPrompt, connection, parameters);
+    InputStream response = requestHelper.executeGenerateText(memoryPrompt, connection, parameters);
 
     addMessageToMemory(chatMemory, prompt);
 

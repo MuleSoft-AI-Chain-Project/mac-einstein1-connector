@@ -54,9 +54,9 @@ public class AgentforceEmbeddingOperations {
                                                                            @ParameterGroup(
                                                                                name = "Additional properties") ParamsEmbeddingModelDetails paramDetails) {
     try {
-      String response = requestHelper.executeGenerateEmbedding(text, connection, paramDetails);
+      InputStream responseStream = requestHelper.executeGenerateEmbedding(text, connection, paramDetails);
 
-      return ResponseHelper.createAgentforceEmbeddingResponse(response);
+      return ResponseHelper.createAgentforceEmbeddingResponse(responseStream);
     } catch (Exception e) {
       throw new ModuleException("Error while executing embedding generate from text operation",
                                 EMBEDDING_OPERATIONS_FAILURE, e);
@@ -130,10 +130,10 @@ public class AgentforceEmbeddingOperations {
       String content = requestHelper.embeddingFileQuery(prompt, filePath, connection, paramDetails.getEmbeddingName(),
                                                         paramDetails.getFileType(), paramDetails.getOptionType())
           .toString();
-      String response = requestHelper.executeRAG("data: " + content + ", question: " + prompt, connection,
-                                                 paramDetails);
+      InputStream responseStream = requestHelper.executeRAG("data: " + content + ", question: " + prompt, connection,
+                                                            paramDetails);
 
-      return ResponseHelper.createAgentforceFormattedResponse(response);
+      return ResponseHelper.createAgentforceFormattedResponse(responseStream);
     } catch (Exception e) {
 
       log.error(format("Exception occurred while executing rag adhoc load document operation %s", e.getMessage()), e);
@@ -159,10 +159,10 @@ public class AgentforceEmbeddingOperations {
       String content =
           requestHelper.embeddingFileQuery(prompt, toolsConfig, connection, MODELAPI_OPENAI_ADA_002, "text", "FULL")
               .toString();
-      String response = requestHelper.executeTools(prompt, "data: " + content + ", question: " + prompt,
-                                                   toolsConfig, connection, paramDetails);
+      InputStream responseStream = requestHelper.executeTools(prompt, "data: " + content + ", question: " + prompt,
+                                                              toolsConfig, connection, paramDetails);
 
-      return ResponseHelper.createAgentforceFormattedResponse(response);
+      return ResponseHelper.createAgentforceFormattedResponse(responseStream);
     } catch (Exception e) {
 
       log.error(format("Exception occurred while executing AI service tools operation %s", e.getMessage()), e);

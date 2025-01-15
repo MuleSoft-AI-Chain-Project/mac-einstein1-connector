@@ -60,9 +60,9 @@ public class AgentforceGenerationOperations {
     log.info("Executing agent defined prompt template operation.");
     try {
       String finalPromptTemplate = PromptTemplateHelper.definePromptTemplate(template, instructions, dataset);
-      String response = requestHelper.executeGenerateText(finalPromptTemplate, connection, paramDetails);
+      InputStream responseStream = requestHelper.executeGenerateText(finalPromptTemplate, connection, paramDetails);
 
-      return ResponseHelper.createAgentforceFormattedResponse(response);
+      return ResponseHelper.createAgentforceFormattedResponse(responseStream);
     } catch (Exception e) {
 
       log.error(format("Exception occurred while executing agent defined prompt template operation %s", e.getMessage()), e);
@@ -84,9 +84,9 @@ public class AgentforceGenerationOperations {
                                                                             name = "Additional properties") ParamsModelDetails paramDetails) {
     log.info("Executing chat answer prompt operation.");
     try {
-      String response = requestHelper.executeGenerateText(prompt, connection, paramDetails);
+      InputStream responseStream = requestHelper.executeGenerateText(prompt, connection, paramDetails);
 
-      return ResponseHelper.createAgentforceFormattedResponse(response);
+      return ResponseHelper.createAgentforceFormattedResponse(responseStream);
     } catch (Exception e) {
 
       log.error(format("Exception occurred while executing chat answer prompt operation %s", e.getMessage()), e);
@@ -111,10 +111,10 @@ public class AgentforceGenerationOperations {
     log.info("Executing chat answer prompt with memory operation.");
     try {
 
-      String response = chatMemoryHelper.chatWithMemory(prompt, memoryPath, memoryName, keepLastMessages,
-                                                        connection, paramDetails, requestHelper);
+      InputStream responseStream = chatMemoryHelper.chatWithMemory(prompt, memoryPath, memoryName, keepLastMessages,
+                                                                   connection, paramDetails, requestHelper);
 
-      return ResponseHelper.createAgentforceFormattedResponse(response);
+      return ResponseHelper.createAgentforceFormattedResponse(responseStream);
     } catch (Exception e) {
       log.error(format("Exception occurred while executing chat answer prompt with memory operation %s", e.getMessage()), e);
       throw new ModuleException("Error while generating text from memory path " + memoryPath + ", memory name "
@@ -136,9 +136,9 @@ public class AgentforceGenerationOperations {
     log.info("Executing chat generate from message operation.");
     try {
 
-      String response = requestHelper.executeGenerateChat(messages, connection, paramDetails);
+      InputStream responseStream = requestHelper.executeGenerateChat(messages, connection, paramDetails);
 
-      return ResponseHelper.createAgentforceChatFromMessagesResponse(response);
+      return ResponseHelper.createAgentforceChatFromMessagesResponse(responseStream);
     } catch (Exception e) {
 
       log.error(format("Exception occurred while executing chat generate from message operation %s", e.getMessage()), e);

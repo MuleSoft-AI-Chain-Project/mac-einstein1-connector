@@ -1,6 +1,5 @@
 package com.mulesoft.connector.agentforce.internal.modelsapi.helpers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mulesoft.connector.agentforce.api.metadata.AgentforceResponseAttributes;
 import com.mulesoft.connector.agentforce.api.metadata.ResponseParameters;
@@ -11,12 +10,15 @@ import org.json.JSONObject;
 import org.mule.runtime.api.metadata.MediaType;
 import org.mule.runtime.extension.api.runtime.operation.Result;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import static org.apache.commons.io.IOUtils.toInputStream;
 
 public class ResponseHelper {
+
+  private static final ObjectMapper objectMapper = new ObjectMapper();
 
   public static Result<InputStream, Void> createAgentforceDefaultResponse(String response) {
 
@@ -26,10 +28,10 @@ public class ResponseHelper {
         .build();
   }
 
-  public static Result<InputStream, AgentforceResponseAttributes> createAgentforceFormattedResponse(String response)
-      throws JsonProcessingException {
+  public static Result<InputStream, AgentforceResponseAttributes> createAgentforceFormattedResponse(InputStream responseStream)
+      throws IOException {
 
-    AgentforceGenerationResponseDTO responseDTO = new ObjectMapper().readValue(response, AgentforceGenerationResponseDTO.class);
+    AgentforceGenerationResponseDTO responseDTO = objectMapper.readValue(responseStream, AgentforceGenerationResponseDTO.class);
 
     String generatedText =
         responseDTO.getGeneration() != null ? responseDTO.getGeneration().getGeneratedText() : "";
@@ -45,11 +47,11 @@ public class ResponseHelper {
         .build();
   }
 
-  public static Result<InputStream, ResponseParameters> createAgentforceChatFromMessagesResponse(String response)
-      throws JsonProcessingException {
+  public static Result<InputStream, ResponseParameters> createAgentforceChatFromMessagesResponse(InputStream responseStream)
+      throws IOException {
 
     AgentforceChatFromMessagesResponseDTO responseDTO =
-        new ObjectMapper().readValue(response, AgentforceChatFromMessagesResponseDTO.class);
+        objectMapper.readValue(responseStream, AgentforceChatFromMessagesResponseDTO.class);
 
     JSONObject jsonObject = new JSONObject();
     jsonObject.put("generations", responseDTO.getGenerationDetails().getGenerations());
@@ -62,10 +64,8 @@ public class ResponseHelper {
         .build();
   }
 
-  public static Result<InputStream, ResponseParameters> createAgentforceEmbeddingResponse(String response)
-      throws JsonProcessingException {
-
-    ObjectMapper objectMapper = new ObjectMapper();
+  public static Result<InputStream, ResponseParameters> createAgentforceEmbeddingResponse(InputStream response)
+      throws IOException {
 
     AgentforceEmbeddingResponseDTO responseDTO = objectMapper.readValue(response, AgentforceEmbeddingResponseDTO.class);
     JSONObject jsonObject = new JSONObject();
