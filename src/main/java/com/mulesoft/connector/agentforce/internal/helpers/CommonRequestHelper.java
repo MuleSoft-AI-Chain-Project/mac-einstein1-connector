@@ -24,14 +24,13 @@ import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantU
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.QUERY_PARAM_CLIENT_SECRET;
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.QUERY_PARAM_GRANT_TYPE;
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.READ_TIMEOUT;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.URI_HTTPS_PREFIX;
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.URI_OAUTH_TOKEN;
 
 
 public class CommonRequestHelper {
 
   private static final Logger log = LoggerFactory.getLogger(CommonRequestHelper.class);
-
+/*
   public static String getOAuthURL(String salesforceOrg) {
     return URI_HTTPS_PREFIX + salesforceOrg + URI_OAUTH_TOKEN;
   }
@@ -65,7 +64,7 @@ public class CommonRequestHelper {
     }
     return null;
   }
-
+*/
   public static HttpURLConnection createURLConnection(String urlString, String httpMethod) throws IOException {
     URL url = new URL(urlString);
     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -106,7 +105,8 @@ public class CommonRequestHelper {
     }
   }
 
-  public static String handleHttpResponse(HttpURLConnection httpConnection, AgentforceErrorType errorType) throws IOException {
+  public static InputStream handleHttpResponse(HttpURLConnection httpConnection, AgentforceErrorType errorType)
+      throws IOException {
     int responseCode = httpConnection.getResponseCode();
 
     if (responseCode == HttpURLConnection.HTTP_OK) {
@@ -114,7 +114,7 @@ public class CommonRequestHelper {
         throw new ModuleException(
                                   "Error: No response received from Agentforce", errorType);
       }
-      return readResponseStream(httpConnection.getInputStream());
+      return httpConnection.getInputStream();
     } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
       throw new AccessTokenExpiredException();
     } else {

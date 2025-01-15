@@ -26,27 +26,27 @@ import java.io.IOException;
 @DisplayName("OAuth Client Credentials")
 @ClientCredentials(tokenUrl = "https://{salesforceorg}/services/oauth2/token")
 public class CustomOauthClientCredentialsConnectionProvider implements AgentforceConnectionProvider,
-        CachedConnectionProvider<AgentforceConnection> {
+    CachedConnectionProvider<AgentforceConnection> {
 
-    private final static Logger logger = LoggerFactory.getLogger(CustomOauthClientCredentialsConnectionProvider.class);
-    private ClientCredentialsState clientCredentialsState;
-    @OAuthCallbackValue(expression = "#[payload.instance_url]")
-    private String salesforceOrg;
-    @OAuthCallbackValue(expression = "#[payload.api_instance_url]")
-    private String apiInstanceUrl;
-    @OAuthCallbackValue(expression = "#[payload.id]")
-    private String id;
+  private final static Logger logger = LoggerFactory.getLogger(CustomOauthClientCredentialsConnectionProvider.class);
+  private ClientCredentialsState clientCredentialsState;
+  @OAuthCallbackValue(expression = "#[payload.instance_url]")
+  private String salesforceOrg;
+  @OAuthCallbackValue(expression = "#[payload.api_instance_url]")
+  private String apiInstanceUrl;
+  @OAuthCallbackValue(expression = "#[payload.id]")
+  private String id;
 
-    @Override
-    public AgentforceConnection connect() {
-        logger.info("Inside CustomOauthClientCredentialsConnectionProvider connect, salesforceOrg {}, apiInstanceUrl = {}," +
-                " id = {} ", salesforceOrg, apiInstanceUrl, id);
+  @Override
+  public AgentforceConnection connect() {
+    logger.info("Inside CustomOauthClientCredentialsConnectionProvider connect, salesforceOrg {}, apiInstanceUrl = {}," +
+        " id = {} ", salesforceOrg, apiInstanceUrl, id);
 
-        OAuthResponseDTO oAuthResponseDTO = new OAuthResponseDTO(apiInstanceUrl, id, salesforceOrg);
-        return new CustomOAuthClientCredentialsConnection(salesforceOrg, oAuthResponseDTO, clientCredentialsState);
-    }
+    OAuthResponseDTO oAuthResponseDTO = new OAuthResponseDTO(apiInstanceUrl, id, salesforceOrg);
+    return new CustomOAuthClientCredentialsConnection(salesforceOrg, oAuthResponseDTO, clientCredentialsState);
+  }
 
-    public void setClientCredentialsState(ClientCredentialsState clientCredentialsState) {
-        this.clientCredentialsState = clientCredentialsState;
-    }
+  public void setClientCredentialsState(ClientCredentialsState clientCredentialsState) {
+    this.clientCredentialsState = clientCredentialsState;
+  }
 }

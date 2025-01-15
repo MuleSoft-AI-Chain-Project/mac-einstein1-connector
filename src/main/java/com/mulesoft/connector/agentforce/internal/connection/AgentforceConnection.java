@@ -11,15 +11,16 @@ import com.mulesoft.connectors.commons.template.connection.ConnectorConnection;
  */
 //In future if we are adding new connection types, then common parameters of connection types will go here
 public interface AgentforceConnection extends ConnectorConnection {
-   OAuthResponseDTO getoAuthResponseDTO();
 
-   String getSalesforceOrg();
+  OAuthResponseDTO getoAuthResponseDTO();
 
-   RequestHelper getRequestHelper();
+  String getSalesforceOrg();
 
-   ChatMemoryHelper getChatMemoryHelper();
+  RequestHelper getRequestHelper();
 
-   BotRequestHelper getBotRequestHelper();
+  ChatMemoryHelper getChatMemoryHelper();
 
-   String getAccessToken();
+  BotRequestHelper getBotRequestHelper();
+
+  String getAccessToken();
 }

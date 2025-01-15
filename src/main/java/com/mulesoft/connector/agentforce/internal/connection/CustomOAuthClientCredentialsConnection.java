@@ -45,11 +45,11 @@ public class CustomOAuthClientCredentialsConnection implements AgentforceConnect
 
   @Override
   public void validate() {
-      try {
-          botRequestHelper.getAgentList();
-      } catch (IOException e) {
-          throw new RuntimeException(e);
-      }
+    try {
+      botRequestHelper.getAgentList();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public OAuthResponseDTO getoAuthResponseDTO() {
@@ -63,6 +63,7 @@ public class CustomOAuthClientCredentialsConnection implements AgentforceConnect
   public ClientCredentialsState getClientCredentialsState() {
     return clientCredentialsState;
   }
+
   @Override
   public RequestHelper getRequestHelper() {
     return requestHelper;

@@ -5,9 +5,8 @@
  */
 package com.mulesoft.connector.agentforce.internal.botapi.metadata;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mulesoft.connector.agentforce.internal.botapi.dto.BotRecord;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
-import com.mulesoft.connector.agentforce.internal.botapi.dto.AgentMetadataResponse;
 import com.mulesoft.connector.agentforce.internal.botapi.helpers.BotRequestHelperImpl;
 import org.mule.runtime.api.value.Value;
 import org.mule.runtime.extension.api.annotation.param.Connection;
@@ -34,21 +33,20 @@ public class AgentListValueProvider implements ValueProvider {
   public Set<Value> resolve() throws ValueResolvingException {
     try {
 
-      String agentListResponse = connection.getBotRequestHelper().getAgentList();
-
-      AgentMetadataResponse agentMetadataResponse = new ObjectMapper().readValue(
-                                                                                 agentListResponse,
-                                                                                 AgentMetadataResponse.class);
-      return agentMetadataResponse.getRecords()
+      return new BotRequestHelperImpl(connection).getAgentList()
           .stream()
           .filter(agent -> agent.getStatus().equals("Active"))
           .map(agent -> ValueBuilder
               .newValue(agent.getBotDefinitionId())
-              .withDisplayName(agent.getBotDefinition().getMasterLabel())
+              .withDisplayName(constructDisplayName(agent))
               .build())
           .collect(Collectors.toSet());
     } catch (IOException e) {
       throw new ValueResolvingException(format(AGENT_LIST_ERR_MSG), CONNECTION_FAILURE, e);
     }
+  }
+
+  private static String constructDisplayName(BotRecord agent) {
+    return agent.getBotDefinition().getMasterLabel() + " [" + agent.getBotDefinitionId() + "]";
   }
 }
