@@ -6,11 +6,13 @@ import com.mulesoft.connector.agentforce.internal.botapi.error.provider.BotError
 import com.mulesoft.connector.agentforce.internal.botapi.group.BotMessageParameterGroup;
 import com.mulesoft.connector.agentforce.internal.botapi.helpers.BotRequestHelper;
 import com.mulesoft.connector.agentforce.internal.botapi.group.BotAgentParameterGroup;
+import com.mulesoft.connector.agentforce.internal.botapi.metadata.AgentConversationResponseMetadataResolver;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
 import org.json.JSONObject;
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.error.Throws;
 import org.mule.runtime.extension.api.annotation.metadata.MetadataKeyId;
+import org.mule.runtime.extension.api.annotation.metadata.OutputResolver;
 import org.mule.runtime.extension.api.annotation.metadata.fixed.OutputJsonType;
 import org.mule.runtime.extension.api.annotation.param.Connection;
 import org.mule.runtime.extension.api.annotation.param.Content;
@@ -60,6 +62,7 @@ public class AgentforceBotOperations {
   @MediaType(value = TEXT_PLAIN, strict = false)
   @Alias("Continue-agent-conversation")
   @Throws(BotErrorTypeProvider.class)
+  @OutputResolver(output = AgentConversationResponseMetadataResolver.class)
   public Result<InputStream, InvokeAgentResponseAttributes> continueConversation(@Content String sessionId,
                                                                                  @ParameterGroup(
                                                                                      name = "Message") BotMessageParameterGroup messageParameterGroup,

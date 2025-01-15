@@ -2,6 +2,7 @@ package com.mulesoft.connector.agentforce.internal.modelsapi.helpers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
+import com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType;
 import com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil;
 import com.mulesoft.connector.agentforce.internal.modelsapi.dto.AgentforceEmbeddingResponseDTO;
 import com.mulesoft.connector.agentforce.internal.dto.OAuthResponseDTO;
@@ -74,7 +75,7 @@ public class RequestHelper {
 
   public String executeGenerateChat(String messages, AgentforceConnection connection, ParamsModelDetails paramDetails)
       throws IOException {
-    String payload = constrcutJsonMessages(messages, paramDetails);
+    String payload = constructJsonMessages(messages, paramDetails);
     OAuthResponseDTO accessTokeDTO = connection.getoAuthResponseDTO();
     return executeAgentforceRequest(accessTokeDTO, payload, paramDetails.getModelApiName(), URI_MODELS_API_CHAT_GENERATIONS);
   }
@@ -393,7 +394,7 @@ public class RequestHelper {
     return jsonPayload.toString();
   }
 
-  private String constrcutJsonMessages(String message, ParamsModelDetails paramsModelDetails) {
+  private String constructJsonMessages(String message, ParamsModelDetails paramsModelDetails) {
     JSONArray messages = new JSONArray(message);
 
     JSONObject locale = new JSONObject();
@@ -457,20 +458,7 @@ public class RequestHelper {
           conn.setRequestProperty(CommonConstantUtil.CONTENT_TYPE_STRING, "application/json; charset=UTF-8");
           conn.setDoOutput(true);
 
-          if (method.equals("POST")) {
-            try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream())) {
-              wr.writeBytes(payload);
-              wr.flush();
-            }
-          }
-          int responseCode = conn.getResponseCode();
-
-          BufferedReader in;
-          if (responseCode >= 200 && responseCode < 300) {
-            in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-          } else {
-            in = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
-          }
+          BufferedReader in = getBufferedReader(payload, method, conn);
 
           String inputLine;
           StringBuilder response = new StringBuilder();
@@ -486,6 +474,24 @@ public class RequestHelper {
       }
       return responseString;
     }
+  }
+
+  private static BufferedReader getBufferedReader(String payload, String method, HttpURLConnection conn) throws IOException {
+    if (method.equals("POST")) {
+      try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream())) {
+        wr.writeBytes(payload);
+        wr.flush();
+      }
+    }
+    int responseCode = conn.getResponseCode();
+
+    BufferedReader in;
+    if (responseCode >= 200 && responseCode < 300) {
+      in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+    } else {
+      in = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+    }
+    return in;
   }
 
   private String extractPayload(String payload) {
