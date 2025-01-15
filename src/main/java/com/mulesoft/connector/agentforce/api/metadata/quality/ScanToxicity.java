@@ -1,8 +1,9 @@
 package com.mulesoft.connector.agentforce.api.metadata.quality;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class ScanToxicity {
+public class ScanToxicity implements Serializable {
 
   private boolean isDetected;
   private List<Categories> categories;

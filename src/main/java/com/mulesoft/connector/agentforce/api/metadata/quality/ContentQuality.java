@@ -1,6 +1,8 @@
 package com.mulesoft.connector.agentforce.api.metadata.quality;
 
-public class ContentQuality {
+import java.io.Serializable;
+
+public class ContentQuality implements Serializable {
 
   private ScanToxicity scanToxicity;
 

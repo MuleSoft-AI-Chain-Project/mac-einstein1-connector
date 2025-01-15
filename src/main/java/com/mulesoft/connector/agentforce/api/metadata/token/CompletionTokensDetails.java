@@ -4,9 +4,10 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import java.beans.ConstructorProperties;
+import java.io.Serializable;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class CompletionTokensDetails {
+public class CompletionTokensDetails implements Serializable {
 
   private final int reasoningTokens;
   private final int audioTokens;

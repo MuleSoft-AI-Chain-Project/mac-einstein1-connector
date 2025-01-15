@@ -6,10 +6,11 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.mulesoft.connector.agentforce.api.metadata.token.TokenUsage;
 
 import java.beans.ConstructorProperties;
+import java.io.Serializable;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class ResponseParameters {
+public class ResponseParameters implements Serializable {
 
   private final TokenUsage tokenUsage;
   private final String model;

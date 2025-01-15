@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+      xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:ms-agentforce="http://www.mulesoft.org/schema/mule/ms-agentforce"
+      xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+        http://www.mulesoft.org/schema/mule/munit-tools http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+        http://www.mulesoft.org/schema/mule/ms-agentforce http://www.mulesoft.org/schema/mule/ms-agentforce/current/mule-ms-agentforce.xsd">
+
+    <munit:config name="BotInvokeAgentOperationTestCase.xml"/>
+
+    <munit:test name="StartAgentTest">
+        <munit:execution>
+            <ms-agentforce:start-agent-conversation doc:name="Start agent" doc:id="cfe4865c-2280-4e0d-8bd2-da6c2e034f4f" config-ref="Agentforce_Config" agent="0Xx5b0000008ObjCAE"/>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that is="#[MunitTools::notNullValue()]" expression="#[payload.sessionId]"/>
+        </munit:validation>
+    </munit:test>
+    <munit:after-test name="new-test-suiteAfter_Test" doc:id="fa1c061a-85f3-480f-96bb-9cc305aa49c3" >
+        <ms-agentforce:end-agent-conversation doc:name="End agent conversation" doc:id="46c41ed7-88f7-49ea-8025-89a21c1524cf" config-ref="Agentforce_Config">
+            <ms-agentforce:session-id ><![CDATA[#[output application/json
+---
+payload.sessionId]]]></ms-agentforce:session-id>
+        </ms-agentforce:end-agent-conversation>
+    </munit:after-test>
+
+</mule>
