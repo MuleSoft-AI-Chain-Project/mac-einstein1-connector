@@ -3,7 +3,7 @@ package com.mulesoft.connector.agentforce.internal.helpers;
 public class CommonConstantUtil {
 
   public static final String URI_OAUTH_TOKEN = "/services/oauth2/token";
-  
+
   public static final String HTTP_METHOD_DELETE = "DELETE";
 
   public static final String HTTP_METHOD_POST = "POST";

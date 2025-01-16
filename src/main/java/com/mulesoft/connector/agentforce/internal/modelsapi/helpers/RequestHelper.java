@@ -71,19 +71,19 @@ public class RequestHelper {
   public String executeGenerateText(String prompt, ParamsModelDetails paramDetails)
       throws IOException {
     String payload = constructJsonPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
-    return executeAgentforceRequest(payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS, true);
+    return executeAgentforceRequest(payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
   }
 
   public String executeGenerateChat(String messages, ParamsModelDetails paramDetails)
       throws IOException {
     String payload = constrcutJsonMessages(messages, paramDetails);
-    return executeAgentforceRequest(payload, paramDetails.getModelApiName(), URI_MODELS_API_CHAT_GENERATIONS, true);
+    return executeAgentforceRequest(payload, paramDetails.getModelApiName(), URI_MODELS_API_CHAT_GENERATIONS);
   }
 
   public String executeGenerateEmbedding(String text, ParamsEmbeddingModelDetails paramDetails)
       throws IOException {
     String payload = constructEmbeddingJSON(text);
-    return executeAgentforceRequest(payload, paramDetails.getModelApiName(), URI_MODELS_API_EMBEDDINGS, true);
+    return executeAgentforceRequest(payload, paramDetails.getModelApiName(), URI_MODELS_API_EMBEDDINGS);
   }
 
   public JSONArray embeddingFromFile(String filePath, ParamsEmbeddingDocumentDetails embeddingDocumentDetails)
@@ -97,7 +97,7 @@ public class RequestHelper {
 
   public String executeRAG(String text, RAGParamsModelDetails paramDetails) throws IOException {
     String payload = constructJsonPayload(text, paramDetails.getLocale(), paramDetails.getProbability());
-    return executeAgentforceRequest(payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS, true);
+    return executeAgentforceRequest(payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
   }
 
   public String executeTools(String originalPrompt, String prompt, String filePath, ParamsModelDetails paramDetails)
@@ -106,10 +106,10 @@ public class RequestHelper {
     String payloadOptional = constructJsonPayload(originalPrompt, paramDetails.getLocale(), paramDetails.getProbability());
 
     String intermediateAnswer =
-        executeAgentforceRequest(payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS, true);
+        executeAgentforceRequest(payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
 
     String response =
-        executeAgentforceRequest(payloadOptional, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS, true);
+        executeAgentforceRequest(payloadOptional, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
     List<String> findURL = extractUrls(intermediateAnswer);
     if (findURL != null) {
       JSONObject jsonObject = new JSONObject(intermediateAnswer);
@@ -121,7 +121,7 @@ public class RequestHelper {
       String finalPayload = constructJsonPayload("data: " + response + ", question: " + originalPrompt, paramDetails.getLocale(),
                                                  paramDetails.getProbability());
       response =
-          executeAgentforceRequest(finalPayload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS, true);
+          executeAgentforceRequest(finalPayload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
 
     }
     return response;
@@ -162,7 +162,7 @@ public class RequestHelper {
 
       if (text != null && !text.isEmpty()) {
         embeddingResponse =
-            executeAgentforceRequest(constructEmbeddingJSON(corpusBody), modelName, URI_MODELS_API_EMBEDDINGS, true);
+            executeAgentforceRequest(constructEmbeddingJSON(corpusBody), modelName, URI_MODELS_API_EMBEDDINGS);
 
         AgentforceEmbeddingResponseDTO embeddingResponseDTO =
             new ObjectMapper().readValue(embeddingResponse, AgentforceEmbeddingResponseDTO.class);
@@ -176,7 +176,7 @@ public class RequestHelper {
   private List<Double> getQueryEmbedding(String body, String modelName)
       throws IOException {
 
-    String embeddingResponse = executeAgentforceRequest(body, modelName, URI_MODELS_API_EMBEDDINGS, true);
+    String embeddingResponse = executeAgentforceRequest(body, modelName, URI_MODELS_API_EMBEDDINGS);
 
     AgentforceEmbeddingResponseDTO embeddingResponseDTO =
         new ObjectMapper().readValue(embeddingResponse, AgentforceEmbeddingResponseDTO.class);
@@ -228,7 +228,7 @@ public class RequestHelper {
     return Collections.emptyList();
   }
 
-  private String executeAgentforceRequest(String payload, String modelName, String resource, boolean retry)
+  private String executeAgentforceRequest(String payload, String modelName, String resource)
       throws IOException {
 
     String urlString = agentforceConnection.getoAuthResponseDTO().getApiInstanceUrl() + URI_MODELS_API + modelName + resource;
