@@ -80,7 +80,7 @@ class AgentforceGenerationOperationsTest {
   }
 
   @Test
-  void testGenerateTextMemoryFailure() throws IOException, ConnectionException {
+  void testGenerateTextMemoryFailure() throws IOException {
     String prompt = "Test";
     String memoryPath = "src/resources/testdb";
     String memoryName = "vt";
@@ -102,7 +102,7 @@ class AgentforceGenerationOperationsTest {
   void testGenerateChatFailure() throws IOException {
     String messages = "Test Messages";
 
-    when(requestHelperMock.executeGenerateChat(anyString(), any(), any()))
+    when(requestHelperMock.generateChatFromMessages(anyString(), any(), any()))
         .thenThrow(new RuntimeException("Test exception"));
 
     ModuleException exception =

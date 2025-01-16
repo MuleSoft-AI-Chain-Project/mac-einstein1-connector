@@ -136,7 +136,7 @@ public class AgentforceGenerationOperations {
     log.info("Executing chat generate from message operation.");
     try {
 
-      InputStream responseStream = requestHelper.executeGenerateChat(messages, connection, paramDetails);
+      InputStream responseStream = requestHelper.generateChatFromMessages(messages, connection, paramDetails);
 
       return ResponseHelper.createAgentforceChatFromMessagesResponse(responseStream);
     } catch (Exception e) {

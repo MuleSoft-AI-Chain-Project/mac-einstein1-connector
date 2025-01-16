@@ -31,7 +31,7 @@ public class AgentforceConnection {
     return clientSecret;
   }
 
-  public OAuthResponseDTO getoAuthResponseDTO() {
+  public OAuthResponseDTO getOAuthResponseDTO() {
     return oAuthResponseDTO;
   }
 

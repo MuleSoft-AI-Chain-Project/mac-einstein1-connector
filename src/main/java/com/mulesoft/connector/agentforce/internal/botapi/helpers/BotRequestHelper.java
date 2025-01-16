@@ -57,7 +57,7 @@ public class BotRequestHelper {
         + URI_BOT_API_METADATA_SERVICES_V_62 + URI_BOT_API_METADATA_AGENTLIST;
 
     HttpURLConnection httpConnection = createURLConnection(metadataUrl, HTTP_METHOD_GET);
-    addConnectionHeaders(httpConnection, connection.getoAuthResponseDTO().getAccessToken());
+    addConnectionHeaders(httpConnection, connection.getOAuthResponseDTO().getAccessToken());
 
     log.debug("Executing getAgentList request with URL: {} ", metadataUrl);
     InputStream responseStream = handleHttpResponse(httpConnection,
@@ -82,7 +82,7 @@ public class BotRequestHelper {
         getRuntimeBaseUrl(agentforceConnection) + URI_BOT_API_VERSION + URI_BOT_API_BOTS + agentId + URI_BOT_API_SESSIONS;
     String externalSessionKey = UUID.randomUUID().toString();
     String forceConfigEndpoint = URI_HTTPS_PREFIX + agentforceConnection.getSalesforceOrg();
-    String orgId = agentforceConnection.getoAuthResponseDTO().getOrgId();
+    String orgId = agentforceConnection.getOAuthResponseDTO().getOrgId();
     BotSessionRequestDTO payload = createStartSessionRequestPayload(
                                                                     externalSessionKey, forceConfigEndpoint);
 
@@ -91,7 +91,7 @@ public class BotRequestHelper {
               startSessionUrl, externalSessionKey, forceConfigEndpoint, orgId);
 
     HttpURLConnection httpConnection = createURLConnection(startSessionUrl, HTTP_METHOD_POST);
-    addConnectionHeaders(httpConnection, agentforceConnection.getoAuthResponseDTO().getAccessToken(), orgId);
+    addConnectionHeaders(httpConnection, agentforceConnection.getOAuthResponseDTO().getAccessToken(), orgId);
     writePayloadToConnStream(httpConnection, objectMapper.writeValueAsString(payload));
 
     return parseResponse(httpConnection);
@@ -103,7 +103,7 @@ public class BotRequestHelper {
 
     String continueSessionUrl =
         getRuntimeBaseUrl(agentforceConnection) + URI_BOT_API_VERSION + URI_BOT_API_SESSIONS + sessionId + URI_BOT_API_MESSAGES;
-    String orgId = agentforceConnection.getoAuthResponseDTO().getOrgId();
+    String orgId = agentforceConnection.getOAuthResponseDTO().getOrgId();
     BotContinueSessionRequestDTO payload =
         createContinueSessionRequestPayload(IOUtils.toString(message), messageSequenceNumber, inReplyToMessageId);
 
@@ -111,7 +111,7 @@ public class BotRequestHelper {
         " OrgId: {}, inReplyToMessageId: {}",
               continueSessionUrl, sessionId, orgId, inReplyToMessageId);
     HttpURLConnection httpConnection = createURLConnection(continueSessionUrl, HTTP_METHOD_POST);
-    addConnectionHeaders(httpConnection, agentforceConnection.getoAuthResponseDTO().getAccessToken(), orgId);
+    addConnectionHeaders(httpConnection, agentforceConnection.getOAuthResponseDTO().getAccessToken(), orgId);
     writePayloadToConnStream(httpConnection, objectMapper.writeValueAsString(payload));
 
     return parseResponse(httpConnection);
@@ -120,13 +120,13 @@ public class BotRequestHelper {
   public AgentConversationResponseDTO endSession(String sessionId, AgentforceConnection agentforceConnection) throws IOException {
 
     String endSessionUrl = getRuntimeBaseUrl(agentforceConnection) + URI_BOT_API_VERSION + URI_BOT_API_SESSIONS + sessionId;
-    String orgId = agentforceConnection.getoAuthResponseDTO().getOrgId();
+    String orgId = agentforceConnection.getOAuthResponseDTO().getOrgId();
 
     log.debug("Agentforce end session details. Request URL: {}, Session ID:{}," +
         " OrgId: {}", endSessionUrl, sessionId, orgId);
 
     HttpURLConnection httpConnection = createURLConnection(endSessionUrl, HTTP_METHOD_DELETE);
-    addConnectionHeadersForEndSession(httpConnection, agentforceConnection.getoAuthResponseDTO().getAccessToken(), orgId);
+    addConnectionHeadersForEndSession(httpConnection, agentforceConnection.getOAuthResponseDTO().getAccessToken(), orgId);
 
     return parseResponse(httpConnection);
   }
@@ -206,7 +206,7 @@ public class BotRequestHelper {
         + URI_BOT_API_METADATA_SERVICES_V_62 + URI_BOT_API_METADATA_RUNTIMEURL;
 
     HttpURLConnection httpConnection = createURLConnection(metadataUrl, HTTP_METHOD_GET);
-    addConnectionHeaders(httpConnection, connection.getoAuthResponseDTO().getAccessToken());
+    addConnectionHeaders(httpConnection, connection.getOAuthResponseDTO().getAccessToken());
 
     log.debug("Executing API to fetch runtime base URL: {} ", metadataUrl);
     InputStream responseStream = handleHttpResponse(httpConnection,

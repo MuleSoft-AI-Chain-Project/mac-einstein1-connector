@@ -54,7 +54,7 @@ public class AgentforceEmbeddingOperations {
                                                                            @ParameterGroup(
                                                                                name = "Additional properties") ParamsEmbeddingModelDetails paramDetails) {
     try {
-      InputStream responseStream = requestHelper.executeGenerateEmbedding(text, connection, paramDetails);
+      InputStream responseStream = requestHelper.generateEmbeddingFromText(text, connection, paramDetails);
 
       return ResponseHelper.createAgentforceEmbeddingResponse(responseStream);
     } catch (Exception e) {
@@ -74,7 +74,7 @@ public class AgentforceEmbeddingOperations {
                                                              @ParameterGroup(
                                                                  name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails) {
     try {
-      JSONArray response = requestHelper.embeddingFromFile(filePath, connection, paramDetails);
+      JSONArray response = requestHelper.generateEmbeddingFromFile(filePath, connection, paramDetails);
 
       JSONObject jsonObject = new JSONObject();
       jsonObject.put("result", response);

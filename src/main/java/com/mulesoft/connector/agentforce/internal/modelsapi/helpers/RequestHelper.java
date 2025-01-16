@@ -65,50 +65,50 @@ public class RequestHelper {
 
   public InputStream executeGenerateText(String prompt, AgentforceConnection connection, ParamsModelDetails paramDetails)
       throws IOException {
-    String payload = constructJsonPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
-    return executeAgentforceRequest(connection.getoAuthResponseDTO(), payload, paramDetails.getModelApiName(),
+    String payload = constructPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
+    return executeAgentforceRequest(connection.getOAuthResponseDTO(), payload, paramDetails.getModelApiName(),
                                     URI_MODELS_API_GENERATIONS);
   }
 
-  public InputStream executeGenerateChat(String messages, AgentforceConnection connection, ParamsModelDetails paramDetails)
+  public InputStream generateChatFromMessages(String messages, AgentforceConnection connection, ParamsModelDetails paramDetails)
       throws IOException {
-    String payload = constructJsonMessages(messages, paramDetails);
-    return executeAgentforceRequest(connection.getoAuthResponseDTO(), payload, paramDetails.getModelApiName(),
+    String payload = constructPayloadWithMessages(messages, paramDetails);
+    return executeAgentforceRequest(connection.getOAuthResponseDTO(), payload, paramDetails.getModelApiName(),
                                     URI_MODELS_API_CHAT_GENERATIONS);
   }
 
-  public InputStream executeGenerateEmbedding(String text, AgentforceConnection connection,
-                                              ParamsEmbeddingModelDetails paramDetails)
+  public InputStream generateEmbeddingFromText(String text, AgentforceConnection connection,
+                                               ParamsEmbeddingModelDetails paramDetails)
       throws IOException {
-    String payload = constructEmbeddingJSON(text);
-    return executeAgentforceRequest(connection.getoAuthResponseDTO(), payload, paramDetails.getModelApiName(),
+    String payload = constructEmbeddingJsonPayload(text);
+    return executeAgentforceRequest(connection.getOAuthResponseDTO(), payload, paramDetails.getModelApiName(),
                                     URI_MODELS_API_EMBEDDINGS);
   }
 
-  public JSONArray embeddingFromFile(String filePath, AgentforceConnection connection,
-                                     ParamsEmbeddingDocumentDetails embeddingDocumentDetails)
+  public JSONArray generateEmbeddingFromFile(String filePath, AgentforceConnection connection,
+                                             ParamsEmbeddingDocumentDetails embeddingDocumentDetails)
       throws IOException, SAXException, TikaException {
 
     List<String> corpus =
         createCorpusList(filePath, embeddingDocumentDetails.getFileType(), embeddingDocumentDetails.getOptionType());
     return new JSONArray(
                          getCorpusEmbeddings(embeddingDocumentDetails.getModelApiName(), corpus,
-                                             connection.getoAuthResponseDTO()));
+                                             connection.getOAuthResponseDTO()));
   }
 
   public InputStream executeRAG(String text, AgentforceConnection connection, RAGParamsModelDetails paramDetails)
       throws IOException {
-    String payload = constructJsonPayload(text, paramDetails.getLocale(), paramDetails.getProbability());
-    return executeAgentforceRequest(connection.getoAuthResponseDTO(), payload, paramDetails.getModelApiName(),
+    String payload = constructPayload(text, paramDetails.getLocale(), paramDetails.getProbability());
+    return executeAgentforceRequest(connection.getOAuthResponseDTO(), payload, paramDetails.getModelApiName(),
                                     URI_MODELS_API_GENERATIONS);
   }
 
   public InputStream executeTools(String originalPrompt, String prompt, String filePath, AgentforceConnection connection,
                                   ParamsModelDetails paramDetails)
       throws IOException {
-    String payload = constructJsonPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
-    OAuthResponseDTO accessTokeDTO = connection.getoAuthResponseDTO();
-    String payloadOptional = constructJsonPayload(originalPrompt, paramDetails.getLocale(), paramDetails.getProbability());
+    String payload = constructPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
+    OAuthResponseDTO accessTokeDTO = connection.getOAuthResponseDTO();
+    String payloadOptional = constructPayload(originalPrompt, paramDetails.getLocale(), paramDetails.getProbability());
 
     String intermediateAnswer =
         readResponseStream(executeAgentforceRequest(accessTokeDTO, payload, paramDetails.getModelApiName(),
@@ -123,8 +123,8 @@ public class RequestHelper {
       String ePayload = buildPayload(generatedText);
 
       String response = getAttributes(findURL.get(0), filePath, extractPayload(ePayload));
-      String finalPayload = constructJsonPayload("data: " + response + ", question: " + originalPrompt, paramDetails.getLocale(),
-                                                 paramDetails.getProbability());
+      String finalPayload = constructPayload("data: " + response + ", question: " + originalPrompt, paramDetails.getLocale(),
+                                             paramDetails.getProbability());
       return executeAgentforceRequest(accessTokeDTO, finalPayload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
 
     } else {
@@ -136,8 +136,8 @@ public class RequestHelper {
                                       String fileType, String optionType)
       throws IOException, SAXException, TikaException {
     List<String> corpus = createCorpusList(filePath, fileType, optionType);
-    String body = constructEmbeddingJSON(prompt);
-    OAuthResponseDTO accessTokeDTO = connection.getoAuthResponseDTO();
+    String body = constructEmbeddingJsonPayload(prompt);
+    OAuthResponseDTO accessTokeDTO = connection.getOAuthResponseDTO();
     List<Double> embeddingList = getQueryEmbedding(accessTokeDTO, body, modelName);
 
     List<List<Double>> corpusEmbeddingList = getCorpusEmbeddings(modelName, corpus, accessTokeDTO);
@@ -164,11 +164,12 @@ public class RequestHelper {
 
     for (String text : corpus) {
 
-      corpusBody = constructEmbeddingJSON(text);
+      corpusBody = constructEmbeddingJsonPayload(text);
 
       if (text != null && !text.isEmpty()) {
         embeddingResponse =
-            executeAgentforceRequest(accessTokeDTO, constructEmbeddingJSON(corpusBody), modelName, URI_MODELS_API_EMBEDDINGS);
+            executeAgentforceRequest(accessTokeDTO, constructEmbeddingJsonPayload(corpusBody), modelName,
+                                     URI_MODELS_API_EMBEDDINGS);
 
         AgentforceEmbeddingResponseDTO embeddingResponseDTO =
             new ObjectMapper().readValue(embeddingResponse, AgentforceEmbeddingResponseDTO.class);
@@ -358,7 +359,7 @@ public class RequestHelper {
     return urls.isEmpty() ? null : urls;
   }
 
-  private String constructJsonPayload(String prompt, String locale, Number probability) {
+  private String constructPayload(String prompt, String locale, Number probability) {
     JSONObject localization = new JSONObject();
     localization.put("defaultLocale", locale);
 
@@ -381,7 +382,7 @@ public class RequestHelper {
     return jsonPayload.toString();
   }
 
-  private String constructJsonMessages(String message, ParamsModelDetails paramsModelDetails) {
+  private String constructPayloadWithMessages(String message, ParamsModelDetails paramsModelDetails) {
     JSONArray messages = new JSONArray(message);
 
     JSONObject locale = new JSONObject();
@@ -409,7 +410,7 @@ public class RequestHelper {
     return jsonObject.toString();
   }
 
-  private String constructEmbeddingJSON(String text) {
+  private String constructEmbeddingJsonPayload(String text) {
     JSONArray input = new JSONArray();
     input.put(text);
 
