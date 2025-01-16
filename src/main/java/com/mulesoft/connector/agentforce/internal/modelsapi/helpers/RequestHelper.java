@@ -2,7 +2,7 @@ package com.mulesoft.connector.agentforce.internal.modelsapi.helpers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
-import com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil;
+import com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType;
 import com.mulesoft.connector.agentforce.internal.modelsapi.dto.AgentforceEmbeddingResponseDTO;
 import com.mulesoft.connector.agentforce.internal.modelsapi.models.ParamsEmbeddingDocumentDetails;
 import com.mulesoft.connector.agentforce.internal.modelsapi.models.ParamsEmbeddingModelDetails;
@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.createURLConnection;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.readErrorStream;
+import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.handleHttpResponse;
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.readResponseStream;
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.writePayloadToConnStream;
 import static com.mulesoft.connector.agentforce.internal.modelsapi.helpers.ConstantUtil.AI_PLATFORM_MODELS_CONNECTED_APP;
@@ -68,25 +68,26 @@ public class RequestHelper {
     this.agentforceConnection = agentforceConnection;
   }
 
-  public String executeGenerateText(String prompt, ParamsModelDetails paramDetails)
+  public InputStream executeGenerateText(String prompt, ParamsModelDetails paramDetails)
       throws IOException {
-    String payload = constructJsonPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
+    String payload = constructPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
     return executeAgentforceRequest(payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
   }
 
-  public String executeGenerateChat(String messages, ParamsModelDetails paramDetails)
+  public InputStream generateChatFromMessages(String messages, ParamsModelDetails paramDetails)
       throws IOException {
-    String payload = constrcutJsonMessages(messages, paramDetails);
-    return executeAgentforceRequest(payload, paramDetails.getModelApiName(), URI_MODELS_API_CHAT_GENERATIONS);
+    String payload = constructPayloadWithMessages(messages, paramDetails);
+    return executeAgentforceRequest(payload, paramDetails.getModelApiName(),
+                                    URI_MODELS_API_CHAT_GENERATIONS);
   }
 
-  public String executeGenerateEmbedding(String text, ParamsEmbeddingModelDetails paramDetails)
+  public InputStream generateEmbeddingFromText(String text, ParamsEmbeddingModelDetails paramDetails)
       throws IOException {
-    String payload = constructEmbeddingJSON(text);
+    String payload = constructEmbeddingJsonPayload(text);
     return executeAgentforceRequest(payload, paramDetails.getModelApiName(), URI_MODELS_API_EMBEDDINGS);
   }
 
-  public JSONArray embeddingFromFile(String filePath, ParamsEmbeddingDocumentDetails embeddingDocumentDetails)
+  public JSONArray generateEmbeddingFromFile(String filePath, ParamsEmbeddingDocumentDetails embeddingDocumentDetails)
       throws IOException, SAXException, TikaException {
 
     List<String> corpus =
@@ -95,43 +96,44 @@ public class RequestHelper {
                          getCorpusEmbeddings(embeddingDocumentDetails.getModelApiName(), corpus));
   }
 
-  public String executeRAG(String text, RAGParamsModelDetails paramDetails) throws IOException {
-    String payload = constructJsonPayload(text, paramDetails.getLocale(), paramDetails.getProbability());
+  public InputStream executeRAG(String text, RAGParamsModelDetails paramDetails)
+      throws IOException {
+    String payload = constructPayload(text, paramDetails.getLocale(), paramDetails.getProbability());
     return executeAgentforceRequest(payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
   }
 
-  public String executeTools(String originalPrompt, String prompt, String filePath, ParamsModelDetails paramDetails)
+  public InputStream executeTools(String originalPrompt, String prompt, String filePath, ParamsModelDetails paramDetails)
       throws IOException {
-    String payload = constructJsonPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
-    String payloadOptional = constructJsonPayload(originalPrompt, paramDetails.getLocale(), paramDetails.getProbability());
+    String payload = constructPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
+    String payloadOptional = constructPayload(originalPrompt, paramDetails.getLocale(), paramDetails.getProbability());
 
     String intermediateAnswer =
-        executeAgentforceRequest(payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
+        readResponseStream(executeAgentforceRequest(payload, paramDetails.getModelApiName(),
+                                                    URI_MODELS_API_GENERATIONS));
 
-    String response =
-        executeAgentforceRequest(payloadOptional, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
     List<String> findURL = extractUrls(intermediateAnswer);
+
     if (findURL != null) {
       JSONObject jsonObject = new JSONObject(intermediateAnswer);
       String generatedText = jsonObject.getJSONObject("generation").getString("generatedText");
 
       String ePayload = buildPayload(generatedText);
 
-      response = getAttributes(findURL.get(0), filePath, extractPayload(ePayload));
-      String finalPayload = constructJsonPayload("data: " + response + ", question: " + originalPrompt, paramDetails.getLocale(),
-                                                 paramDetails.getProbability());
-      response =
-          executeAgentforceRequest(finalPayload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
+      String response = getAttributes(findURL.get(0), filePath, extractPayload(ePayload));
+      String finalPayload = constructPayload("data: " + response + ", question: " + originalPrompt, paramDetails.getLocale(),
+                                             paramDetails.getProbability());
+      return executeAgentforceRequest(finalPayload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
 
+    } else {
+      return executeAgentforceRequest(payloadOptional, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
     }
-    return response;
   }
 
   public JSONArray embeddingFileQuery(String prompt, String filePath, String modelName, String fileType,
                                       String optionType)
       throws IOException, SAXException, TikaException {
     List<String> corpus = createCorpusList(filePath, fileType, optionType);
-    String body = constructEmbeddingJSON(prompt);
+    String body = constructEmbeddingJsonPayload(prompt);
     List<Double> embeddingList = getQueryEmbedding(body, modelName);
 
     List<List<Double>> corpusEmbeddingList = getCorpusEmbeddings(modelName, corpus);
@@ -151,18 +153,18 @@ public class RequestHelper {
   private List<List<Double>> getCorpusEmbeddings(String modelName, List<String> corpus)
       throws IOException {
 
-    String embeddingResponse;
+    InputStream embeddingResponse;
     String corpusBody;
     // Generate embeddings for the corpus
     List<List<Double>> corpusEmbeddings = new ArrayList<>();
 
     for (String text : corpus) {
 
-      corpusBody = constructEmbeddingJSON(text);
+      corpusBody = constructEmbeddingJsonPayload(text);
 
       if (text != null && !text.isEmpty()) {
         embeddingResponse =
-            executeAgentforceRequest(constructEmbeddingJSON(corpusBody), modelName, URI_MODELS_API_EMBEDDINGS);
+            executeAgentforceRequest(constructEmbeddingJsonPayload(corpusBody), modelName, URI_MODELS_API_EMBEDDINGS);
 
         AgentforceEmbeddingResponseDTO embeddingResponseDTO =
             new ObjectMapper().readValue(embeddingResponse, AgentforceEmbeddingResponseDTO.class);
@@ -176,7 +178,7 @@ public class RequestHelper {
   private List<Double> getQueryEmbedding(String body, String modelName)
       throws IOException {
 
-    String embeddingResponse = executeAgentforceRequest(body, modelName, URI_MODELS_API_EMBEDDINGS);
+    InputStream embeddingResponse = executeAgentforceRequest(body, modelName, URI_MODELS_API_EMBEDDINGS);
 
     AgentforceEmbeddingResponseDTO embeddingResponseDTO =
         new ObjectMapper().readValue(embeddingResponse, AgentforceEmbeddingResponseDTO.class);
@@ -228,7 +230,7 @@ public class RequestHelper {
     return Collections.emptyList();
   }
 
-  private String executeAgentforceRequest(String payload, String modelName, String resource)
+  private InputStream executeAgentforceRequest(String payload, String modelName, String resource)
       throws IOException {
 
     String urlString = agentforceConnection.getApiInstanceUrl() + URI_MODELS_API + modelName + resource;
@@ -238,20 +240,7 @@ public class RequestHelper {
     addConnectionHeaders(httpConnection, agentforceConnection.getAccessToken());
     writePayloadToConnStream(httpConnection, payload);
 
-    log.info("Executing rest {} ", urlString);
-    int responseCode = httpConnection.getResponseCode();
-    if (responseCode == HttpURLConnection.HTTP_OK) {
-      if (httpConnection.getInputStream() == null) {
-        return "Error: No response received from Agentforce";
-      }
-      return readResponseStream(httpConnection.getInputStream());
-    } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
-      throw new AccessTokenExpiredException();
-    } else {
-      String errorMessage = readErrorStream(httpConnection.getErrorStream());
-      log.debug("Error response code: {}, message: {}", responseCode, errorMessage);
-      return String.format("Error: %d", responseCode);
-    }
+    return handleHttpResponse(httpConnection, AgentforceErrorType.MODELS_API_ERROR);
   }
 
   private String getContentFromUrl(String urlString) throws IOException, SAXException, TikaException {
@@ -364,7 +353,7 @@ public class RequestHelper {
     return urls.isEmpty() ? null : urls;
   }
 
-  private String constructJsonPayload(String prompt, String locale, Number probability) {
+  private String constructPayload(String prompt, String locale, Number probability) {
     JSONObject localization = new JSONObject();
     localization.put("defaultLocale", locale);
 
@@ -387,7 +376,7 @@ public class RequestHelper {
     return jsonPayload.toString();
   }
 
-  private String constrcutJsonMessages(String message, ParamsModelDetails paramsModelDetails) {
+  private String constructPayloadWithMessages(String message, ParamsModelDetails paramsModelDetails) {
     JSONArray messages = new JSONArray(message);
 
     JSONObject locale = new JSONObject();
@@ -415,7 +404,7 @@ public class RequestHelper {
     return jsonObject.toString();
   }
 
-  private String constructEmbeddingJSON(String text) {
+  private String constructEmbeddingJsonPayload(String text) {
     JSONArray input = new JSONArray();
     input.put(text);
 
@@ -448,23 +437,10 @@ public class RequestHelper {
           if (headers != null && !headers.isEmpty()) {
             conn.setRequestProperty("Authorization", headers);
           }
-          conn.setRequestProperty(CommonConstantUtil.CONTENT_TYPE_STRING, "application/json; charset=UTF-8");
+          conn.setRequestProperty(CONTENT_TYPE_STRING, "application/json; charset=UTF-8");
           conn.setDoOutput(true);
 
-          if (method.equals("POST")) {
-            try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream())) {
-              wr.writeBytes(payload);
-              wr.flush();
-            }
-          }
-          int responseCode = conn.getResponseCode();
-
-          BufferedReader in;
-          if (responseCode >= 200 && responseCode < 300) {
-            in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-          } else {
-            in = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
-          }
+          BufferedReader in = getBufferedReader(payload, method, conn);
 
           String inputLine;
           StringBuilder response = new StringBuilder();
@@ -480,6 +456,24 @@ public class RequestHelper {
       }
       return responseString;
     }
+  }
+
+  private static BufferedReader getBufferedReader(String payload, String method, HttpURLConnection conn) throws IOException {
+    if (method.equals("POST")) {
+      try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream())) {
+        wr.writeBytes(payload);
+        wr.flush();
+      }
+    }
+    int responseCode = conn.getResponseCode();
+
+    BufferedReader in;
+    if (responseCode >= 200 && responseCode < 300) {
+      in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+    } else {
+      in = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+    }
+    return in;
   }
 
   private String extractPayload(String payload) {

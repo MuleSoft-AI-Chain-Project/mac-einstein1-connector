@@ -89,7 +89,6 @@ class AgentforceGenerationOperationsTest {
     assertEquals(CHAT_FAILURE, exception.getType());
   }
 
-
   @Test
   void testGenerateTextMemoryFailure() throws IOException {
     String prompt = "Test";
@@ -114,7 +113,7 @@ class AgentforceGenerationOperationsTest {
   void testGenerateChatFailure() throws IOException {
     String messages = "Test Messages";
     when(connectionMock.getRequestHelper()).thenReturn(requestHelperMock);
-    when(requestHelperMock.executeGenerateChat(anyString(), any()))
+    when(requestHelperMock.generateChatFromMessages(anyString(), any()))
         .thenThrow(new RuntimeException("Test exception"));
 
     ModuleException exception =
@@ -126,6 +125,5 @@ class AgentforceGenerationOperationsTest {
                  exception.getMessage());
     assertEquals(CHAT_FAILURE, exception.getType());
   }
-
 }
 

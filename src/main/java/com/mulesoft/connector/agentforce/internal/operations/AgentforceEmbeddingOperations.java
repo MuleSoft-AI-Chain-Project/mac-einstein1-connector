@@ -52,8 +52,9 @@ public class AgentforceEmbeddingOperations {
                                                                            @ParameterGroup(
                                                                                name = "Additional properties") ParamsEmbeddingModelDetails paramDetails) {
     try {
-      String response = connection.getRequestHelper().executeGenerateEmbedding(text, paramDetails);
-      return ResponseHelper.createAgentforceEmbeddingResponse(response);
+      InputStream responseStream = connection.getRequestHelper().generateEmbeddingFromText(text, paramDetails);
+
+      return ResponseHelper.createAgentforceEmbeddingResponse(responseStream);
     } catch (Exception e) {
       throw new ModuleException("Error while executing embedding generate from text operation",
                                 EMBEDDING_OPERATIONS_FAILURE, e);
@@ -71,7 +72,8 @@ public class AgentforceEmbeddingOperations {
                                                              @ParameterGroup(
                                                                  name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails) {
     try {
-      JSONArray response = connection.getRequestHelper().embeddingFromFile(filePath, paramDetails);
+      JSONArray response = connection.getRequestHelper().generateEmbeddingFromFile(filePath, paramDetails);
+
       JSONObject jsonObject = new JSONObject();
       jsonObject.put("result", response);
 
@@ -126,10 +128,10 @@ public class AgentforceEmbeddingOperations {
       String content = connection.getRequestHelper().embeddingFileQuery(prompt, filePath, paramDetails.getEmbeddingName(),
                                                                         paramDetails.getFileType(), paramDetails.getOptionType())
           .toString();
-      String response = connection.getRequestHelper().executeRAG("data: " + content + ", question: " + prompt,
-                                                                 paramDetails);
+      InputStream responseStream = connection.getRequestHelper().executeRAG("data: " + content + ", question: " + prompt,
+                                                                            paramDetails);
 
-      return ResponseHelper.createAgentforceFormattedResponse(response);
+      return ResponseHelper.createAgentforceFormattedResponse(responseStream);
     } catch (Exception e) {
 
       log.error(format("Exception occurred while executing rag adhoc load document operation %s", e.getMessage()), e);
@@ -155,10 +157,11 @@ public class AgentforceEmbeddingOperations {
       String content =
           connection.getRequestHelper().embeddingFileQuery(prompt, toolsConfig, MODELAPI_OPENAI_ADA_002, "text", "FULL")
               .toString();
-      String response = connection.getRequestHelper().executeTools(prompt, "data: " + content + ", question: " + prompt,
-                                                                   toolsConfig, paramDetails);
+      InputStream responseStream =
+          connection.getRequestHelper().executeTools(prompt, "data: " + content + ", question: " + prompt,
+                                                     toolsConfig, paramDetails);
 
-      return ResponseHelper.createAgentforceFormattedResponse(response);
+      return ResponseHelper.createAgentforceFormattedResponse(responseStream);
     } catch (Exception e) {
 
       log.error(format("Exception occurred while executing AI service tools operation %s", e.getMessage()), e);
