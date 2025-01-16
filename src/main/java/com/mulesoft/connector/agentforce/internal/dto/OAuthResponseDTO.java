@@ -1,24 +1,15 @@
 package com.mulesoft.connector.agentforce.internal.dto;
 
-import java.beans.ConstructorProperties;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
-
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class OAuthResponseDTO {
 
   private final String apiInstanceUrl;
   private final String orgId;
-  private final String salesforceorg;
+  private final String salesforceOrgUrl;
 
-  @ConstructorProperties({"apiInstanceUrl", "id", "intanceUrl"})
-  public OAuthResponseDTO(String apiInstanceUrl, String id, String salesforceorg) {
+  public OAuthResponseDTO(String apiInstanceUrl, String id, String salesforceOrgUrl) {
     this.apiInstanceUrl = apiInstanceUrl;
     this.orgId = parseOrgId(id);
-    this.salesforceorg = salesforceorg;
+    this.salesforceOrgUrl = salesforceOrgUrl;
   }
 
   public String getApiInstanceUrl() {
@@ -29,21 +20,12 @@ public class OAuthResponseDTO {
     return orgId;
   }
 
-  public String getSalesforceorg() {
-    return salesforceorg;
+  public String getSalesforceOrgUrl() {
+    return salesforceOrgUrl;
   }
 
   private String parseOrgId(String id) {
     String[] idArr = id.split("/");
     return idArr[idArr.length - 2];
-  }
-
-  @Override
-  public String toString() {
-    return "OAuthResponseDTO{" +
-        ", apiInstanceUrl='" + apiInstanceUrl + '\'' +
-        ", orgId='" + orgId + '\'' +
-        ", salesforceorg='" + salesforceorg + '\'' +
-        '}';
   }
 }
