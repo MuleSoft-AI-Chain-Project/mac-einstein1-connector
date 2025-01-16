@@ -161,16 +161,6 @@ public class RequestHelper {
     public  JSONArray generateEmbeddingFromFileStream(InputStream inputStream, AgentforceConnection connection,
                                                      ParamsEmbeddingDocumentDetails embeddingDocumentDetails)
             throws IOException {
-
-    /*String script = "output json --- {\"(payload)\": upper(payload), \"vars\": vars }";
-
-    DataWeaveScriptingEngine scriptingEngine = new DataWeaveScriptingEngine();
-    //new ScriptingBindings().addBinding();
-
-
-    OAuthResponseDTO accessTokeDTO = connection.getoAuthResponseDTO();
-    return new JSONArray(
-                         getCorpusEmbeddingsInputStream(embeddingDocumentDetails.getModelApiName(), inputStream, accessTokeDTO));*/
       List<List<Double>> allEmbeddings = new ArrayList<>();
      // List<JSONObject> batchedResults = new ArrayList<>();
       JSONArray currentBatch = new JSONArray();
@@ -193,10 +183,7 @@ public class RequestHelper {
               String embeddingResponse =
                       executeAgentforceRequest(connection.getoAuthResponseDTO(), batchObject.toString() , embeddingDocumentDetails.getModelApiName(), URI_MODELS_API_EMBEDDINGS);
               allEmbeddings.addAll(parseEmbeddings(embeddingResponse));
-
-
              // batchedResults.add(batchObject);
-
               // Reset for the next batch
               currentBatch = new JSONArray();
               count = 0;
@@ -274,6 +261,58 @@ public class RequestHelper {
     return new JSONArray(allEmbeddings);  // Return the list of batched JSON objects
   }
 
+    public JSONArray generateEmbeddingFromBufferedReader(InputStream inputStream, AgentforceConnection connection,
+                                                         ParamsEmbeddingDocumentDetails embeddingDocumentDetails)
+            throws IOException {
+        List<List<Double>> allEmbeddings = new ArrayList<>();
+       // JSONArray currentBatch = new JSONArray();
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+            StringBuilder paragraph = new StringBuilder();
+            List<JSONObject> currentBatch = new ArrayList<>();
+           // List<List<Double>> allEmbeddings = new ArrayList<>();
+
+            reader.lines().forEach(line -> {
+                if (line.trim().isEmpty() && paragraph.length() > 0) {
+                    currentBatch.add(constructEmbeddingJSON2(paragraph.toString().trim()));
+                    paragraph.setLength(0);  // Clear paragraph
+
+                    if (currentBatch.size() == 100) {
+                        try {
+                            processBatch(new JSONArray(currentBatch), connection, embeddingDocumentDetails, allEmbeddings);
+                            currentBatch.clear();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                } else {
+                    paragraph.append(line).append("\n");
+                }
+            });
+
+            if (paragraph.length() > 0) {
+                currentBatch.add(constructEmbeddingJSON2(paragraph.toString().trim()));
+            }
+            processBatch(new JSONArray(currentBatch), connection, embeddingDocumentDetails, allEmbeddings);
+        }
+        return new JSONArray(allEmbeddings);
+    }
+
+    private void processBatch(JSONArray currentBatch, AgentforceConnection connection,
+                              ParamsEmbeddingDocumentDetails embeddingDocumentDetails,
+                              List<List<Double>> allEmbeddings) throws IOException {
+        if (!currentBatch.isEmpty()) {
+            JSONObject batchObject = new JSONObject();
+            batchObject.put("input", currentBatch);
+            System.out.println("batchObject = "+batchObject);
+            String embeddingResponse = executeAgentforceRequest(
+                    connection.getoAuthResponseDTO(),
+                    batchObject.toString(),
+                    embeddingDocumentDetails.getModelApiName(),
+                    URI_MODELS_API_EMBEDDINGS);
+            allEmbeddings.addAll(parseEmbeddings(embeddingResponse));
+        }
+    }
 
   public static List<List<Double>> parseEmbeddings(String jsonResponse) throws IOException {
     ObjectMapper objectMapper = new ObjectMapper();
@@ -609,6 +648,15 @@ public class RequestHelper {
         jsonObject.put("input", input);
 
         return jsonObject.toString();
+    }
+    private JSONObject constructEmbeddingJSON2(String text) {
+        JSONArray input = new JSONArray();
+        input.put(text);
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("input", input);
+
+        return jsonObject;
     }
 
     private String getAttributes(String url, String filePath, String payload) throws IOException {
