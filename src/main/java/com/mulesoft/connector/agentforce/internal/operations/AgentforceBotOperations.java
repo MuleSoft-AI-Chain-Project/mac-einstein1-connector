@@ -64,13 +64,13 @@ public class AgentforceBotOperations {
   @Alias("Continue-agent-conversation")
   @Throws(BotErrorTypeProvider.class)
   @OutputResolver(output = AgentConversationResponseMetadataResolver.class)
-  public Result<InputStream, InvokeAgentResponseAttributes> continueConversation(@Content(primary = true) InputStream message,
+  public Result<InputStream, InvokeAgentResponseAttributes> continueConversation(@Content(primary = true) InputStream prompt,
                                                                                  @Content String sessionId,
                                                                                  @ParameterGroup(
                                                                                      name = "Additional Details") BotMessageParameterGroup messageParameterGroup,
                                                                                  @Connection AgentforceConnection connection) {
     try {
-      AgentConversationResponseDTO responseDTO = connection.getBotRequestHelper().continueSession(message,
+      AgentConversationResponseDTO responseDTO = connection.getBotRequestHelper().continueSession(prompt,
                                                                                                   sessionId,
                                                                                                   messageParameterGroup
                                                                                                       .getMessageSequenceNumber(),

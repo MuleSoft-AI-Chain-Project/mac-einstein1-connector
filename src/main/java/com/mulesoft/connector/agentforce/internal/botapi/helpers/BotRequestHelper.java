@@ -12,6 +12,7 @@ import com.mulesoft.connector.agentforce.internal.botapi.dto.ForceConfigDTO;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
 import com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType;
 import org.mule.runtime.core.api.util.IOUtils;
+import org.mule.runtime.extension.api.exception.ModuleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -220,7 +221,8 @@ public class BotRequestHelper {
           .map(x -> getTextValue(x, "text"))
           .collect(Collectors.joining(" "));
     }
-    return null;
+    throw new ModuleException(
+                              "Invalid response structure. Expected 'Messages'", AgentforceErrorType.AGENT_API_ERROR);
   }
 
   private static String getTextValue(JsonNode node, String keyName) {
