@@ -62,7 +62,7 @@ import static com.mulesoft.connector.agentforce.internal.modelsapi.helpers.Const
 public class RequestHelper {
 
   private static final Logger log = LoggerFactory.getLogger(RequestHelper.class);
-  private AgentforceConnection agentforceConnection;
+  private final AgentforceConnection agentforceConnection;
 
   public RequestHelper(AgentforceConnection agentforceConnection) {
     this.agentforceConnection = agentforceConnection;
@@ -233,7 +233,7 @@ public class RequestHelper {
   private InputStream executeAgentforceRequest(String payload, String modelName, String resource)
       throws IOException {
 
-    String urlString = agentforceConnection.getoAuthResponseDTO().getApiInstanceUrl() + URI_MODELS_API + modelName + resource;
+    String urlString = agentforceConnection.getApiInstanceUrl() + URI_MODELS_API + modelName + resource;
     log.debug("Agentforce Request URL: {}", urlString);
 
     HttpURLConnection httpConnection = createURLConnection(urlString, HTTP_METHOD_POST);

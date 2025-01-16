@@ -1,7 +1,6 @@
 package com.mulesoft.connector.agentforce.internal.connection;
 
 import com.mulesoft.connector.agentforce.internal.botapi.helpers.BotRequestHelper;
-import com.mulesoft.connector.agentforce.internal.dto.OAuthResponseDTO;
 import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.RequestHelper;
 import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.chatmemory.ChatMemoryHelper;
 import com.mulesoft.connectors.commons.template.connection.ConnectorConnection;
@@ -12,9 +11,11 @@ import com.mulesoft.connectors.commons.template.connection.ConnectorConnection;
 //In future if we are adding new connection types, then common parameters of connection types will go here
 public interface AgentforceConnection extends ConnectorConnection {
 
-  OAuthResponseDTO getoAuthResponseDTO();
+  String getSalesforceOrgUrl();
 
-  String getSalesforceOrg();
+  String getApiInstanceUrl();
+
+  String getOrgId();
 
   RequestHelper getRequestHelper();
 
