@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.CONTINUE_SESSION_MESSAGE_TYPE_TEXT;
 import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.END_SESSION_REASON_USERREQUEST;
@@ -212,13 +214,13 @@ public class BotRequestHelper {
 
   private String getMessageText(JsonNode rootNode) {
     JsonNode messagesNode = rootNode.get("messages");
-    StringBuilder text = new StringBuilder();
     if (messagesNode != null && messagesNode.isArray()) {
-      for (JsonNode messageNode : messagesNode) {
-        text.append(getTextValue(messageNode, "text")).append(" ");
-      }
+      return StreamSupport
+          .stream(messagesNode.spliterator(), false)
+          .map(x -> getTextValue(x, "text"))
+          .collect(Collectors.joining(" "));
     }
-    return text.toString();
+    return null;
   }
 
   private static String getTextValue(JsonNode node, String keyName) {
