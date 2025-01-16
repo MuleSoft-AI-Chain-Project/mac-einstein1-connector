@@ -2,9 +2,8 @@ package com.mulesoft.connector.agentforce.internal.modelsapi.helpers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
-import com.mulesoft.connector.agentforce.internal.dto.AgentMetadataResponse;
-import com.mulesoft.connector.agentforce.internal.dto.BotRecord;
 import com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil;
+import com.mulesoft.connector.agentforce.internal.modelsapi.dto.AgentforceEmbeddingDTO;
 import com.mulesoft.connector.agentforce.internal.modelsapi.dto.AgentforceEmbeddingResponseDTO;
 import com.mulesoft.connector.agentforce.internal.dto.OAuthResponseDTO;
 import com.mulesoft.connector.agentforce.internal.modelsapi.models.ParamsEmbeddingDocumentDetails;
@@ -21,8 +20,6 @@ import org.apache.tika.sax.BodyContentHandler;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.mule.weave.v2.runtime.DataWeaveScriptingEngine;
-import org.mule.weave.v2.runtime.ScriptingBindings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -33,7 +30,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -162,7 +158,7 @@ public class RequestHelper {
                 getCorpusEmbeddingsInputStream(embeddingDocumentDetails.getModelApiName(), inputStream, accessTokeDTO));
     }
 
-    public List<JSONObject> generateEmbeddingFromFileStream(InputStream inputStream, AgentforceConnection connection,
+    public  JSONArray generateEmbeddingFromFileStream(InputStream inputStream, AgentforceConnection connection,
                                                      ParamsEmbeddingDocumentDetails embeddingDocumentDetails)
             throws IOException {
 
@@ -175,7 +171,8 @@ public class RequestHelper {
     OAuthResponseDTO accessTokeDTO = connection.getoAuthResponseDTO();
     return new JSONArray(
                          getCorpusEmbeddingsInputStream(embeddingDocumentDetails.getModelApiName(), inputStream, accessTokeDTO));*/
-      List<JSONObject> batchedResults = new ArrayList<>();
+      List<List<Double>> allEmbeddings = new ArrayList<>();
+     // List<JSONObject> batchedResults = new ArrayList<>();
       JSONArray currentBatch = new JSONArray();
       int count = 0;
       try (Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8.name())) {
@@ -193,7 +190,12 @@ public class RequestHelper {
               JSONObject batchObject = new JSONObject();
               batchObject.put("input", currentBatch);
 
-              batchedResults.add(batchObject);
+              String embeddingResponse =
+                      executeAgentforceRequest(connection.getoAuthResponseDTO(), batchObject.toString() , embeddingDocumentDetails.getModelApiName(), URI_MODELS_API_EMBEDDINGS);
+              allEmbeddings.addAll(parseEmbeddings(embeddingResponse));
+
+
+             // batchedResults.add(batchObject);
 
               // Reset for the next batch
               currentBatch = new JSONArray();
@@ -204,21 +206,83 @@ public class RequestHelper {
         if (count > 0) {
           JSONObject lastBatchObject = new JSONObject();
           lastBatchObject.put("input", currentBatch);
-          batchedResults.add(lastBatchObject);
+          String embeddingResponse =
+                  executeAgentforceRequest(connection.getoAuthResponseDTO(), lastBatchObject.toString() , embeddingDocumentDetails.getModelApiName(), URI_MODELS_API_EMBEDDINGS);
+          allEmbeddings.addAll(parseEmbeddings(embeddingResponse));
+          //batchedResults.add(lastBatchObject);
         }
 
       }
-      return batchedResults;  // Return the list of batched JSON objects
+      return new JSONArray(allEmbeddings);  // Return the list of batched JSON objects
     }
+
+  public  JSONArray generateEmbeddingFromFileStream2(InputStream inputStream, AgentforceConnection connection,
+                                                    ParamsEmbeddingDocumentDetails embeddingDocumentDetails)
+          throws IOException {
+
+    /*String script = "output json --- {\"(payload)\": upper(payload), \"vars\": vars }";
+
+    DataWeaveScriptingEngine scriptingEngine = new DataWeaveScriptingEngine();
+    //new ScriptingBindings().addBinding();
+
+
+    OAuthResponseDTO accessTokeDTO = connection.getoAuthResponseDTO();
+    return new JSONArray(
+                         getCorpusEmbeddingsInputStream(embeddingDocumentDetails.getModelApiName(), inputStream, accessTokeDTO));*/
+    List<List<Double>> allEmbeddings = new ArrayList<>();
+    // List<JSONObject> batchedResults = new ArrayList<>();
+    JSONArray currentBatch = new JSONArray();
+    int count = 0;
+    try (Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8.name())) {
+      // Set delimiter to match one or more blank lines
+      scanner.useDelimiter("\\r?\\n(\\r?\\n)+");
+      while (scanner.hasNext()) {
+        String paragraph = scanner.next().trim();  // Get the next paragraph and trim whitespace
+        if (!paragraph.isEmpty()) {
+          String jsonString = constructEmbeddingJSON(paragraph);  // Construct JSON for the paragraph
+          currentBatch.put(jsonString);  // Add JSON string to the current batch
+          count++;
+
+          // If the batch reaches 100, store it and reset for the next batch
+          if (count == 100) {
+            JSONObject batchObject = new JSONObject();
+            batchObject.put("input", currentBatch);
+
+            String embeddingResponse =
+                    executeAgentforceRequest(connection.getoAuthResponseDTO(), batchObject.toString() , embeddingDocumentDetails.getModelApiName(), URI_MODELS_API_EMBEDDINGS);
+            allEmbeddings.addAll(parseEmbeddings(embeddingResponse));
+
+
+            // batchedResults.add(batchObject);
+
+            // Reset for the next batch
+            currentBatch = new JSONArray();
+            count = 0;
+          }
+        }
+      }
+      if (count > 0) {
+        JSONObject lastBatchObject = new JSONObject();
+        lastBatchObject.put("input", currentBatch);
+        String embeddingResponse =
+                executeAgentforceRequest(connection.getoAuthResponseDTO(), lastBatchObject.toString() , embeddingDocumentDetails.getModelApiName(), URI_MODELS_API_EMBEDDINGS);
+        allEmbeddings.addAll(parseEmbeddings(embeddingResponse));
+        //batchedResults.add(lastBatchObject);
+      }
+
+    }
+    return new JSONArray(allEmbeddings);  // Return the list of batched JSON objects
+  }
+
 
   public static List<List<Double>> parseEmbeddings(String jsonResponse) throws IOException {
     ObjectMapper objectMapper = new ObjectMapper();
-    EmbeddingResponse response = objectMapper.readValue(jsonResponse, EmbeddingResponse.class);
+    AgentforceEmbeddingResponseDTO embeddingResponseDTO = objectMapper.readValue(jsonResponse, AgentforceEmbeddingResponseDTO.class);
 
     // Extract the embeddings list
-    return response.getEmbeddings().stream()
-            .map(Embedding::getEmbedding)
-            .toList();
+    return embeddingResponseDTO.getEmbeddings().stream()
+            .map(AgentforceEmbeddingDTO::getEmbedding)
+            .collect(Collectors.toList());
   }
     public static Stream<String> createTokenStream(Scanner scanner) {
         return StreamSupport.stream(
