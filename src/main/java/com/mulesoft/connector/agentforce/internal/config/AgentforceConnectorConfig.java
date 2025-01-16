@@ -1,6 +1,6 @@
-package com.mulesoft.connector.agentforce.internal;
+package com.mulesoft.connector.agentforce.internal.config;
 
-import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnectionProvider;
+import com.mulesoft.connector.agentforce.internal.connection.provider.CustomOauthClientCredentialsConnectionProvider;
 import com.mulesoft.connector.agentforce.internal.operations.AgentforceBotOperations;
 import com.mulesoft.connector.agentforce.internal.operations.AgentforceGenerationOperations;
 import com.mulesoft.connector.agentforce.internal.operations.AgentforceEmbeddingOperations;
@@ -27,9 +27,9 @@ import static org.mule.sdk.api.meta.JavaVersion.JAVA_8;
 @Operations({AgentforceEmbeddingOperations.class,
     AgentforceGenerationOperations.class,
     AgentforceBotOperations.class})
-@ConnectionProviders(AgentforceConnectionProvider.class)
+@ConnectionProviders(CustomOauthClientCredentialsConnectionProvider.class)
 @RequiresEnterpriseLicense(allowEvaluationLicense = true)
 @JavaVersionSupport({JAVA_8, JAVA_11, JAVA_17})
-public class AgentforceConnector {
+public class AgentforceConnectorConfig {
 
 }

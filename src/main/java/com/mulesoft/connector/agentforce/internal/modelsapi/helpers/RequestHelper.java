@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
 import com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType;
 import com.mulesoft.connector.agentforce.internal.modelsapi.dto.AgentforceEmbeddingResponseDTO;
-import com.mulesoft.connector.agentforce.internal.dto.OAuthResponseDTO;
 import com.mulesoft.connector.agentforce.internal.modelsapi.models.ParamsEmbeddingDocumentDetails;
 import com.mulesoft.connector.agentforce.internal.modelsapi.models.ParamsEmbeddingModelDetails;
 import com.mulesoft.connector.agentforce.internal.modelsapi.models.ParamsModelDetails;
@@ -19,6 +18,7 @@ import org.apache.tika.sax.BodyContentHandler;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.mule.runtime.extension.api.connectivity.oauth.AccessTokenExpiredException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -62,56 +62,53 @@ import static com.mulesoft.connector.agentforce.internal.modelsapi.helpers.Const
 public class RequestHelper {
 
   private static final Logger log = LoggerFactory.getLogger(RequestHelper.class);
+  private AgentforceConnection agentforceConnection;
 
-  public InputStream executeGenerateText(String prompt, AgentforceConnection connection, ParamsModelDetails paramDetails)
-      throws IOException {
-    String payload = constructPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
-    return executeAgentforceRequest(connection.getOAuthResponseDTO(), payload, paramDetails.getModelApiName(),
-                                    URI_MODELS_API_GENERATIONS);
+  public RequestHelper(AgentforceConnection agentforceConnection) {
+    this.agentforceConnection = agentforceConnection;
   }
 
-  public InputStream generateChatFromMessages(String messages, AgentforceConnection connection, ParamsModelDetails paramDetails)
+    public InputStream executeGenerateText(String prompt, AgentforceConnection connection, ParamsModelDetails paramDetails)
+            throws IOException {
+        String payload = constructPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
+        return executeAgentforceRequest(payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
+    }
+
+  public InputStream generateChatFromMessages(String messages, ParamsModelDetails paramDetails)
       throws IOException {
     String payload = constructPayloadWithMessages(messages, paramDetails);
-    return executeAgentforceRequest(connection.getOAuthResponseDTO(), payload, paramDetails.getModelApiName(),
+    return executeAgentforceRequest(payload, paramDetails.getModelApiName(),
                                     URI_MODELS_API_CHAT_GENERATIONS);
   }
 
-  public InputStream generateEmbeddingFromText(String text, AgentforceConnection connection,
-                                               ParamsEmbeddingModelDetails paramDetails)
+  public InputStream generateEmbeddingFromText(String text, ParamsEmbeddingModelDetails paramDetails)
       throws IOException {
     String payload = constructEmbeddingJsonPayload(text);
-    return executeAgentforceRequest(connection.getOAuthResponseDTO(), payload, paramDetails.getModelApiName(),
-                                    URI_MODELS_API_EMBEDDINGS);
+    return executeAgentforceRequest(payload, paramDetails.getModelApiName(), URI_MODELS_API_EMBEDDINGS);
   }
 
-  public JSONArray generateEmbeddingFromFile(String filePath, AgentforceConnection connection,
-                                             ParamsEmbeddingDocumentDetails embeddingDocumentDetails)
+  public JSONArray generateEmbeddingFromFile(String filePath, ParamsEmbeddingDocumentDetails embeddingDocumentDetails)
       throws IOException, SAXException, TikaException {
 
     List<String> corpus =
         createCorpusList(filePath, embeddingDocumentDetails.getFileType(), embeddingDocumentDetails.getOptionType());
     return new JSONArray(
-                         getCorpusEmbeddings(embeddingDocumentDetails.getModelApiName(), corpus,
-                                             connection.getOAuthResponseDTO()));
+                         getCorpusEmbeddings(embeddingDocumentDetails.getModelApiName(), corpus));
   }
 
-  public InputStream executeRAG(String text, AgentforceConnection connection, RAGParamsModelDetails paramDetails)
+  public InputStream executeRAG(String text, RAGParamsModelDetails paramDetails)
       throws IOException {
     String payload = constructPayload(text, paramDetails.getLocale(), paramDetails.getProbability());
-    return executeAgentforceRequest(connection.getOAuthResponseDTO(), payload, paramDetails.getModelApiName(),
-                                    URI_MODELS_API_GENERATIONS);
+    return executeAgentforceRequest(payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
   }
 
-  public InputStream executeTools(String originalPrompt, String prompt, String filePath, AgentforceConnection connection,
-                                  ParamsModelDetails paramDetails)
+  public InputStream executeTools(String originalPrompt, String prompt, String filePath, ParamsModelDetails paramDetails)
       throws IOException {
     String payload = constructPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
-    OAuthResponseDTO accessTokeDTO = connection.getOAuthResponseDTO();
     String payloadOptional = constructPayload(originalPrompt, paramDetails.getLocale(), paramDetails.getProbability());
 
     String intermediateAnswer =
-        readResponseStream(executeAgentforceRequest(accessTokeDTO, payload, paramDetails.getModelApiName(),
+        readResponseStream(executeAgentforceRequest(payload, paramDetails.getModelApiName(),
                                                     URI_MODELS_API_GENERATIONS));
 
     List<String> findURL = extractUrls(intermediateAnswer);
@@ -125,22 +122,21 @@ public class RequestHelper {
       String response = getAttributes(findURL.get(0), filePath, extractPayload(ePayload));
       String finalPayload = constructPayload("data: " + response + ", question: " + originalPrompt, paramDetails.getLocale(),
                                              paramDetails.getProbability());
-      return executeAgentforceRequest(accessTokeDTO, finalPayload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
+      return executeAgentforceRequest(finalPayload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
 
     } else {
-      return executeAgentforceRequest(accessTokeDTO, payloadOptional, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
+      return executeAgentforceRequest(payloadOptional, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
     }
   }
 
-  public JSONArray embeddingFileQuery(String prompt, String filePath, AgentforceConnection connection, String modelName,
-                                      String fileType, String optionType)
+  public JSONArray embeddingFileQuery(String prompt, String filePath, String modelName, String fileType,
+                                      String optionType)
       throws IOException, SAXException, TikaException {
     List<String> corpus = createCorpusList(filePath, fileType, optionType);
     String body = constructEmbeddingJsonPayload(prompt);
-    OAuthResponseDTO accessTokeDTO = connection.getOAuthResponseDTO();
-    List<Double> embeddingList = getQueryEmbedding(accessTokeDTO, body, modelName);
+    List<Double> embeddingList = getQueryEmbedding(body, modelName);
 
-    List<List<Double>> corpusEmbeddingList = getCorpusEmbeddings(modelName, corpus, accessTokeDTO);
+    List<List<Double>> corpusEmbeddingList = getCorpusEmbeddings(modelName, corpus);
 
     // Compare embeddings and rank results
     List<Double> similarityScores = new ArrayList<>();
@@ -154,7 +150,7 @@ public class RequestHelper {
     return new JSONArray(results);
   }
 
-  private List<List<Double>> getCorpusEmbeddings(String modelName, List<String> corpus, OAuthResponseDTO accessTokeDTO)
+  private List<List<Double>> getCorpusEmbeddings(String modelName, List<String> corpus)
       throws IOException {
 
     InputStream embeddingResponse;
@@ -168,8 +164,7 @@ public class RequestHelper {
 
       if (text != null && !text.isEmpty()) {
         embeddingResponse =
-            executeAgentforceRequest(accessTokeDTO, constructEmbeddingJsonPayload(corpusBody), modelName,
-                                     URI_MODELS_API_EMBEDDINGS);
+            executeAgentforceRequest(constructEmbeddingJsonPayload(corpusBody), modelName, URI_MODELS_API_EMBEDDINGS);
 
         AgentforceEmbeddingResponseDTO embeddingResponseDTO =
             new ObjectMapper().readValue(embeddingResponse, AgentforceEmbeddingResponseDTO.class);
@@ -180,10 +175,10 @@ public class RequestHelper {
     return corpusEmbeddings;
   }
 
-  private List<Double> getQueryEmbedding(OAuthResponseDTO accessTokeDTO, String body, String modelName)
+  private List<Double> getQueryEmbedding(String body, String modelName)
       throws IOException {
 
-    InputStream embeddingResponse = executeAgentforceRequest(accessTokeDTO, body, modelName, URI_MODELS_API_EMBEDDINGS);
+      InputStream embeddingResponse = executeAgentforceRequest(body, modelName, URI_MODELS_API_EMBEDDINGS);
 
     AgentforceEmbeddingResponseDTO embeddingResponseDTO =
         new ObjectMapper().readValue(embeddingResponse, AgentforceEmbeddingResponseDTO.class);
@@ -235,15 +230,14 @@ public class RequestHelper {
     return Collections.emptyList();
   }
 
-  private InputStream executeAgentforceRequest(OAuthResponseDTO accessTokenDTO, String payload, String modelName,
-                                               String resource)
+  private InputStream executeAgentforceRequest(String payload, String modelName, String resource)
       throws IOException {
 
-    String urlString = accessTokenDTO.getApiInstanceUrl() + URI_MODELS_API + modelName + resource;
+    String urlString = agentforceConnection.getoAuthResponseDTO().getApiInstanceUrl() + URI_MODELS_API + modelName + resource;
     log.debug("Agentforce Request URL: {}", urlString);
 
     HttpURLConnection httpConnection = createURLConnection(urlString, HTTP_METHOD_POST);
-    addConnectionHeaders(httpConnection, accessTokenDTO.getAccessToken());
+    addConnectionHeaders(httpConnection, agentforceConnection.getAccessToken());
     writePayloadToConnStream(httpConnection, payload);
 
     return handleHttpResponse(httpConnection, AgentforceErrorType.MODELS_API_ERROR);
@@ -510,5 +504,4 @@ public class RequestHelper {
     conn.setRequestProperty(X_CLIENT_FEATURE_ID, AI_PLATFORM_MODELS_CONNECTED_APP);
     conn.setRequestProperty(CONTENT_TYPE_STRING, CONTENT_TYPE_APPLICATION_JSON);
   }
-
 }

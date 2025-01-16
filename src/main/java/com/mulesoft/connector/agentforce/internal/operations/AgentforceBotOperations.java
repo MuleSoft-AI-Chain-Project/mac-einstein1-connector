@@ -4,7 +4,6 @@ import com.mulesoft.connector.agentforce.api.metadata.InvokeAgentResponseAttribu
 import com.mulesoft.connector.agentforce.internal.botapi.dto.AgentConversationResponseDTO;
 import com.mulesoft.connector.agentforce.internal.botapi.error.provider.BotErrorTypeProvider;
 import com.mulesoft.connector.agentforce.internal.botapi.group.BotMessageParameterGroup;
-import com.mulesoft.connector.agentforce.internal.botapi.helpers.BotRequestHelper;
 import com.mulesoft.connector.agentforce.internal.botapi.group.BotAgentParameterGroup;
 import com.mulesoft.connector.agentforce.internal.botapi.metadata.AgentConversationResponseMetadataResolver;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
@@ -23,6 +22,8 @@ import org.mule.runtime.extension.api.runtime.operation.Result;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType.AGENT_OPERATIONS_FAILURE;
 import static org.apache.commons.io.IOUtils.toInputStream;
@@ -31,7 +32,7 @@ import static org.mule.runtime.extension.api.annotation.param.MediaType.TEXT_PLA
 
 public class AgentforceBotOperations {
 
-  BotRequestHelper requestHelper = new BotRequestHelper();
+  private static final Logger log = LoggerFactory.getLogger(AgentforceBotOperations.class);
 
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("Start-agent-conversation")
@@ -39,10 +40,11 @@ public class AgentforceBotOperations {
   @OutputJsonType(schema = "api/response/StartAgentConversationResponse.json")
   public Result<InputStream, InvokeAgentResponseAttributes> startAgentConversation(@Connection AgentforceConnection connection,
                                                                                    @ParameterGroup(
-                                                                                       name = "Agent") @MetadataKeyId BotAgentParameterGroup parameterGroup) {
-    try {
-      AgentConversationResponseDTO responseDTO = requestHelper.startSession(connection, parameterGroup.getAgent());
+                                                                                       name = "Agent") @MetadataKeyId BotAgentParameterGroup parameterGroup)
+  {
 
+    try {
+      AgentConversationResponseDTO responseDTO = connection.getBotRequestHelper().startSession(parameterGroup.getAgent());
       JSONObject jsonObject = new JSONObject();
       jsonObject.put("sessionId", responseDTO.getSessionId());
 
@@ -69,11 +71,10 @@ public class AgentforceBotOperations {
                                                                                      name = "Additional Details") BotMessageParameterGroup messageParameterGroup,
                                                                                  @Connection AgentforceConnection connection) {
     try {
-      AgentConversationResponseDTO responseDTO = requestHelper.continueSession(message,
+      AgentConversationResponseDTO responseDTO = connection.getBotRequestHelper().continueSession(message,
                                                                                sessionId,
                                                                                messageParameterGroup.getMessageSequenceNumber(),
-                                                                               messageParameterGroup.getInReplyToMessageId(),
-                                                                               connection);
+                                                                               messageParameterGroup.getInReplyToMessageId());
       return Result.<InputStream, InvokeAgentResponseAttributes>builder()
           .output(toInputStream(responseDTO.getText(), StandardCharsets.UTF_8))
           .attributes(responseDTO.getResponseAttributes())
@@ -94,7 +95,7 @@ public class AgentforceBotOperations {
                                                                      @Connection AgentforceConnection connection) {
 
     try {
-      AgentConversationResponseDTO responseDTO = requestHelper.endSession(sessionId, connection);
+      AgentConversationResponseDTO responseDTO = connection.getBotRequestHelper().endSession(sessionId, connection);
 
       return Result.<Void, InvokeAgentResponseAttributes>builder()
           .attributes(responseDTO.getResponseAttributes())
