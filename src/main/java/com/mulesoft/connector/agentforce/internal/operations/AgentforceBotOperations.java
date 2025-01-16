@@ -40,8 +40,7 @@ public class AgentforceBotOperations {
   @OutputJsonType(schema = "api/response/StartAgentConversationResponse.json")
   public Result<InputStream, InvokeAgentResponseAttributes> startAgentConversation(@Connection AgentforceConnection connection,
                                                                                    @ParameterGroup(
-                                                                                       name = "Agent") @MetadataKeyId BotAgentParameterGroup parameterGroup)
-  {
+                                                                                       name = "Agent") @MetadataKeyId BotAgentParameterGroup parameterGroup) {
 
     try {
       AgentConversationResponseDTO responseDTO = connection.getBotRequestHelper().startSession(parameterGroup.getAgent());
@@ -72,9 +71,11 @@ public class AgentforceBotOperations {
                                                                                  @Connection AgentforceConnection connection) {
     try {
       AgentConversationResponseDTO responseDTO = connection.getBotRequestHelper().continueSession(message,
-                                                                               sessionId,
-                                                                               messageParameterGroup.getMessageSequenceNumber(),
-                                                                               messageParameterGroup.getInReplyToMessageId());
+                                                                                                  sessionId,
+                                                                                                  messageParameterGroup
+                                                                                                      .getMessageSequenceNumber(),
+                                                                                                  messageParameterGroup
+                                                                                                      .getInReplyToMessageId());
       return Result.<InputStream, InvokeAgentResponseAttributes>builder()
           .output(toInputStream(responseDTO.getText(), StandardCharsets.UTF_8))
           .attributes(responseDTO.getResponseAttributes())
@@ -95,7 +96,7 @@ public class AgentforceBotOperations {
                                                                      @Connection AgentforceConnection connection) {
 
     try {
-      AgentConversationResponseDTO responseDTO = connection.getBotRequestHelper().endSession(sessionId, connection);
+      AgentConversationResponseDTO responseDTO = connection.getBotRequestHelper().endSession(sessionId);
 
       return Result.<Void, InvokeAgentResponseAttributes>builder()
           .attributes(responseDTO.getResponseAttributes())

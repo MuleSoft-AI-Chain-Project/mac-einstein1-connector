@@ -16,9 +16,9 @@ public class ChatMemoryHelper {
     this.requestHelper = requestHelper;
   }
 
-    public InputStream chatWithMemory(String prompt, String memoryPath, String memoryName, Integer keepLastMessages,
-                                      ParamsModelDetails parameters)
-            throws IOException {
+  public InputStream chatWithMemory(String prompt, String memoryPath, String memoryName, Integer keepLastMessages,
+                                    ParamsModelDetails parameters)
+      throws IOException {
 
     //Chat memory initialization
     ChatMemoryUtil chatMemory = intializeChatMemory(memoryPath, memoryName);

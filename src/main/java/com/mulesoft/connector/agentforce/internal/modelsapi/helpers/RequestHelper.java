@@ -68,11 +68,11 @@ public class RequestHelper {
     this.agentforceConnection = agentforceConnection;
   }
 
-    public InputStream executeGenerateText(String prompt, AgentforceConnection connection, ParamsModelDetails paramDetails)
-            throws IOException {
-        String payload = constructPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
-        return executeAgentforceRequest(payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
-    }
+  public InputStream executeGenerateText(String prompt, ParamsModelDetails paramDetails)
+      throws IOException {
+    String payload = constructPayload(prompt, paramDetails.getLocale(), paramDetails.getProbability());
+    return executeAgentforceRequest(payload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
+  }
 
   public InputStream generateChatFromMessages(String messages, ParamsModelDetails paramDetails)
       throws IOException {
@@ -178,7 +178,7 @@ public class RequestHelper {
   private List<Double> getQueryEmbedding(String body, String modelName)
       throws IOException {
 
-      InputStream embeddingResponse = executeAgentforceRequest(body, modelName, URI_MODELS_API_EMBEDDINGS);
+    InputStream embeddingResponse = executeAgentforceRequest(body, modelName, URI_MODELS_API_EMBEDDINGS);
 
     AgentforceEmbeddingResponseDTO embeddingResponseDTO =
         new ObjectMapper().readValue(embeddingResponse, AgentforceEmbeddingResponseDTO.class);

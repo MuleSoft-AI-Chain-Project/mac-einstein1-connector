@@ -99,8 +99,9 @@ public class AgentforceGenerationOperations {
     log.info("Executing chat answer prompt with memory operation.");
     try {
 
-      InputStream responseStream = connection.getChatMemoryHelper().chatWithMemory(prompt, memoryPath, memoryName, keepLastMessages,
-                                                                    paramDetails);
+      InputStream responseStream =
+          connection.getChatMemoryHelper().chatWithMemory(prompt, memoryPath, memoryName, keepLastMessages,
+                                                          paramDetails);
 
       return ResponseHelper.createAgentforceFormattedResponse(responseStream);
     } catch (Exception e) {

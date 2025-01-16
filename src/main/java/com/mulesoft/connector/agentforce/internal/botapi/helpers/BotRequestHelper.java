@@ -141,14 +141,14 @@ public class BotRequestHelper {
   public String findRuntimeBaseUrl() throws IOException {
 
     String metadataUrl = agentforceConnection.getSalesforceOrg()
-            + URI_BOT_API_METADATA_SERVICES_V_62 + URI_BOT_API_METADATA_RUNTIMEURL;
+        + URI_BOT_API_METADATA_SERVICES_V_62 + URI_BOT_API_METADATA_RUNTIMEURL;
 
     HttpURLConnection httpConnection = createURLConnection(metadataUrl, HTTP_METHOD_GET);
     addConnectionHeaders(httpConnection, agentforceConnection.getAccessToken());
 
     log.debug("Executing API to fetch runtime base URL: {} ", metadataUrl);
     InputStream responseStream = handleHttpResponse(httpConnection,
-            AgentforceErrorType.AGENT_METADATA_FAILURE);
+                                                    AgentforceErrorType.AGENT_METADATA_FAILURE);
     JsonNode rootNode = objectMapper.readTree(responseStream);
     String runtimeBaseURL = rootNode.get("runtimeBaseUrl").textValue();
 

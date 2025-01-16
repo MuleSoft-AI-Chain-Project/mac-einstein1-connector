@@ -129,7 +129,7 @@ public class AgentforceEmbeddingOperations {
                                                                         paramDetails.getFileType(), paramDetails.getOptionType())
           .toString();
       InputStream responseStream = connection.getRequestHelper().executeRAG("data: " + content + ", question: " + prompt,
-                                                            paramDetails);
+                                                                            paramDetails);
 
       return ResponseHelper.createAgentforceFormattedResponse(responseStream);
     } catch (Exception e) {
@@ -157,8 +157,9 @@ public class AgentforceEmbeddingOperations {
       String content =
           connection.getRequestHelper().embeddingFileQuery(prompt, toolsConfig, MODELAPI_OPENAI_ADA_002, "text", "FULL")
               .toString();
-      InputStream responseStream = connection.getRequestHelper().executeTools(prompt, "data: " + content + ", question: " + prompt,
-                                                              toolsConfig, paramDetails);
+      InputStream responseStream =
+          connection.getRequestHelper().executeTools(prompt, "data: " + content + ", question: " + prompt,
+                                                     toolsConfig, paramDetails);
 
       return ResponseHelper.createAgentforceFormattedResponse(responseStream);
     } catch (Exception e) {
