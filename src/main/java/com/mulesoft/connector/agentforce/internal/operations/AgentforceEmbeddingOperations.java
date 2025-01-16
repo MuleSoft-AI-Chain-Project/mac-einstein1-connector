@@ -4,7 +4,6 @@ import com.mulesoft.connector.agentforce.api.metadata.AgentforceResponseAttribut
 import com.mulesoft.connector.agentforce.api.metadata.ResponseParameters;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
 import com.mulesoft.connector.agentforce.internal.modelsapi.error.provider.EmbeddingErrorTypeProvider;
-import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.RequestHelper;
 import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.ResponseHelper;
 import com.mulesoft.connector.agentforce.internal.modelsapi.models.ParamsEmbeddingDocumentDetails;
 import com.mulesoft.connector.agentforce.internal.modelsapi.models.ParamsEmbeddingModelDetails;
@@ -40,7 +39,6 @@ import static org.mule.runtime.extension.api.annotation.param.MediaType.APPLICAT
 public class AgentforceEmbeddingOperations {
 
   private static final Logger log = LoggerFactory.getLogger(AgentforceEmbeddingOperations.class);
-  RequestHelper requestHelper = new RequestHelper();
 
   /**
    * Create an embedding vector representing the input text.
@@ -54,8 +52,7 @@ public class AgentforceEmbeddingOperations {
                                                                            @ParameterGroup(
                                                                                name = "Additional properties") ParamsEmbeddingModelDetails paramDetails) {
     try {
-      String response = requestHelper.executeGenerateEmbedding(text, connection, paramDetails);
-
+      String response = connection.getRequestHelper().executeGenerateEmbedding(text, paramDetails);
       return ResponseHelper.createAgentforceEmbeddingResponse(response);
     } catch (Exception e) {
       throw new ModuleException("Error while executing embedding generate from text operation",
@@ -74,8 +71,7 @@ public class AgentforceEmbeddingOperations {
                                                              @ParameterGroup(
                                                                  name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails) {
     try {
-      JSONArray response = requestHelper.embeddingFromFile(filePath, connection, paramDetails);
-
+      JSONArray response = connection.getRequestHelper().embeddingFromFile(filePath, paramDetails);
       JSONObject jsonObject = new JSONObject();
       jsonObject.put("result", response);
 
@@ -99,8 +95,9 @@ public class AgentforceEmbeddingOperations {
                                                              name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails) {
     log.info("Executing embedding adhoc file query operation.");
     try {
-      JSONArray response = requestHelper.embeddingFileQuery(prompt, filePath, connection, paramDetails.getModelApiName(),
-                                                            paramDetails.getFileType(), paramDetails.getOptionType());
+      JSONArray response = connection.getRequestHelper().embeddingFileQuery(prompt, filePath, paramDetails.getModelApiName(),
+                                                                            paramDetails.getFileType(),
+                                                                            paramDetails.getOptionType());
 
       JSONObject jsonObject = new JSONObject();
       jsonObject.put("result", response);
@@ -126,12 +123,11 @@ public class AgentforceEmbeddingOperations {
                                                                           name = "Additional properties") RAGParamsModelDetails paramDetails) {
     log.info("Executing rag adhoc load document.");
     try {
-
-      String content = requestHelper.embeddingFileQuery(prompt, filePath, connection, paramDetails.getEmbeddingName(),
-                                                        paramDetails.getFileType(), paramDetails.getOptionType())
+      String content = connection.getRequestHelper().embeddingFileQuery(prompt, filePath, paramDetails.getEmbeddingName(),
+                                                                        paramDetails.getFileType(), paramDetails.getOptionType())
           .toString();
-      String response = requestHelper.executeRAG("data: " + content + ", question: " + prompt, connection,
-                                                 paramDetails);
+      String response = connection.getRequestHelper().executeRAG("data: " + content + ", question: " + prompt,
+                                                                 paramDetails);
 
       return ResponseHelper.createAgentforceFormattedResponse(response);
     } catch (Exception e) {
@@ -157,10 +153,10 @@ public class AgentforceEmbeddingOperations {
     try {
 
       String content =
-          requestHelper.embeddingFileQuery(prompt, toolsConfig, connection, MODELAPI_OPENAI_ADA_002, "text", "FULL")
+          connection.getRequestHelper().embeddingFileQuery(prompt, toolsConfig, MODELAPI_OPENAI_ADA_002, "text", "FULL")
               .toString();
-      String response = requestHelper.executeTools(prompt, "data: " + content + ", question: " + prompt,
-                                                   toolsConfig, connection, paramDetails);
+      String response = connection.getRequestHelper().executeTools(prompt, "data: " + content + ", question: " + prompt,
+                                                                   toolsConfig, paramDetails);
 
       return ResponseHelper.createAgentforceFormattedResponse(response);
     } catch (Exception e) {

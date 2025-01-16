@@ -3,6 +3,7 @@ package com.mulesoft.connector.agentforce.internal.helpers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mulesoft.connector.agentforce.internal.dto.OAuthResponseDTO;
 import com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType;
+import org.mule.runtime.extension.api.connectivity.oauth.AccessTokenExpiredException;
 import org.mule.runtime.extension.api.exception.ModuleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,47 +24,12 @@ import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantU
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.QUERY_PARAM_CLIENT_SECRET;
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.QUERY_PARAM_GRANT_TYPE;
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.READ_TIMEOUT;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.URI_HTTPS_PREFIX;
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.URI_OAUTH_TOKEN;
 
 
 public class CommonRequestHelper {
 
   private static final Logger log = LoggerFactory.getLogger(CommonRequestHelper.class);
-
-  public static String getOAuthURL(String salesforceOrg) {
-    return URI_HTTPS_PREFIX + salesforceOrg + URI_OAUTH_TOKEN;
-  }
-
-  public static String getOAuthParams(String clientId, String clientSecret) {
-    return QUERY_PARAM_GRANT_TYPE + "=" + GRANT_TYPE_CLIENT_CREDENTIALS
-        + "&" + QUERY_PARAM_CLIENT_ID + "=" + clientId
-        + "&" + QUERY_PARAM_CLIENT_SECRET + "=" + clientSecret;
-  }
-
-  public static OAuthResponseDTO getOAuthResponseDTO(String salesforceOrg, String clientId, String clientSecret)
-      throws IOException {
-
-    log.debug("Preparing request for connection for salesforce org:{}", salesforceOrg);
-
-    String urlString = CommonRequestHelper.getOAuthURL(salesforceOrg);
-    String urlParameters = CommonRequestHelper.getOAuthParams(clientId, clientSecret);
-    HttpURLConnection httpConnection = createURLConnection(urlString, HTTP_METHOD_POST);
-
-    writePayloadToConnStream(httpConnection, urlParameters);
-
-    log.info("Executing rest {} ", urlString);
-    int responseCode = httpConnection.getResponseCode();
-    log.debug("Response code for connection request:{}", responseCode);
-    if (responseCode == HttpURLConnection.HTTP_OK) {
-      if (httpConnection.getInputStream() == null) {
-        return null;
-      }
-      String response = readResponseStream(httpConnection.getInputStream());
-      return new ObjectMapper().readValue(response, OAuthResponseDTO.class);
-    }
-    return null;
-  }
 
   public static HttpURLConnection createURLConnection(String urlString, String httpMethod) throws IOException {
     URL url = new URL(urlString);
@@ -115,6 +81,8 @@ public class CommonRequestHelper {
                                   "Error: No response received from Agentforce", errorType);
       }
       return httpConnection.getInputStream();
+    } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+      throw new AccessTokenExpiredException();
     } else {
       String errorMessage = readErrorStream(httpConnection.getErrorStream());
       log.info("Error in HTTP request. Response code: {}, message: {}", responseCode, errorMessage);

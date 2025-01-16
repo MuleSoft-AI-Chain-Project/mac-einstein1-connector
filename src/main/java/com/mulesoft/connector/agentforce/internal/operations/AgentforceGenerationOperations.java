@@ -4,10 +4,8 @@ import com.mulesoft.connector.agentforce.api.metadata.AgentforceResponseAttribut
 import com.mulesoft.connector.agentforce.api.metadata.ResponseParameters;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
 import com.mulesoft.connector.agentforce.internal.modelsapi.error.provider.ChatErrorTypeProvider;
-import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.RequestHelper;
 import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.PromptTemplateHelper;
 import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.ResponseHelper;
-import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.chatmemory.ChatMemoryHelper;
 import com.mulesoft.connector.agentforce.internal.modelsapi.models.ParamsModelDetails;
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.error.Throws;
@@ -33,16 +31,6 @@ import static org.mule.runtime.extension.api.annotation.param.MediaType.APPLICAT
 public class AgentforceGenerationOperations {
 
   private static final Logger log = LoggerFactory.getLogger(AgentforceGenerationOperations.class);
-  RequestHelper requestHelper = new RequestHelper();
-  ChatMemoryHelper chatMemoryHelper = new ChatMemoryHelper();
-
-  public void setPayloadHelper(RequestHelper requestHelper) {
-    this.requestHelper = requestHelper;
-  }
-
-  public void setChatMemoryHelper(ChatMemoryHelper chatMemoryHelper) {
-    this.chatMemoryHelper = chatMemoryHelper;
-  }
 
   /**
    * Helps defining an AI Agent with a prompt template
@@ -60,7 +48,7 @@ public class AgentforceGenerationOperations {
     log.info("Executing agent defined prompt template operation.");
     try {
       String finalPromptTemplate = PromptTemplateHelper.definePromptTemplate(template, instructions, dataset);
-      String response = requestHelper.executeGenerateText(finalPromptTemplate, connection, paramDetails);
+      String response = connection.getRequestHelper().executeGenerateText(finalPromptTemplate, paramDetails);
 
       return ResponseHelper.createAgentforceFormattedResponse(response);
     } catch (Exception e) {
@@ -84,7 +72,7 @@ public class AgentforceGenerationOperations {
                                                                             name = "Additional properties") ParamsModelDetails paramDetails) {
     log.info("Executing chat answer prompt operation.");
     try {
-      String response = requestHelper.executeGenerateText(prompt, connection, paramDetails);
+      String response = connection.getRequestHelper().executeGenerateText(prompt, paramDetails);
 
       return ResponseHelper.createAgentforceFormattedResponse(response);
     } catch (Exception e) {
@@ -111,8 +99,8 @@ public class AgentforceGenerationOperations {
     log.info("Executing chat answer prompt with memory operation.");
     try {
 
-      String response = chatMemoryHelper.chatWithMemory(prompt, memoryPath, memoryName, keepLastMessages,
-                                                        connection, paramDetails, requestHelper);
+      String response = connection.getChatMemoryHelper().chatWithMemory(prompt, memoryPath, memoryName, keepLastMessages,
+                                                                        paramDetails);
 
       return ResponseHelper.createAgentforceFormattedResponse(response);
     } catch (Exception e) {
@@ -136,7 +124,7 @@ public class AgentforceGenerationOperations {
     log.info("Executing chat generate from message operation.");
     try {
 
-      String response = requestHelper.executeGenerateChat(messages, connection, paramDetails);
+      String response = connection.getRequestHelper().executeGenerateChat(messages, paramDetails);
 
       return ResponseHelper.createAgentforceChatFromMessagesResponse(response);
     } catch (Exception e) {
@@ -145,5 +133,4 @@ public class AgentforceGenerationOperations {
       throw new ModuleException("Error while generating the chat from messages " + messages, CHAT_FAILURE, e);
     }
   }
-
 }

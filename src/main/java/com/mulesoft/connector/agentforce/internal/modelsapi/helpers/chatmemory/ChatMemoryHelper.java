@@ -1,39 +1,43 @@
 package com.mulesoft.connector.agentforce.internal.modelsapi.helpers.chatmemory;
 
-import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
 import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.RequestHelper;
 import com.mulesoft.connector.agentforce.internal.modelsapi.models.ParamsModelDetails;
-import org.mule.runtime.api.connection.ConnectionException;
 
 import java.io.IOException;
 import java.util.List;
 
 public class ChatMemoryHelper {
 
+  private RequestHelper requestHelper;
+
+  public ChatMemoryHelper(RequestHelper requestHelper) {
+    this.requestHelper = requestHelper;
+  }
+
   public String chatWithMemory(String prompt, String memoryPath, String memoryName, Integer keepLastMessages,
-                               AgentforceConnection connection, ParamsModelDetails parameters, RequestHelper requestHelper)
-      throws IOException, ConnectionException {
+                               ParamsModelDetails parameters)
+      throws IOException {
 
     //Chat memory initialization
-    ChatMemory chatMemory = intializeChatMemory(memoryPath, memoryName);
+    ChatMemoryUtil chatMemory = intializeChatMemory(memoryPath, memoryName);
 
     //Get keepLastMessages
     List<String> keepLastMessagesList = getKeepLastMessage(chatMemory, keepLastMessages);
     keepLastMessagesList.add(prompt);
     String memoryPrompt = formatMemoryPrompt(keepLastMessagesList);
 
-    String response = requestHelper.executeGenerateText(memoryPrompt, connection, parameters);
+    String response = requestHelper.executeGenerateText(memoryPrompt, parameters);
 
     addMessageToMemory(chatMemory, prompt);
 
     return response;
   }
 
-  private ChatMemory intializeChatMemory(String memoryPath, String memoryName) {
-    return new ChatMemory(memoryPath, memoryName);
+  private ChatMemoryUtil intializeChatMemory(String memoryPath, String memoryName) {
+    return new ChatMemoryUtil(memoryPath, memoryName);
   }
 
-  private List<String> getKeepLastMessage(ChatMemory chatMemory, Integer keepLastMessages) {
+  private List<String> getKeepLastMessage(ChatMemoryUtil chatMemory, Integer keepLastMessages) {
 
     // Retrieve all messages in ascending order of messageId
     List<String> messagesAsc = chatMemory.getAllMessagesByMessageIdAsc();
@@ -45,7 +49,7 @@ public class ChatMemoryHelper {
     return messagesAsc;
   }
 
-  private void addMessageToMemory(ChatMemory chatMemory, String prompt) {
+  private void addMessageToMemory(ChatMemoryUtil chatMemory, String prompt) {
     if (!isQuestion(prompt)) {
       chatMemory.addMessage(chatMemory.getMessageCount() + 1L, prompt);
     }
