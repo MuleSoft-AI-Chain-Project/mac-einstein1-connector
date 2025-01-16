@@ -84,7 +84,7 @@ public class BotRequestHelper {
   public AgentConversationResponseDTO startSession(String agentId)
       throws IOException {
     String startSessionUrl =
-        getRuntimeBaseUrl(agentforceConnection) + URI_BOT_API_VERSION + URI_BOT_API_BOTS + agentId + URI_BOT_API_SESSIONS;
+        getRuntimeBaseUrl() + URI_BOT_API_VERSION + URI_BOT_API_BOTS + agentId + URI_BOT_API_SESSIONS;
     String externalSessionKey = UUID.randomUUID().toString();
     String forceConfigEndpoint = agentforceConnection.getSalesforceOrg();
     String orgId = agentforceConnection.getoAuthResponseDTO().getOrgId();
@@ -106,7 +106,7 @@ public class BotRequestHelper {
       throws IOException {
 
     String continueSessionUrl =
-        getRuntimeBaseUrl(agentforceConnection) + URI_BOT_API_VERSION + URI_BOT_API_SESSIONS + sessionId + URI_BOT_API_MESSAGES;
+        getRuntimeBaseUrl() + URI_BOT_API_VERSION + URI_BOT_API_SESSIONS + sessionId + URI_BOT_API_MESSAGES;
     String orgId = agentforceConnection.getoAuthResponseDTO().getOrgId();
     BotContinueSessionRequestDTO payload =
         createContinueSessionRequestPayload(IOUtils.toString(message), messageSequenceNumber, inReplyToMessageId);
@@ -123,7 +123,7 @@ public class BotRequestHelper {
 
   public AgentConversationResponseDTO endSession(String sessionId) throws IOException {
 
-    String endSessionUrl = getRuntimeBaseUrl(agentforceConnection) + URI_BOT_API_VERSION + URI_BOT_API_SESSIONS + sessionId;
+    String endSessionUrl = getRuntimeBaseUrl() + URI_BOT_API_VERSION + URI_BOT_API_SESSIONS + sessionId;
     String orgId = agentforceConnection.getoAuthResponseDTO().getOrgId();
 
     log.debug("Agentforce end session details. Request URL: {}, Session ID:{}," +
@@ -135,12 +135,30 @@ public class BotRequestHelper {
     return getParsedHttpResponse(httpConnection);
   }
 
-  public String getRuntimeBaseUrl(AgentforceConnection connection) throws IOException {
+  public String getRuntimeBaseUrl() throws IOException {
 
-    if (!runTimeBaseUrlMap.containsKey(connection.getSalesforceOrg())) {
-      runTimeBaseUrlMap.put(connection.getSalesforceOrg(), findRuntimeBaseUrl(connection));
+    if (!runTimeBaseUrlMap.containsKey(agentforceConnection.getSalesforceOrg())) {
+      runTimeBaseUrlMap.put(agentforceConnection.getSalesforceOrg(), findRuntimeBaseUrl());
     }
-    return runTimeBaseUrlMap.get(connection.getSalesforceOrg());
+    return runTimeBaseUrlMap.get(agentforceConnection.getSalesforceOrg());
+  }
+
+  public String findRuntimeBaseUrl() throws IOException {
+
+    String metadataUrl = agentforceConnection.getSalesforceOrg()
+            + URI_BOT_API_METADATA_SERVICES_V_62 + URI_BOT_API_METADATA_RUNTIMEURL;
+
+    HttpURLConnection httpConnection = createURLConnection(metadataUrl, HTTP_METHOD_GET);
+    addConnectionHeaders(httpConnection, agentforceConnection.getAccessToken());
+
+    log.debug("Executing API to fetch runtime base URL: {} ", metadataUrl);
+    InputStream responseStream = handleHttpResponse(httpConnection,
+            AgentforceErrorType.AGENT_METADATA_FAILURE);
+    JsonNode rootNode = objectMapper.readTree(responseStream);
+    String runtimeBaseURL = rootNode.get("runtimeBaseUrl").textValue();
+
+    log.debug("Runtime base URL for connecting to agent: {} ", runtimeBaseURL);
+    return runtimeBaseURL;
   }
 
   private static void addConnectionHeaders(HttpURLConnection conn, String accessToken) {
@@ -269,25 +287,6 @@ public class BotRequestHelper {
       }
     }
     return sequenceIds;
-  }
-
-  private String findRuntimeBaseUrl(AgentforceConnection connection) throws IOException {
-
-    String metadataUrl = connection.getSalesforceOrg()
-        + URI_BOT_API_METADATA_SERVICES_V_62 + URI_BOT_API_METADATA_RUNTIMEURL;
-
-    HttpURLConnection httpConnection = createURLConnection(metadataUrl, HTTP_METHOD_GET);
-    addConnectionHeaders(httpConnection, connection.getAccessToken());
-
-    log.debug("Executing API to fetch runtime base URL: {} ", metadataUrl);
-    InputStream responseStream = handleHttpResponse(httpConnection,
-                                                    AgentforceErrorType.AGENT_METADATA_FAILURE);
-    JsonNode rootNode = objectMapper.readTree(responseStream);
-    String runtimeBaseURL = rootNode.get("runtimeBaseUrl").textValue();
-
-
-    log.debug("Runtime base URL for connecting to agent: {} ", runtimeBaseURL);
-    return runtimeBaseURL;
   }
 }
 

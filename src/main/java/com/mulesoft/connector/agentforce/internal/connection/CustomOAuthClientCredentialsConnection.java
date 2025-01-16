@@ -42,7 +42,7 @@ public class CustomOAuthClientCredentialsConnection implements AgentforceConnect
   public void validate() {
     try {
       logger.info("Inside CustomOAuthClientCredentialsConnection validate, salesforceOrg {}", salesforceOrg);
-      botRequestHelper.getAgentList();
+      botRequestHelper.findRuntimeBaseUrl();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
