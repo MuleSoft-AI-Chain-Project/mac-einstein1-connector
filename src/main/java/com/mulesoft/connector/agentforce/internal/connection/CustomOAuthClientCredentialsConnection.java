@@ -1,7 +1,6 @@
 package com.mulesoft.connector.agentforce.internal.connection;
 
 import com.mulesoft.connector.agentforce.internal.botapi.helpers.BotRequestHelper;
-import com.mulesoft.connector.agentforce.internal.dto.OAuthResponseDTO;
 import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.RequestHelper;
 import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.chatmemory.ChatMemoryHelper;
 import org.mule.runtime.extension.api.connectivity.oauth.ClientCredentialsState;
@@ -12,21 +11,23 @@ import java.io.IOException;
 
 public class CustomOAuthClientCredentialsConnection implements AgentforceConnection {
 
-  private final static Logger logger = LoggerFactory.getLogger(AgentforceConnection.class);
+  private static final Logger logger = LoggerFactory.getLogger(CustomOAuthClientCredentialsConnection.class);
 
-  private ClientCredentialsState clientCredentialsState;
-  private String salesforceOrg;
-  private OAuthResponseDTO oAuthResponseDTO;
-  private RequestHelper requestHelper;
-  private ChatMemoryHelper chatMemoryHelper;
+  private final ClientCredentialsState clientCredentialsState;
+  private final String salesforceOrgUrl;
+  private final String apiInstanceUrl;
+  private final String orgId;
+  private final RequestHelper requestHelper;
+  private final ChatMemoryHelper chatMemoryHelper;
 
-  private BotRequestHelper botRequestHelper;
+  private final BotRequestHelper botRequestHelper;
 
-  public CustomOAuthClientCredentialsConnection(String salesforceOrg, OAuthResponseDTO oAuthResponseDTO,
-                                                ClientCredentialsState clientCredentialsState) {
-    this.salesforceOrg = salesforceOrg;
-    this.oAuthResponseDTO = oAuthResponseDTO;
+  public CustomOAuthClientCredentialsConnection(String salesforceOrgUrl, ClientCredentialsState clientCredentialsState,
+                                                String apiInstanceUrl, String orgId) {
+    this.salesforceOrgUrl = salesforceOrgUrl;
     this.clientCredentialsState = clientCredentialsState;
+    this.apiInstanceUrl = apiInstanceUrl;
+    this.orgId = parseOrgId(orgId);
     this.requestHelper = new RequestHelper(this);
     this.chatMemoryHelper = new ChatMemoryHelper(requestHelper);
     this.botRequestHelper = new BotRequestHelper(this);
@@ -41,23 +42,23 @@ public class CustomOAuthClientCredentialsConnection implements AgentforceConnect
   @Override
   public void validate() {
     try {
-      logger.info("Inside CustomOAuthClientCredentialsConnection validate, salesforceOrg {}", salesforceOrg);
+      logger.info("Inside CustomOAuthClientCredentialsConnection validate, salesforceOrg {}", salesforceOrgUrl);
       botRequestHelper.findRuntimeBaseUrl();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
-  public OAuthResponseDTO getoAuthResponseDTO() {
-    return oAuthResponseDTO;
+  public String getSalesforceOrgUrl() {
+    return salesforceOrgUrl;
   }
 
-  public String getSalesforceOrg() {
-    return salesforceOrg;
+  public String getApiInstanceUrl() {
+    return apiInstanceUrl;
   }
 
-  public ClientCredentialsState getClientCredentialsState() {
-    return clientCredentialsState;
+  public String getOrgId() {
+    return orgId;
   }
 
   @Override
@@ -78,5 +79,10 @@ public class CustomOAuthClientCredentialsConnection implements AgentforceConnect
   @Override
   public String getAccessToken() {
     return clientCredentialsState.getAccessToken();
+  }
+
+  private String parseOrgId(String id) {
+    String[] idArr = id.split("/");
+    return idArr[idArr.length - 2];
   }
 }

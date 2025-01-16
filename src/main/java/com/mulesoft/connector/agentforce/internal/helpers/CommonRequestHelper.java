@@ -1,7 +1,5 @@
 package com.mulesoft.connector.agentforce.internal.helpers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mulesoft.connector.agentforce.internal.dto.OAuthResponseDTO;
 import com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType;
 import org.mule.runtime.extension.api.connectivity.oauth.AccessTokenExpiredException;
 import org.mule.runtime.extension.api.exception.ModuleException;
@@ -18,13 +16,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.CONNECTION_TIMEOUT;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.GRANT_TYPE_CLIENT_CREDENTIALS;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.HTTP_METHOD_POST;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.QUERY_PARAM_CLIENT_ID;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.QUERY_PARAM_CLIENT_SECRET;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.QUERY_PARAM_GRANT_TYPE;
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.READ_TIMEOUT;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.URI_OAUTH_TOKEN;
 
 
 public class CommonRequestHelper {
