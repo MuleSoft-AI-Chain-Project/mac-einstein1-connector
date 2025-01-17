@@ -7,8 +7,12 @@ http://www.mulesoft.org/schema/mule/ms-agentforce http://www.mulesoft.org/schema
 http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
 
-	<ms-agentforce:config name="Agentforce_Config" doc:name="Agentforce Config" doc:id="40136642-33a7-4a9b-a9cf-8d9bd3724b69" >
-		<ms-agentforce:connection salesforceOrg="" clientId="" clientSecret="" />
+	<configuration-properties doc:name="Configuration properties" file="mule-artifact.properties"/>
+
+	<ms-agentforce:config name="Agentforce_AI_Config" doc:name="Agentforce Config" doc:id="e2310b9c-aa50-406c-85ae-8bfa200c009a" >
+		<ms-agentforce:oauth-client-credentials-connection >
+			<ms-agentforce:oauth-client-credentials clientId="${config.clientId}" clientSecret="${config.clientSecret}" tokenUrl="${config.salesforceOrgUrl}" />
+		</ms-agentforce:oauth-client-credentials-connection>
 	</ms-agentforce:config>
 
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="2430f525-f4b3-47da-8f70-3aecb7950ea6" >
@@ -18,7 +22,7 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 	<flow name="PromptTemplate" doc:id="c590d347-42eb-41e6-b945-028a2cdf6190" >
 		<http:listener doc:name="Listener" doc:id="53a66d51-c9e9-4775-bc59-9209f2ef37b4" path="/promptTemplate" config-ref="HTTP_Listener_config"/>
 		<ms-agentforce:agent-define-prompt-template doc:name="Agent define prompt template" doc:id="ff86dae4-5b31-47ea-bde2-ac85177f1fff"
-												  config-ref="Agentforce_Config">
+												  config-ref="Agentforce_AI_Config">
 			<ms-agentforce:template ><![CDATA[#[payload.template]]]></ms-agentforce:template>
 			<ms-agentforce:instructions ><![CDATA[#[payload.instructions]]]></ms-agentforce:instructions>
 			<ms-agentforce:dataset ><![CDATA[#[payload.dataset]]]></ms-agentforce:dataset>
