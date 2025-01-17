@@ -11,7 +11,7 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 
 	<ms-agentforce:config name="Agentforce_AI_Config" doc:name="Agentforce Config" doc:id="e2310b9c-aa50-406c-85ae-8bfa200c009a" >
 		<ms-agentforce:oauth-client-credentials-connection >
-			<ms-agentforce:oauth-client-credentials clientId="${config.clientId}" clientSecret="${config.clientSecret}" tokenUrl="${config.salesforceOrgUrl}" />
+			<ms-agentforce:oauth-client-credentials clientId="${config.client-id}" clientSecret="${config.client-secret}" tokenUrl="${config.salesforce-org-url}" />
 		</ms-agentforce:oauth-client-credentials-connection>
 	</ms-agentforce:config>
 
