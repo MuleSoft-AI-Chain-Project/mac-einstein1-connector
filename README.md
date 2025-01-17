@@ -2,7 +2,7 @@
 
 ## <img src="icon/icon.svg" width="6%" alt="banner"> [MuleSoft AI Chain - Anypoint Agentforce Connector](https://mac-project.ai/docs/einstein-ai)
 
-MuleSoft Anypoint Agentforce Connector for Salesforce Einstein AI to interact with the models API of the Salesforce platform and benefit from its trust layer and automation capabilities. It allows you to:
+MuleSoft Anypoint Agentforce Connector for Salesforce Einstein AI to interact with the _models API_ of the Salesforce platform and benefit from its trust layer and automation capabilities. It allows you to:
 - **Leverage the Salesforce Trustlayer**
 - **Ingest files into the Vector Database**
 - **Build Prompt Templates in your workflow**
@@ -10,6 +10,10 @@ MuleSoft Anypoint Agentforce Connector for Salesforce Einstein AI to interact wi
 - **Build Chat Memory capabilities**
 - **Optimized usage in MuleSoft applications**
 
+In addition to the above operations, Anypoint Agentforce Connector provides a way to interact with the _Bots API_ of the Salesforce platform and benefit from the agent related capabilities. It allows you to:
+- **Start Agent Conversation**
+- **Continue Agent Conversation**
+- **End Agent Conversation**
 
 ### Requirements
 
@@ -24,7 +28,7 @@ To use this connector, add the following dependency to your application's `pom.x
 	<dependency>
 		<groupId>com.mulesoft.connectors</groupId>
 		<artifactId>mule4-agentforce-connector</artifactId>
-		<version>0.20.0</version>
+		<version>0.3.0</version>
 		<classifier>mule-plugin</classifier>		
 	</dependency>
 ```
