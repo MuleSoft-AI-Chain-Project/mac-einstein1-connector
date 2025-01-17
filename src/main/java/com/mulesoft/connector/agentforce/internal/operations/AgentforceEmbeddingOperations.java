@@ -90,6 +90,7 @@ public class AgentforceEmbeddingOperations {
   /**
    * Generate a response based on a file embedding.
    */
+  // TODO: change String filePath to InputStream
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("EMBEDDING-adhoc-file-query")
   @Throws(EmbeddingErrorTypeProvider.class)
@@ -117,6 +118,7 @@ public class AgentforceEmbeddingOperations {
   /**
    * Generate a response based on a plain text prompt and file from embedding and LLM.
    */
+  // TODO: change String filePath to InputStream
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("RAG-adhoc-load-document")
   @Throws(EmbeddingErrorTypeProvider.class)
@@ -146,11 +148,12 @@ public class AgentforceEmbeddingOperations {
   /**
    * Generate a response based on a plain text prompt and tools config.
    */
+  // TODO: change String filePath to InputStream
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("Tools-use-ai-service")
   @Throws(EmbeddingErrorTypeProvider.class)
   @OutputJsonType(schema = "api/response/AgentForceOperationResponse.json")
-  public Result<InputStream, AgentforceResponseAttributes> executeTools(@Content String prompt, String toolsConfig,
+  public Result<InputStream, AgentforceResponseAttributes> executeTools(@Content String prompt, String toolsConfigFilePath,
                                                                         @Connection AgentforceConnection connection,
                                                                         @ParameterGroup(
                                                                             name = "Additional properties") ParamsModelDetails paramDetails) {
@@ -158,16 +161,16 @@ public class AgentforceEmbeddingOperations {
     try {
 
       String content =
-          requestHelper.embeddingFileQuery(prompt, toolsConfig, connection, MODELAPI_OPENAI_ADA_002, "text", "FULL")
+          requestHelper.embeddingFileQuery(prompt, toolsConfigFilePath, connection, MODELAPI_OPENAI_ADA_002, "text", "FULL")
               .toString();
       String response = requestHelper.executeTools(prompt, "data: " + content + ", question: " + prompt,
-                                                   toolsConfig, connection, paramDetails);
+              toolsConfigFilePath, connection, paramDetails);
 
       return ResponseHelper.createAgentforceFormattedResponse(response);
     } catch (Exception e) {
 
       log.error(format("Exception occurred while executing AI service tools operation %s", e.getMessage()), e);
-      throw new ModuleException("Error while executing AI service tools with provided config " + toolsConfig + ", for prompt "
+      throw new ModuleException("Error while executing AI service tools with provided config " + toolsConfigFilePath + ", for prompt "
           + prompt, TOOLS_OPERATION_FAILURE, e);
     }
   }
