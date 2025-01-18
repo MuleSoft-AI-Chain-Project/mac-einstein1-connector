@@ -14,7 +14,7 @@ How to Run Sample
 -----------------
 
 1. Import the project folder demo in Studio.
-2. Update the Client Id, Client Secret and Salesforce Org in the Connection config
+2. Update the Client Id, Client Secret and Salesforce Org URL in the Connection config
 3. Save the configuration & run the application
 
 
