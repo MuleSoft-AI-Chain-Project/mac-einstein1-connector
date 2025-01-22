@@ -74,6 +74,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.mulesoft.connectors</groupId>
+            <artifactId>mule-connector-commons</artifactId>
+            <version>2.1.1</version>
+        </dependency>
+        <dependency>
             <groupId>org.mule.sdk</groupId>
             <artifactId>mule-sdk-api</artifactId>
             <version>${mule.sdk.api.version}</version>
@@ -179,11 +184,16 @@
             <version>2.9.0-20241028</version>
         </dependency>
 
-
         <dependency>
             <groupId>org.mule.weave</groupId>
             <artifactId>runtime</artifactId>
             <version>2.9.0-20241028</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mule.connectors</groupId>
+            <artifactId>mule-file-connector</artifactId>
+            <version>1.5.2</version>
+            <classifier>mule-plugin</classifier>
         </dependency>
     </dependencies>
 
@@ -313,7 +323,6 @@
             <url>https://repository-master.mulesoft.org/nexus/content/repositories/releases/</url>
         </repository>
     </repositories>
-
     <pluginRepositories>
         <pluginRepository>
             <id>mulesoft-releases</id>
@@ -325,19 +334,18 @@
             </snapshots>
         </pluginRepository>
     </pluginRepositories>
-	<distributionManagement>
-		<snapshotRepository>
-			<id>exchange-repository</id>
-			<name>Exchange Repository</name>
-			<url>https://maven.anypoint.mulesoft.com/api/v1/organizations/cf06d6a9-ce61-461c-b28d-047fc3ddf45b/maven</url>
-			<layout>default</layout>
-		</snapshotRepository>
-		<repository>
-			<id>exchange-repository</id>
-			<name>Exchange Repository</name>
-			<url>https://maven.anypoint.mulesoft.com/api/v1/organizations/cf06d6a9-ce61-461c-b28d-047fc3ddf45b/maven</url>
-			<layout>default</layout>
-		</repository>
-	</distributionManagement>
-
+    <distributionManagement>
+        <snapshotRepository>
+            <id>exchange-repository</id>
+            <name>Exchange Repository</name>
+            <url>https://maven.anypoint.mulesoft.com/api/v1/organizations/cf06d6a9-ce61-461c-b28d-047fc3ddf45b/maven</url>
+            <layout>default</layout>
+        </snapshotRepository>
+        <repository>
+            <id>exchange-repository</id>
+            <name>Exchange Repository</name>
+            <url>https://maven.anypoint.mulesoft.com/api/v1/organizations/cf06d6a9-ce61-461c-b28d-047fc3ddf45b/maven</url>
+            <layout>default</layout>
+        </repository>
+    </distributionManagement>
 </project>

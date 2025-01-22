@@ -13,15 +13,12 @@ public class InvokeMetadataResolver
 
   @Override
   public String getResolverName() {
-    System.out.println("InputTypeResolver.super.getResolverName() = " + InputTypeResolver.super.getResolverName());
-
     return InputTypeResolver.super.getResolverName();
   }
 
   @Override
   public MetadataType getOutputType(MetadataContext context, CopilotAgentDetails key)
       throws MetadataResolvingException, ConnectionException {
-    System.out.println("Inside getInputMetadata, key = " + key + ", context = " + context);
     key.setAgent("Testing");
     return null;
   }
@@ -29,14 +26,12 @@ public class InvokeMetadataResolver
   @Override
   public MetadataType getInputMetadata(MetadataContext context, CopilotAgentDetails key)
       throws MetadataResolvingException, ConnectionException {
-    System.out.println("Inside getInputMetadata, key = " + key + ", context = " + context);
     key.setAgent("Testing");
     return null;
   }
 
   @Override
   public String getCategoryName() {
-    System.out.println("Inside getCategoryName");
     return null;
   }
 }

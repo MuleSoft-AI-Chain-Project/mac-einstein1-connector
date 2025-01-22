@@ -83,7 +83,7 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 	<flow name="ToolsUseAiService" doc:id="c6ca52fc-a5b1-4778-8205-a6c6a779aa5c" >
 		<http:listener doc:name="Listener" doc:id="6cf7f3b7-907c-4845-b163-eb3af49db782" config-ref="HTTP_Listener_config" path="/toolsai" />
 		<ms-agentforce:tools-use-ai-service doc:name="Tools use ai service" doc:id="5df6c534-98d3-4935-a625-37a4a76b8b4b"
-										  config-ref="Agentforce_AI_Config" toolsConfig="#[payload.config]">
+										  config-ref="Agentforce_AI_Config" toolsConfigFilePath="#[payload.config]">
 			<ms-agentforce:prompt ><![CDATA[#[payload.prompt]]]></ms-agentforce:prompt>
 		</ms-agentforce:tools-use-ai-service>
 	</flow>

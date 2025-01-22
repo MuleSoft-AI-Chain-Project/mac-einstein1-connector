@@ -10,12 +10,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-public class ChatMemory {
+public class ChatMemoryUtil {
 
   private final DB db;
   private final Map<Long, String> chatMap;
 
-  public ChatMemory(String dbFile, String memoryName) {
+  public ChatMemoryUtil(String dbFile, String memoryName) {
     // Open or create the DB file
     db = DBMaker.fileDB(new File(dbFile))
         .transactionEnable()

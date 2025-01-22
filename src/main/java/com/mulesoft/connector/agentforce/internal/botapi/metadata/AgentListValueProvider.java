@@ -33,7 +33,7 @@ public class AgentListValueProvider implements ValueProvider {
   public Set<Value> resolve() throws ValueResolvingException {
     try {
 
-      return new BotRequestHelper().getAgentList(connection)
+      return new BotRequestHelper(connection).getAgentList()
           .stream()
           .filter(agent -> agent.getStatus().equals("Active"))
           .map(agent -> ValueBuilder

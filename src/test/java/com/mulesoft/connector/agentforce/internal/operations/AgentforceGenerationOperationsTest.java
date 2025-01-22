@@ -4,12 +4,14 @@ import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnectio
 import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.RequestHelper;
 import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.chatmemory.ChatMemoryHelper;
 import com.mulesoft.connector.agentforce.internal.modelsapi.models.ParamsModelDetails;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mule.runtime.api.connection.ConnectionException;
 import org.mule.runtime.extension.api.exception.ModuleException;
 
 import java.io.IOException;
@@ -17,13 +19,14 @@ import java.io.IOException;
 import static com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType.CHAT_FAILURE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AgentforceGenerationOperationsTest {
 
-  @InjectMocks
   private AgentforceGenerationOperations agentforceGenerationOperations;
 
   @Mock
@@ -37,11 +40,17 @@ class AgentforceGenerationOperationsTest {
 
   @Mock
   private ParamsModelDetails paramDetailsMock;
+  private AutoCloseable closeable;
 
   @BeforeEach
   void setUp() {
-    agentforceGenerationOperations.setPayloadHelper(requestHelperMock);
-    agentforceGenerationOperations.setChatMemoryHelper(chatMemoryHelperMock);
+    closeable = MockitoAnnotations.openMocks(this);
+    agentforceGenerationOperations = new AgentforceGenerationOperations();
+  }
+
+  @AfterEach
+  void tearDown() throws Exception {
+    closeable.close(); // Close the resource to avoid resource leaks
   }
 
   @Test
@@ -49,7 +58,8 @@ class AgentforceGenerationOperationsTest {
     String template = "Template";
     String instructions = "Instructions";
     String dataset = "Dataset";
-    when(requestHelperMock.executeGenerateText(anyString(), any(), any()))
+    when(connectionMock.getRequestHelper()).thenReturn(requestHelperMock);
+    when(requestHelperMock.executeGenerateText(anyString(), any()))
         .thenThrow(new RuntimeException("Test exception"));
 
     ModuleException exception = assertThrows(ModuleException.class,
@@ -65,8 +75,8 @@ class AgentforceGenerationOperationsTest {
   @Test
   void testGenerateTextFailure() throws IOException {
     String prompt = "Test Prompt";
-
-    when(requestHelperMock.executeGenerateText(anyString(), any(), any()))
+    when(connectionMock.getRequestHelper()).thenReturn(requestHelperMock);
+    when(requestHelperMock.executeGenerateText(anyString(), any()))
         .thenThrow(new RuntimeException("Test exception"));
 
     ModuleException exception =
@@ -80,13 +90,14 @@ class AgentforceGenerationOperationsTest {
   }
 
   @Test
-  void testGenerateTextMemoryFailure() throws IOException, ConnectionException {
+  void testGenerateTextMemoryFailure() throws IOException {
     String prompt = "Test";
     String memoryPath = "src/resources/testdb";
     String memoryName = "vt";
     Integer keepLastMessages = 10;
 
-    when(chatMemoryHelperMock.chatWithMemory(anyString(), anyString(), anyString(), anyInt(), any(), any(), any()))
+    when(connectionMock.getChatMemoryHelper()).thenReturn(chatMemoryHelperMock);
+    when(chatMemoryHelperMock.chatWithMemory(anyString(), anyString(), anyString(), anyInt(), any()))
         .thenThrow(new RuntimeException("Test exception"));
 
     ModuleException exception = assertThrows(ModuleException.class, () -> agentforceGenerationOperations
@@ -101,8 +112,8 @@ class AgentforceGenerationOperationsTest {
   @Test
   void testGenerateChatFailure() throws IOException {
     String messages = "Test Messages";
-
-    when(requestHelperMock.executeGenerateChat(anyString(), any(), any()))
+    when(connectionMock.getRequestHelper()).thenReturn(requestHelperMock);
+    when(requestHelperMock.generateChatFromMessages(anyString(), any()))
         .thenThrow(new RuntimeException("Test exception"));
 
     ModuleException exception =
