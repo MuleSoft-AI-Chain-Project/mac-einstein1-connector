@@ -21,5 +21,4 @@
             <ms-agentforce:oauth-client-credentials clientId="testId" clientSecret="testSecret" tokenUrl="${config.salesforce-org}" />
         </ms-agentforce:oauth-client-credentials-connection>
     </ms-agentforce:config>
-
 </mule>
