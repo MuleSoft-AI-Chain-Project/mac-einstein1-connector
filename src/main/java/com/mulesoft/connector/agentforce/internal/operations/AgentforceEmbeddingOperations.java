@@ -148,7 +148,7 @@ public class AgentforceEmbeddingOperations {
   @Alias("Tools-use-ai-service")
   @Throws(EmbeddingErrorTypeProvider.class)
   @OutputJsonType(schema = "api/response/AgentForceOperationResponse.json")
-  public Result<InputStream, AgentforceResponseAttributes> executeTools(@Content String prompt, InputStream toolsConfigFilePath,
+  public Result<InputStream, AgentforceResponseAttributes> executeTools(@Content String prompt, InputStream inputStream,
                                                                         @Connection AgentforceConnection connection,
                                                                         @ParameterGroup(
                                                                             name = "Additional properties") ParamsModelDetails paramDetails) {
@@ -156,20 +156,19 @@ public class AgentforceEmbeddingOperations {
     try {
 
       String content =
-          connection.getRequestHelper().embeddingFileQuery(prompt, toolsConfigFilePath, MODELAPI_OPENAI_ADA_002, "text", "FULL")
+          connection.getRequestHelper().embeddingFileQuery(prompt, inputStream, MODELAPI_OPENAI_ADA_002, "text", "FULL")
               .toString();
-      toolsConfigFilePath.reset();
+      inputStream.reset();
       InputStream responseStream =
           connection.getRequestHelper().executeTools(prompt, "data: " + content + ", question: " + prompt,
-                                                     toolsConfigFilePath, paramDetails);
+                  inputStream, paramDetails);
 
       return ResponseHelper.createAgentforceFormattedResponse(responseStream);
     } catch (Exception e) {
 
       log.error(format("Exception occurred while executing AI service tools operation %s", e.getMessage()), e);
-      throw new ModuleException("Error while executing AI service tools with provided config " + toolsConfigFilePath
-          + ", for prompt "
-          + prompt, TOOLS_OPERATION_FAILURE, e);
+      throw new ModuleException("Error while executing AI service tools" + ", for prompt "
+              + prompt, TOOLS_OPERATION_FAILURE, e);
     }
   }
 }
