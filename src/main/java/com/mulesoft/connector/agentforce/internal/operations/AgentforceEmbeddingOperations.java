@@ -161,14 +161,14 @@ public class AgentforceEmbeddingOperations {
       inputStream.reset();
       InputStream responseStream =
           connection.getRequestHelper().executeTools(prompt, "data: " + content + ", question: " + prompt,
-                  inputStream, paramDetails);
+                                                     inputStream, paramDetails);
 
       return ResponseHelper.createAgentforceFormattedResponse(responseStream);
     } catch (Exception e) {
 
       log.error(format("Exception occurred while executing AI service tools operation %s", e.getMessage()), e);
       throw new ModuleException("Error while executing AI service tools" + ", for prompt "
-              + prompt, TOOLS_OPERATION_FAILURE, e);
+          + prompt, TOOLS_OPERATION_FAILURE, e);
     }
   }
 }
