@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	  xmlns:ms-agentforce="http://www.mulesoft.org/schema/mule/ms-agentforce"
+	  xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ms-agentforce http://www.mulesoft.org/schema/mule/ms-agentforce/current/mule-ms-agentforce.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+
+	<configuration-properties doc:name="Configuration properties" file="mule-artifact.properties"/>
+
+	<ms-agentforce:config name="Agentforce_AI_Config" doc:name="Agentforce Config" doc:id="e2310b9c-aa50-406c-85ae-8bfa200c009a" >
+		<ms-agentforce:oauth-client-credentials-connection >
+			<ms-agentforce:oauth-client-credentials clientId="${config.client-id}" clientSecret="${config.client-secret}" tokenUrl="${config.salesforce-org-url}" />
+		</ms-agentforce:oauth-client-credentials-connection>
+	</ms-agentforce:config>
+
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="2430f525-f4b3-47da-8f70-3aecb7950ea6" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="mule4-agentforce-bot-operations-demoFlow" doc:id="9c31bc64-b24d-4747-a90c-fd29671cea01" >
+		<http:listener doc:name="Listener" doc:id="36eb744e-283d-4c37-959a-02814822ee25" config-ref="HTTP_Listener_config" path="/agentConversation"/>
+		<set-variable value="#[payload.prompt]" doc:name="Set Variable" doc:id="f1a25d31-d4b3-4ef5-9a2b-029512af2fc0" variableName="prompt"/>
+		<ms-agentforce:start-agent-conversation doc:name="Start agent conversation" doc:id="ea0f6615-63d9-43b5-b949-0ce8f823bb7c" config-ref="Agentforce_AI_Config" agent="0Xx5b0000008ObjCAE" target="sessionId" targetValue="#[payload.sessionId]"/>
+		<logger level="INFO" doc:name="Logger" doc:id="fe2b0603-ac1d-4bb6-ab8d-17cc34ef155b" message="Starting  Continue Conversation with session id: #[vars.sessionId] and prompt: #[vars.prompt]"/>
+		<ms-agentforce:continue-agent-conversation doc:name="Continue agent conversation" doc:id="c1f79ba5-affe-4b61-8927-46b4c15200ae" config-ref="Agentforce_AI_Config" messageSequenceNumber="1">
+			<ms-agentforce:message ><![CDATA[#[output application/java
+---
+vars.prompt as String]]]></ms-agentforce:message>
+			<ms-agentforce:session-id ><![CDATA[#[output application/java
+---
+vars.sessionId as String]]]></ms-agentforce:session-id>
+		</ms-agentforce:continue-agent-conversation>
+		<logger level="INFO" doc:name="Logger" doc:id="06878ebd-a01b-44bf-94b0-5df25ea75d55" message="Starting end conversation with session id : #[vars.sessionId]"/>
+		<ms-agentforce:end-agent-conversation doc:name="End agent conversation" doc:id="c7d85b8b-869a-422e-82fd-0c7c6c7c3adb" config-ref="Agentforce_AI_Config">
+			<ms-agentforce:session-id ><![CDATA[#[output application/java
+---
+vars.sessionId as String]]]></ms-agentforce:session-id>
+		</ms-agentforce:end-agent-conversation>
+	</flow>
+</mule>
