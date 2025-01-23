@@ -11,7 +11,7 @@ public class DocumentSplitOptions implements ValueProvider {
 
   @Override
   public Set<Value> resolve() throws ValueResolvingException {
-    return ValueBuilder.getValuesFor("FULL", "PARAGRAPH", "SENTENCES");
+    return ValueBuilder.getValuesFor("FULL", "PARAGRAPH");
   }
 
 }

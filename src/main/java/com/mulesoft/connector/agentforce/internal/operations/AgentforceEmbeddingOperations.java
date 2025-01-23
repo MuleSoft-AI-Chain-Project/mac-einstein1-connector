@@ -23,6 +23,7 @@ import org.mule.runtime.extension.api.runtime.operation.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import static com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType.EMBEDDING_OPERATIONS_FAILURE;
@@ -68,11 +69,12 @@ public class AgentforceEmbeddingOperations {
   @Alias("EMBEDDING-generate-from-file")
   @Throws(EmbeddingErrorTypeProvider.class)
   @OutputJsonType(schema = "api/response/AgentForceFileEmbeddingResponse.json")
-  public Result<InputStream, Void> generateEmbeddingFromFile(String filePath, @Connection AgentforceConnection connection,
+  public Result<InputStream, Void> generateEmbeddingFromFile(InputStream inputStream, @Connection AgentforceConnection connection,
                                                              @ParameterGroup(
                                                                  name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails) {
+    log.info("Executing generate embedding from file operation.");
     try {
-      JSONArray response = connection.getRequestHelper().generateEmbeddingFromFile(filePath, paramDetails);
+      JSONArray response = connection.getRequestHelper().generateEmbeddingFromFileInputStream(inputStream, paramDetails);
 
       JSONObject jsonObject = new JSONObject();
       jsonObject.put("result", response);
@@ -91,13 +93,14 @@ public class AgentforceEmbeddingOperations {
   @Alias("EMBEDDING-adhoc-file-query")
   @Throws(EmbeddingErrorTypeProvider.class)
   @OutputJsonType(schema = "api/response/AgentForceFileEmbeddingResponse.json")
-  public Result<InputStream, Void> queryEmbeddingOnFiles(@Content String prompt, String filePath,
+  public Result<InputStream, Void> queryEmbeddingOnFiles(@Content String prompt, InputStream inputStream,
                                                          @Connection AgentforceConnection connection,
                                                          @ParameterGroup(
                                                              name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails) {
     log.info("Executing embedding adhoc file query operation.");
+
     try {
-      JSONArray response = connection.getRequestHelper().embeddingFileQuery(prompt, filePath, paramDetails.getModelApiName(),
+      JSONArray response = connection.getRequestHelper().embeddingFileQuery(prompt, inputStream, paramDetails.getModelApiName(),
                                                                             paramDetails.getFileType(),
                                                                             paramDetails.getOptionType());
 
@@ -107,8 +110,7 @@ public class AgentforceEmbeddingOperations {
     } catch (Exception e) {
 
       log.error(format("Exception occurred while executing embedding adhoc file query operation %s", e.getMessage()), e);
-      throw new ModuleException("Error while generating the chat from filePath " + filePath + ", for prompt " + prompt,
-                                EMBEDDING_OPERATIONS_FAILURE, e);
+      throw new ModuleException("Error while generating the chat, for prompt " + prompt, EMBEDDING_OPERATIONS_FAILURE, e);
     }
   }
 
@@ -119,13 +121,13 @@ public class AgentforceEmbeddingOperations {
   @Alias("RAG-adhoc-load-document")
   @Throws(EmbeddingErrorTypeProvider.class)
   @OutputJsonType(schema = "api/response/AgentForceOperationResponse.json")
-  public Result<InputStream, AgentforceResponseAttributes> ragOnFiles(@Content String prompt, String filePath,
+  public Result<InputStream, AgentforceResponseAttributes> ragOnFiles(@Content String prompt, InputStream inputStream,
                                                                       @Connection AgentforceConnection connection,
                                                                       @ParameterGroup(
                                                                           name = "Additional properties") RAGParamsModelDetails paramDetails) {
     log.info("Executing rag adhoc load document.");
     try {
-      String content = connection.getRequestHelper().embeddingFileQuery(prompt, filePath, paramDetails.getEmbeddingName(),
+      String content = connection.getRequestHelper().embeddingFileQuery(prompt, inputStream, paramDetails.getEmbeddingName(),
                                                                         paramDetails.getFileType(), paramDetails.getOptionType())
           .toString();
       InputStream responseStream = connection.getRequestHelper().executeRAG("data: " + content + ", question: " + prompt,
@@ -135,8 +137,7 @@ public class AgentforceEmbeddingOperations {
     } catch (Exception e) {
 
       log.error(format("Exception occurred while executing rag adhoc load document operation %s", e.getMessage()), e);
-      throw new ModuleException("Error while doing rag adhoc load document from filePath " + filePath + ", for prompt "
-          + prompt, RAG_FAILURE, e);
+      throw new ModuleException("Error while doing rag adhoc load document for prompt " + prompt, RAG_FAILURE, e);
     }
   }
 
@@ -147,7 +148,7 @@ public class AgentforceEmbeddingOperations {
   @Alias("Tools-use-ai-service")
   @Throws(EmbeddingErrorTypeProvider.class)
   @OutputJsonType(schema = "api/response/AgentForceOperationResponse.json")
-  public Result<InputStream, AgentforceResponseAttributes> executeTools(@Content String prompt, String toolsConfig,
+  public Result<InputStream, AgentforceResponseAttributes> executeTools(@Content String prompt, InputStream inputStream,
                                                                         @Connection AgentforceConnection connection,
                                                                         @ParameterGroup(
                                                                             name = "Additional properties") ParamsModelDetails paramDetails) {
@@ -155,17 +156,18 @@ public class AgentforceEmbeddingOperations {
     try {
 
       String content =
-          connection.getRequestHelper().embeddingFileQuery(prompt, toolsConfig, MODELAPI_OPENAI_ADA_002, "text", "FULL")
+          connection.getRequestHelper().embeddingFileQuery(prompt, inputStream, MODELAPI_OPENAI_ADA_002, "text", "FULL")
               .toString();
+      inputStream.reset();
       InputStream responseStream =
           connection.getRequestHelper().executeTools(prompt, "data: " + content + ", question: " + prompt,
-                                                     toolsConfig, paramDetails);
+                                                     inputStream, paramDetails);
 
       return ResponseHelper.createAgentforceFormattedResponse(responseStream);
     } catch (Exception e) {
 
       log.error(format("Exception occurred while executing AI service tools operation %s", e.getMessage()), e);
-      throw new ModuleException("Error while executing AI service tools with provided config " + toolsConfig + ", for prompt "
+      throw new ModuleException("Error while executing AI service tools" + ", for prompt "
           + prompt, TOOLS_OPERATION_FAILURE, e);
     }
   }

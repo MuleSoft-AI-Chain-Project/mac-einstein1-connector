@@ -11,7 +11,7 @@ public class DocumentFileType implements ValueProvider {
 
   @Override
   public Set<Value> resolve() throws ValueResolvingException {
-    return ValueBuilder.getValuesFor("PDF", "TEXT", "CSV", "URL");
+    return ValueBuilder.getValuesFor("PDF", "TEXT", "CSV");
   }
 
 }
