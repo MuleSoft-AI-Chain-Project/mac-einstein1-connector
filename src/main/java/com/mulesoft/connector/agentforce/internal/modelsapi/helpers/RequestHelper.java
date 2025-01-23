@@ -90,16 +90,18 @@ public class RequestHelper {
     if (inputStream == null) {
       throw new RuntimeException("Input stream is null or empty");
     }
+    List<List<Double>> allEmbeddings;
     try (BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream)) {
       List<String> corpus = createCorpusList(bufferedInputStream, embeddingDocumentDetails.getFileType(),
                                              embeddingDocumentDetails.getOptionType());
 
       if ("PARAGRAPH".equalsIgnoreCase(embeddingDocumentDetails.getOptionType())) {
-        return getBatchCorpusEmbeddings(embeddingDocumentDetails.getModelApiName(), corpus);
+        allEmbeddings = getBatchCorpusEmbeddings(embeddingDocumentDetails.getModelApiName(), corpus);
       } else {
-        return new JSONArray(getCorpusEmbeddings(embeddingDocumentDetails.getModelApiName(), corpus));
+        allEmbeddings = getCorpusEmbeddings(embeddingDocumentDetails.getModelApiName(), corpus);
       }
     }
+    return new JSONArray(allEmbeddings);
   }
 
   public InputStream executeRAG(String text, RAGParamsModelDetails paramDetails)
@@ -182,9 +184,8 @@ public class RequestHelper {
     return corpusEmbeddings;
   }
 
-  private JSONArray getBatchCorpusEmbeddings(String modelName, List<String> corpus) throws IOException {
-    JSONArray allEmbeddings = new JSONArray();
-
+  private List<List<Double>> getBatchCorpusEmbeddings(String modelName, List<String> corpus) throws IOException {
+    List<List<Double>> allEmbeddings = new ArrayList<>();
     for (int i = 0; i < corpus.size(); i += 100) {
       // Create the batch from the corpus
       List<String> batch = corpus.subList(i, Math.min(i + 100, corpus.size()));
@@ -197,7 +198,7 @@ public class RequestHelper {
         // Parse the embedding response and add it to allEmbeddings
         AgentforceEmbeddingResponseDTO embeddingResponseDTO =
             new ObjectMapper().readValue(embeddingResponse, AgentforceEmbeddingResponseDTO.class);
-        allEmbeddings.put(new JSONArray(embeddingResponseDTO.getEmbeddings().get(0).getEmbedding()));
+        allEmbeddings.add(embeddingResponseDTO.getEmbeddings().get(0).getEmbedding());
       } catch (IOException e) {
         throw new RuntimeException("Error fetching embeddings", e);
       }

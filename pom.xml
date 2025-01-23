@@ -160,6 +160,7 @@
             <artifactId>mule-file-connector</artifactId>
             <version>1.5.2</version>
             <classifier>mule-plugin</classifier>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
