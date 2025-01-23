@@ -313,10 +313,8 @@ public class RequestHelper {
   }
 
   private String[] splitByParagraphs(String text) {
-    /*
-    looks for two or more line breaks (with or without spaces between them) to identify paragraph breaks.
-     */
-    return removeEmptyStrings(text.split("\\r?\\n\\s*\\r?\\n"));
+    //it detects and collapses any sequence of one or more line breaks into a single split point.
+    return removeEmptyStrings(text.split("\\r?\\n+"));
   }
 
   /*
