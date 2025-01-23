@@ -36,7 +36,7 @@
     <munit:test name="EmbeddingFromFile">
         <munit:execution>
             <logger message="Test Generate-Embedding-from-file started" level="INFO"/>
-            <file:read doc:name="Read" doc:id="ea5e803b-10e4-4744-be32-13ce8951f050" path="/Users/vishwas.tyagi/salesforceDocs/einstein_temp" config-ref="File_Config" outputMimeType="application/octet-stream"/>
+            <file:read doc:name="Read" doc:id="ea5e803b-10e4-4744-be32-13ce8951f050" path="${app.home}/embeddingaddfiletest/einstein" config-ref="File_Config" outputMimeType="application/octet-stream"/>
             <ms-agentforce:embedding-generate-from-file doc:name="Embedding generate from file"
                                                         doc:id="3f2fb2da-f8b7-4c17-813f-12dbf95b3a96"
                                                         config-ref="Agentforce_Config" inputStream="#[payload]"
