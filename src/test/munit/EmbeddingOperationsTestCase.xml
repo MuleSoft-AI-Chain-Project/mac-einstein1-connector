@@ -15,7 +15,9 @@
 
 <munit:config name="EmbeddingOperationsTestCase.xml"/>
 
-    <file:config name="File_Config" doc:name="File Config" doc:id="5c7b2f44-c58e-4f98-828d-0e876a6b914e" />
+    <file:config name="File_Config" doc:name="File Config" doc:id="5c7b2f44-c58e-4f98-828d-0e876a6b914e" >
+        <file:connection workingDir="${app.home}" />
+    </file:config>
     <munit:test name="EmbeddingFromText">
         <munit:execution>
             <munit:set-event doc:name="Set Event" doc:id="1c45d3f8-1234-5678-9abc-01234def6789">
@@ -36,7 +38,7 @@
     <munit:test name="EmbeddingFromFile">
         <munit:execution>
             <logger message="Test Generate-Embedding-from-file started" level="INFO"/>
-            <file:read doc:name="Read" doc:id="ea5e803b-10e4-4744-be32-13ce8951f050" path="${app.home}/embeddingaddfiletest/einstein" config-ref="File_Config" outputMimeType="application/octet-stream"/>
+            <file:read doc:name="Read" doc:id="ea5e803b-10e4-4744-be32-13ce8951f050" path="embeddingaddfiletest/einstein" config-ref="File_Config" outputMimeType="application/octet-stream"/>
             <ms-agentforce:embedding-generate-from-file doc:name="Embedding generate from file"
                                                         doc:id="3f2fb2da-f8b7-4c17-813f-12dbf95b3a96"
                                                         config-ref="Agentforce_Config" inputStream="#[payload]"
@@ -51,7 +53,7 @@
 
     <munit:test name="EmbeddingAdhocFileQuery">
         <munit:execution>
-            <file:read doc:name="Read" doc:id="ea5e803b-10e4-4744-be32-13ce8951f050" path="${app.home}/embeddingaddfiletest/embedtest.pdf" config-ref="File_Config" outputMimeType="application/octet-stream"/>
+            <file:read doc:name="Read" doc:id="ea5e803b-10e4-4744-be32-13ce8951f050" path="embeddingaddfiletest/embedtest.pdf" config-ref="File_Config" outputMimeType="application/octet-stream"/>
             <logger message="Test EmbeddingAdhocFileQuery started" level="INFO"/>
             <ms-agentforce:embedding-adhoc-file-query doc:name="Chat answer prompt"
                                                       doc:id="5f8c7c79-dffe-4331-a5b4-30375baa66bc"
@@ -70,7 +72,7 @@
 
     <munit:test name="RAGAdhocLoadDocument">
         <munit:execution>
-            <file:read doc:name="Read" doc:id="ea5e803b-10e4-4744-be32-13ce8951f050" path="${app.home}/embeddingaddfiletest/embedtest.pdf" config-ref="File_Config" outputMimeType="application/octet-stream"/>
+            <file:read doc:name="Read" doc:id="ea5e803b-10e4-4744-be32-13ce8951f050" path="embeddingaddfiletest/embedtest.pdf" config-ref="File_Config" outputMimeType="application/octet-stream"/>
             <logger message="Test RAGAdhocLoadDocument started" level="INFO"/>
             <ms-agentforce:rag-adhoc-load-document doc:name="RAG Adhoc Load Document"
                                                    inputStream="#[payload]"
@@ -88,7 +90,7 @@
 
     <munit:test name="ToolsUseAiService">
         <munit:execution>
-            <file:read doc:name="Read" doc:id="ea5e803b-10e4-4744-be32-13ce8951f050" path="${app.home}/tools.config.json" config-ref="File_Config" outputMimeType="application/octet-stream"/>
+            <file:read doc:name="Read" doc:id="ea5e803b-10e4-4744-be32-13ce8951f050" path="tools.config.json" config-ref="File_Config" outputMimeType="application/octet-stream"/>
             <logger message="Test ToolsUseAiService started" level="INFO"/>
             <ms-agentforce:tools-use-ai-service doc:name="tools use ai service"
                                                 inputStream="#[payload]"
@@ -107,7 +109,7 @@
 
     <munit:test name="ToolsAiServiceFailure" description="Tools Use AI Service Failure due to incorrect configuration" expectedErrorType="MS-AGENTFORCE:TOOLS_OPERATION_FAILURE">
         <munit:execution>
-            <file:read doc:name="Read" doc:id="ea5e803b-10e4-4744-be32-13ce8951f050" path="${app.home}/tools.config.json" config-ref="File_Config" outputMimeType="application/octet-stream"/>
+            <file:read doc:name="Read" doc:id="ea5e803b-10e4-4744-be32-13ce8951f050" path="tools.config.json" config-ref="File_Config" outputMimeType="application/octet-stream"/>
             <ms-agentforce:tools-use-ai-service doc:name="Tools use ai service" doc:id="e7a3fcc4-653e-45c8-8f95-7b22ba9e4a63"
                                                 config-ref="Agentforce_Config" inputStream="#[payload]">
                 <ms-agentforce:prompt>
@@ -120,7 +122,7 @@
 
     <munit:test name="RAGAdhocLoadDocumentFailure" expectedErrorType="MS-AGENTFORCE:RAG_FAILURE">
         <munit:execution>
-            <file:read doc:name="Read" doc:id="ea5e803b-10e4-4744-be32-13ce8951f050" path="${app.home}/embeddingaddfiletest/embedtest.pdf" config-ref="File_Config" outputMimeType="application/octet-stream"/>
+            <file:read doc:name="Read" doc:id="ea5e803b-10e4-4744-be32-13ce8951f050" path="embeddingaddfiletest/embedtest.pdf" config-ref="File_Config" outputMimeType="application/octet-stream"/>
             <logger message="Test RAGAdhocLoadDocument started" level="INFO"/>
             <ms-agentforce:rag-adhoc-load-document doc:name="RAG Adhoc Load Document"
                                                    inputStream="#[payload]"
@@ -132,7 +134,7 @@
 
     <munit:test name="EmbeddingAdhocFileQueryFailure" expectedErrorType="MS-AGENTFORCE:EMBEDDING_OPERATIONS_FAILURE">
         <munit:execution>
-            <file:read doc:name="Read" doc:id="ea5e803b-10e4-4744-be32-13ce8951f050" path="${app.home}/embeddingaddfiletest/embedtest.pdf" config-ref="File_Config" outputMimeType="application/octet-stream"/>
+            <file:read doc:name="Read" doc:id="ea5e803b-10e4-4744-be32-13ce8951f050" path="embeddingaddfiletest/embedtest.pdf" config-ref="File_Config" outputMimeType="application/octet-stream"/>
             <logger message="Test EmbeddingAdhocFileQuery started" level="INFO"/>
             <ms-agentforce:embedding-adhoc-file-query doc:name="Chat answer prompt"
                                                       doc:id="5f8c7c79-dffe-4331-a5b4-30375baa66bc"
