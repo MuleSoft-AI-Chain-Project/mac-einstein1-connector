@@ -69,7 +69,8 @@ public class AgentforceEmbeddingOperations {
   @Alias("EMBEDDING-generate-from-file")
   @Throws(EmbeddingErrorTypeProvider.class)
   @OutputJsonType(schema = "api/response/AgentForceFileEmbeddingResponse.json")
-  public Result<InputStream, Void> generateEmbeddingFromFile(InputStream inputStream, @Connection AgentforceConnection connection,
+  public Result<InputStream, Void> generateEmbeddingFromFile(@Content InputStream inputStream,
+                                                             @Connection AgentforceConnection connection,
                                                              @ParameterGroup(
                                                                  name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails) {
     log.info("Executing generate embedding from file operation.");
@@ -93,7 +94,7 @@ public class AgentforceEmbeddingOperations {
   @Alias("EMBEDDING-adhoc-file-query")
   @Throws(EmbeddingErrorTypeProvider.class)
   @OutputJsonType(schema = "api/response/AgentForceFileEmbeddingResponse.json")
-  public Result<InputStream, Void> queryEmbeddingOnFiles(@Content String prompt, InputStream inputStream,
+  public Result<InputStream, Void> queryEmbeddingOnFiles(@Content String prompt, @Content InputStream inputStream,
                                                          @Connection AgentforceConnection connection,
                                                          @ParameterGroup(
                                                              name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails) {
@@ -121,7 +122,8 @@ public class AgentforceEmbeddingOperations {
   @Alias("RAG-adhoc-load-document")
   @Throws(EmbeddingErrorTypeProvider.class)
   @OutputJsonType(schema = "api/response/AgentForceOperationResponse.json")
-  public Result<InputStream, AgentforceResponseAttributes> ragOnFiles(@Content String prompt, InputStream inputStream,
+  public Result<InputStream, AgentforceResponseAttributes> ragOnFiles(@Content String prompt,
+                                                                      @Content InputStream inputStream,
                                                                       @Connection AgentforceConnection connection,
                                                                       @ParameterGroup(
                                                                           name = "Additional properties") RAGParamsModelDetails paramDetails) {
@@ -148,7 +150,8 @@ public class AgentforceEmbeddingOperations {
   @Alias("Tools-use-ai-service")
   @Throws(EmbeddingErrorTypeProvider.class)
   @OutputJsonType(schema = "api/response/AgentForceOperationResponse.json")
-  public Result<InputStream, AgentforceResponseAttributes> executeTools(@Content String prompt, InputStream inputStream,
+  public Result<InputStream, AgentforceResponseAttributes> executeTools(@Content String prompt,
+                                                                        @Content InputStream inputStream,
                                                                         @Connection AgentforceConnection connection,
                                                                         @ParameterGroup(
                                                                             name = "Additional properties") ParamsModelDetails paramDetails) {
