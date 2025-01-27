@@ -1,4 +1,4 @@
-package com.mulesoft.connector.agentforce.internal.operations;
+package com.mulesoft.connector.agentforce.internal.operation;
 
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
 import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.RequestHelper;

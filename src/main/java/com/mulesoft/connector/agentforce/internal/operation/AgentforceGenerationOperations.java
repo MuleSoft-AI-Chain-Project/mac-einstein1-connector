@@ -1,4 +1,4 @@
-package com.mulesoft.connector.agentforce.internal.operations;
+package com.mulesoft.connector.agentforce.internal.operation;
 
 import com.mulesoft.connector.agentforce.api.metadata.AgentforceResponseAttributes;
 import com.mulesoft.connector.agentforce.api.metadata.ResponseParameters;
