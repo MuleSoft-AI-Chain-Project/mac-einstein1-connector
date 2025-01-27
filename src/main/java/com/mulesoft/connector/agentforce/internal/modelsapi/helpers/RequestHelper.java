@@ -140,7 +140,7 @@ public class RequestHelper {
 
   public JSONArray embeddingFileQuery(String prompt, InputStream inputStream, String modelName, String fileType,
                                       String optionType)
-      throws Exception {
+      throws IOException, TikaException, SAXException {
 
     String body = constructEmbeddingJsonPayload(prompt);
     List<Double> embeddings = getQueryEmbedding(body, modelName);
