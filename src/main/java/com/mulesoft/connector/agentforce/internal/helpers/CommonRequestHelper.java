@@ -15,11 +15,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.CONNECTION_TIMEOUT;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.CONNECTION_TIMEOUT_TIMEUNIT;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.READ_TIMEOUT;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.READ_TIMEOUT_TIMEUNIT;
-
+import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.CONNECTION_TIME_OUT;
+import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.READ_TIME_OUT;
 
 public class CommonRequestHelper {
 
@@ -33,8 +30,8 @@ public class CommonRequestHelper {
     URL url = new URL(urlString);
     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
     conn.setRequestMethod(httpMethod);
-    conn.setConnectTimeout((int) CONNECTION_TIMEOUT_TIMEUNIT.toMillis(CONNECTION_TIMEOUT));
-    conn.setReadTimeout((int) READ_TIMEOUT_TIMEUNIT.toMillis(READ_TIMEOUT));
+    conn.setConnectTimeout(CONNECTION_TIME_OUT);
+    conn.setReadTimeout(READ_TIME_OUT);
     conn.setDoOutput(true);
     return conn;
   }
