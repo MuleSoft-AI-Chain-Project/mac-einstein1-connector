@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -94,7 +95,6 @@ public class RequestHelper {
     try (BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream)) {
       List<String> corpus = createCorpusList(bufferedInputStream, embeddingDocumentDetails.getFileType(),
                                              embeddingDocumentDetails.getOptionType());
-
       if ("PARAGRAPH".equalsIgnoreCase(embeddingDocumentDetails.getOptionType())) {
         allEmbeddings = getBatchCorpusEmbeddings(embeddingDocumentDetails.getModelApiName(), corpus);
       } else {
@@ -291,13 +291,14 @@ public class RequestHelper {
         .replace("\uFEFF", "") // BOM
         .replaceAll("[\\p{Cc}&&[^\\t\\n\\r]]", ""); // Control characters except tab, newline, and carriage return
 
-    // Normalize whitespace (remove extra spaces and new lines)
-    content = content.replaceAll("\\s+", " ").trim();
-    return content;
+    return content.trim();
   }
 
   private String splitFullDocument(InputStream inputStream, String fileType) throws Exception {
-    return getFileTypeContextFromFile(inputStream, fileType);
+    String content = getFileTypeContextFromFile(inputStream, fileType);
+    // will match one or more occurrences of either \r\n (Windows line break) or \n (Unix line break).
+    content = content.replaceAll("(\\r?\\n)+", "\n");
+    return content.trim();
   }
 
   private String[] splitByType(InputStream inputStream, String fileType, String splitOption)
@@ -326,7 +327,7 @@ public class RequestHelper {
    */
   private String[] removeEmptyStrings(String[] array) {
     // Convert array to list
-    return Arrays.stream(array)
+    return Arrays.stream(array).filter(Objects::nonNull)
         .map(String::trim)
         .filter(trim -> !trim.isEmpty())
         .toArray(String[]::new);
