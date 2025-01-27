@@ -3,7 +3,7 @@ package com.mulesoft.connector.agentforce.internal.operations;
 import com.mulesoft.connector.agentforce.api.metadata.AgentforceResponseAttributes;
 import com.mulesoft.connector.agentforce.api.metadata.ResponseParameters;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
-import com.mulesoft.connector.agentforce.internal.modelsapi.error.provider.ChatErrorTypeProvider;
+import com.mulesoft.connector.agentforce.internal.error.provider.ChatErrorTypeProvider;
 import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.PromptTemplateHelper;
 import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.ResponseHelper;
 import com.mulesoft.connector.agentforce.internal.modelsapi.models.ParamsModelDetails;
@@ -39,10 +39,10 @@ public class AgentforceGenerationOperations {
   @Alias("AGENT-define-prompt-template")
   @Throws(ChatErrorTypeProvider.class)
   @OutputJsonType(schema = "api/response/AgentForceOperationResponse.json")
-  public Result<InputStream, AgentforceResponseAttributes> definePromptTemplate(@Content(primary = true) String template,
+  public Result<InputStream, AgentforceResponseAttributes> definePromptTemplate(@Connection AgentforceConnection connection,
+                                                                                @Content(primary = true) String template,
                                                                                 @Content String instructions,
                                                                                 @Content String dataset,
-                                                                                @Connection AgentforceConnection connection,
                                                                                 @ParameterGroup(
                                                                                     name = "Additional properties") ParamsModelDetails paramDetails) {
     log.info("Executing agent defined prompt template operation.");
@@ -52,8 +52,6 @@ public class AgentforceGenerationOperations {
 
       return ResponseHelper.createAgentforceFormattedResponse(responseStream);
     } catch (Exception e) {
-
-      log.error(format("Exception occurred while executing agent defined prompt template operation %s", e.getMessage()), e);
       throw new ModuleException("Error while generating prompt from template " + template + ", instructions "
           + instructions + ", dataset " + dataset, CHAT_FAILURE, e);
     }
@@ -66,8 +64,8 @@ public class AgentforceGenerationOperations {
   @Alias("CHAT-answer-prompt")
   @Throws(ChatErrorTypeProvider.class)
   @OutputJsonType(schema = "api/response/AgentForceOperationResponse.json")
-  public Result<InputStream, AgentforceResponseAttributes> generateText(@Content String prompt,
-                                                                        @Connection AgentforceConnection connection,
+  public Result<InputStream, AgentforceResponseAttributes> generateText(@Connection AgentforceConnection connection,
+                                                                        @Content String prompt,
                                                                         @ParameterGroup(
                                                                             name = "Additional properties") ParamsModelDetails paramDetails) {
     log.info("Executing chat answer prompt operation.");
@@ -76,8 +74,6 @@ public class AgentforceGenerationOperations {
 
       return ResponseHelper.createAgentforceFormattedResponse(responseStream);
     } catch (Exception e) {
-
-      log.error(format("Exception occurred while executing chat answer prompt operation %s", e.getMessage()), e);
       throw new ModuleException("Error while generating text for prompt " + prompt, CHAT_FAILURE, e);
     }
   }
@@ -89,11 +85,11 @@ public class AgentforceGenerationOperations {
   @Alias("CHAT-answer-prompt-with-memory")
   @Throws(ChatErrorTypeProvider.class)
   @OutputJsonType(schema = "api/response/AgentForceOperationResponse.json")
-  public Result<InputStream, AgentforceResponseAttributes> generateTextMemory(@Content(primary = true) String prompt,
+  public Result<InputStream, AgentforceResponseAttributes> generateTextMemory(@Connection AgentforceConnection connection,
+                                                                              @Content(primary = true) String prompt,
                                                                               String memoryPath,
                                                                               String memoryName,
                                                                               Integer keepLastMessages,
-                                                                              @Connection AgentforceConnection connection,
                                                                               @ParameterGroup(
                                                                                   name = "Additional properties") ParamsModelDetails paramDetails) {
     log.info("Executing chat answer prompt with memory operation.");
@@ -105,7 +101,6 @@ public class AgentforceGenerationOperations {
 
       return ResponseHelper.createAgentforceFormattedResponse(responseStream);
     } catch (Exception e) {
-      log.error(format("Exception occurred while executing chat answer prompt with memory operation %s", e.getMessage()), e);
       throw new ModuleException("Error while generating text from memory path " + memoryPath + ", memory name "
           + memoryName + ", for prompt " + prompt, CHAT_FAILURE, e);
     }
@@ -118,8 +113,8 @@ public class AgentforceGenerationOperations {
   @Alias("CHAT-generate-from-messages")
   @Throws(ChatErrorTypeProvider.class)
   @OutputJsonType(schema = "api/response/AgentForceChatFromMessagesResponse.json")
-  public Result<InputStream, ResponseParameters> generateChatFromMessages(@Content String messages,
-                                                                          @Connection AgentforceConnection connection,
+  public Result<InputStream, ResponseParameters> generateChatFromMessages(@Connection AgentforceConnection connection,
+                                                                          @Content String messages,
                                                                           @ParameterGroup(
                                                                               name = "Additional properties") ParamsModelDetails paramDetails) {
     log.info("Executing chat generate from message operation.");
@@ -129,8 +124,6 @@ public class AgentforceGenerationOperations {
 
       return ResponseHelper.createAgentforceChatFromMessagesResponse(responseStream);
     } catch (Exception e) {
-
-      log.error(format("Exception occurred while executing chat generate from message operation %s", e.getMessage()), e);
       throw new ModuleException("Error while generating the chat from messages " + messages, CHAT_FAILURE, e);
     }
   }

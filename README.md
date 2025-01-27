@@ -1,8 +1,8 @@
-# Mule4 Anypoint Agentforce Connector
+# Mule4 Agentforce Connector
 
-## <img src="icon/icon.svg" width="6%" alt="banner"> [MuleSoft AI Chain - Anypoint Agentforce Connector](https://mac-project.ai/docs/einstein-ai)
+## <img src="icon/icon.svg" width="6%" alt="banner"> [MuleSoft AI Chain - Agentforce Connector](https://mac-project.ai/docs/einstein-ai)
 
-MuleSoft Anypoint Agentforce Connector for Salesforce Einstein AI to interact with the _models API_ of the Salesforce platform and benefit from its trust layer and automation capabilities. It allows you to:
+MuleSoft Agentforce Connector for Salesforce Einstein AI to interact with the _models API_ of the Salesforce platform and benefit from its trust layer and automation capabilities. It allows you to:
 - **Leverage the Salesforce Trustlayer**
 - **Ingest files into the Vector Database**
 - **Build Prompt Templates in your workflow**
@@ -10,7 +10,7 @@ MuleSoft Anypoint Agentforce Connector for Salesforce Einstein AI to interact wi
 - **Build Chat Memory capabilities**
 - **Optimized usage in MuleSoft applications**
 
-In addition to the above operations, Anypoint Agentforce Connector provides a way to interact with the _Bots API_ of the Salesforce platform and benefit from the agent related capabilities. It allows you to:
+In addition to the above operations, Agentforce Connector provides a way to interact with the _Bots API_ of the Salesforce platform and benefit from the agent related capabilities. It allows you to:
 - **Start Agent Conversation**
 - **Continue Agent Conversation**
 - **End Agent Conversation**
@@ -34,7 +34,7 @@ To use this connector, add the following dependency to your application's `pom.x
 ```
 
 ### Documentation
-- Check out MuleChain Anypoint Agentforce Connector Documentation on [mac-project.ai](https://mac-project.ai/docs/einstein-ai)
+- Check out MuleChain Agentforce Connector Documentation on [mac-project.ai](https://mac-project.ai/docs/einstein-ai)
 - Learn from the [Getting Started Playlist on YouTube](https://www.youtube.com/playlist?list=PLnuJGpEBF6ZAV1JfID1SRKN6OmGORvgv6)
 
 ---

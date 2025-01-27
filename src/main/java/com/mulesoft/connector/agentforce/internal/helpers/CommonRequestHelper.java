@@ -16,10 +16,16 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.CONNECTION_TIMEOUT;
+import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.CONNECTION_TIMEOUT_TIMEUNIT;
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.READ_TIMEOUT;
+import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.READ_TIMEOUT_TIMEUNIT;
 
 
 public class CommonRequestHelper {
+
+  private CommonRequestHelper() {
+    throw new IllegalStateException("Utility class");
+  }
 
   private static final Logger log = LoggerFactory.getLogger(CommonRequestHelper.class);
 
@@ -27,8 +33,8 @@ public class CommonRequestHelper {
     URL url = new URL(urlString);
     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
     conn.setRequestMethod(httpMethod);
-    conn.setConnectTimeout(CONNECTION_TIMEOUT);
-    conn.setReadTimeout(READ_TIMEOUT);
+    conn.setConnectTimeout((int) CONNECTION_TIMEOUT_TIMEUNIT.toMillis(CONNECTION_TIMEOUT));
+    conn.setReadTimeout((int) READ_TIMEOUT_TIMEUNIT.toMillis(READ_TIMEOUT));
     conn.setDoOutput(true);
     return conn;
   }

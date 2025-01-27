@@ -18,6 +18,10 @@ import static org.apache.commons.io.IOUtils.toInputStream;
 
 public class ResponseHelper {
 
+  private ResponseHelper() {
+    throw new IllegalStateException("Utility class");
+  }
+
   private static final ObjectMapper objectMapper = new ObjectMapper();
 
   public static Result<InputStream, Void> createAgentforceDefaultResponse(String response) {

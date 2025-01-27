@@ -2,10 +2,10 @@ package com.mulesoft.connector.agentforce.internal.operations;
 
 import com.mulesoft.connector.agentforce.api.metadata.InvokeAgentResponseAttributes;
 import com.mulesoft.connector.agentforce.internal.botapi.dto.AgentConversationResponseDTO;
-import com.mulesoft.connector.agentforce.internal.botapi.error.provider.BotErrorTypeProvider;
+import com.mulesoft.connector.agentforce.internal.error.provider.BotErrorTypeProvider;
 import com.mulesoft.connector.agentforce.internal.botapi.group.BotMessageParameterGroup;
 import com.mulesoft.connector.agentforce.internal.botapi.group.BotAgentParameterGroup;
-import com.mulesoft.connector.agentforce.internal.botapi.metadata.AgentConversationResponseMetadataResolver;
+import com.mulesoft.connector.agentforce.internal.metadata.AgentConversationResponseMetadataResolver;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
 import org.json.JSONObject;
 import org.mule.runtime.extension.api.annotation.Alias;
@@ -42,6 +42,8 @@ public class AgentforceBotOperations {
                                                                                    @ParameterGroup(
                                                                                        name = "Agent") @MetadataKeyId BotAgentParameterGroup parameterGroup) {
 
+    log.info("Executing start agent conversation operation.");
+
     try {
       AgentConversationResponseDTO responseDTO = connection.getBotRequestHelper().startSession(parameterGroup.getAgent());
       JSONObject jsonObject = new JSONObject();
@@ -64,11 +66,13 @@ public class AgentforceBotOperations {
   @Alias("Continue-agent-conversation")
   @Throws(BotErrorTypeProvider.class)
   @OutputResolver(output = AgentConversationResponseMetadataResolver.class)
-  public Result<InputStream, InvokeAgentResponseAttributes> continueConversation(@Content(primary = true) InputStream message,
+  public Result<InputStream, InvokeAgentResponseAttributes> continueConversation(@Connection AgentforceConnection connection,
+                                                                                 @Content(primary = true) InputStream message,
                                                                                  @Content String sessionId,
                                                                                  @ParameterGroup(
-                                                                                     name = "Additional Details") BotMessageParameterGroup messageParameterGroup,
-                                                                                 @Connection AgentforceConnection connection) {
+                                                                                     name = "Additional Details") BotMessageParameterGroup messageParameterGroup) {
+    log.info("Executing continue agent conversation operation.");
+
     try {
       AgentConversationResponseDTO responseDTO = connection.getBotRequestHelper().continueSession(message,
                                                                                                   sessionId,
@@ -92,8 +96,10 @@ public class AgentforceBotOperations {
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("End-agent-conversation")
   @Throws(BotErrorTypeProvider.class)
-  public Result<Void, InvokeAgentResponseAttributes> endConversation(@Content String sessionId,
-                                                                     @Connection AgentforceConnection connection) {
+  public Result<Void, InvokeAgentResponseAttributes> endConversation(@Connection AgentforceConnection connection,
+                                                                     @Content String sessionId) {
+
+    log.info("Executing end agent conversation operation.");
 
     try {
       AgentConversationResponseDTO responseDTO = connection.getBotRequestHelper().endSession(sessionId);

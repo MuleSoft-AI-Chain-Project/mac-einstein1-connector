@@ -2,6 +2,10 @@ package com.mulesoft.connector.agentforce.internal.modelsapi.helpers;
 
 public class ConstantUtil {
 
+  private ConstantUtil() {
+    throw new IllegalStateException("Utility class");
+  }
+
   public static final String URI_MODELS_API = "/einstein/platform/v1/models/";
   public static final String URI_MODELS_API_EMBEDDINGS = "/embeddings";
   public static final String URI_MODELS_API_GENERATIONS = "/generations";

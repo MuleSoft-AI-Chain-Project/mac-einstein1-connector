@@ -8,14 +8,14 @@ import org.mule.runtime.extension.api.values.ValueResolvingException;
 
 public class EmbeddingModelApiNameProvider implements ValueProvider {
 
-  private static final Set<Value> VALUES_FOR = ValueBuilder.getValuesFor(
-                                                                         "sfdc_ai__DefaultAzureOpenAITextEmbeddingAda_002",
-                                                                         "sfdc_ai__DefaultOpenAITextEmbeddingAda_002");
+  private static final Set<Value> EMBEDDING_MODEL_API_VALUES = ValueBuilder.getValuesFor(
+                                                                                         "sfdc_ai__DefaultAzureOpenAITextEmbeddingAda_002",
+                                                                                         "sfdc_ai__DefaultOpenAITextEmbeddingAda_002");
 
   @Override
   public Set<Value> resolve() throws ValueResolvingException {
 
-    return VALUES_FOR;
+    return EMBEDDING_MODEL_API_VALUES;
   }
 
 }

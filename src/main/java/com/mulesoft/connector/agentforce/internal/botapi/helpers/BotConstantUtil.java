@@ -2,6 +2,10 @@ package com.mulesoft.connector.agentforce.internal.botapi.helpers;
 
 public class BotConstantUtil {
 
+  private BotConstantUtil() {
+    throw new IllegalStateException("Utility class");
+  }
+
   public static final String URI_BOT_API_METADATA_SERVICES_V_62 =
       "/services/data/v62.0";
   public static final String URI_BOT_API_METADATA_AGENTLIST =

@@ -1,4 +1,4 @@
-package com.mulesoft.connector.agentforce.internal.modelsapi.error.provider;
+package com.mulesoft.connector.agentforce.internal.error.provider;
 
 import org.mule.runtime.extension.api.annotation.error.ErrorTypeProvider;
 import org.mule.runtime.extension.api.error.ErrorTypeDefinition;

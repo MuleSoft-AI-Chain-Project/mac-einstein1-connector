@@ -18,6 +18,7 @@ import org.apache.tika.sax.BodyContentHandler;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.mule.runtime.extension.api.exception.ModuleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -87,14 +88,14 @@ public class RequestHelper {
 
   public JSONArray generateEmbeddingFromFileInputStream(InputStream inputStream,
                                                         ParamsEmbeddingDocumentDetails embeddingDocumentDetails)
-      throws Exception {
+      throws IOException, TikaException, SAXException {
     if (inputStream == null) {
-      throw new RuntimeException("Input stream is null or empty");
+      throw new IllegalArgumentException("Input stream is null.");
     }
     List<List<Double>> allEmbeddings;
     try (BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream)) {
-      List<String> corpus = createCorpusList(bufferedInputStream, embeddingDocumentDetails.getFileType(),
-                                             embeddingDocumentDetails.getOptionType());
+      List<String> corpus = createCorpusListFromStream(bufferedInputStream, embeddingDocumentDetails.getFileType(),
+                                                       embeddingDocumentDetails.getOptionType());
       if ("PARAGRAPH".equalsIgnoreCase(embeddingDocumentDetails.getOptionType())) {
         allEmbeddings = getBatchCorpusEmbeddings(embeddingDocumentDetails.getModelApiName(), corpus);
       } else {
@@ -119,15 +120,15 @@ public class RequestHelper {
         readResponseStream(executeAgentforceRequest(payload, paramDetails.getModelApiName(),
                                                     URI_MODELS_API_GENERATIONS));
 
-    List<String> findURL = extractUrls(intermediateAnswer);
+    List<String> urls = extractUrls(intermediateAnswer);
 
-    if (findURL != null) {
+    if (urls != null) {
       JSONObject jsonObject = new JSONObject(intermediateAnswer);
       String generatedText = jsonObject.getJSONObject("generation").getString("generatedText");
 
       String ePayload = buildPayload(generatedText);
 
-      String response = getAttributes(findURL.get(0), inputStream, extractPayload(ePayload));
+      String response = getAttributes(urls.get(0), inputStream, extractPayload(ePayload));
       String finalPayload = constructPayload("data: " + response + ", question: " + originalPrompt, paramDetails.getLocale(),
                                              paramDetails.getProbability());
       return executeAgentforceRequest(finalPayload, paramDetails.getModelApiName(), URI_MODELS_API_GENERATIONS);
@@ -142,23 +143,24 @@ public class RequestHelper {
       throws Exception {
 
     String body = constructEmbeddingJsonPayload(prompt);
-    List<Double> embeddingList = getQueryEmbedding(body, modelName);
+    List<Double> embeddings = getQueryEmbedding(body, modelName);
 
     List<String> corpus = createCorpusListFromStream(inputStream, fileType, optionType);
-    List<List<Double>> corpusEmbeddingList = getCorpusEmbeddings(modelName, corpus);
+    List<List<Double>> corpusEmbeddings = getCorpusEmbeddings(modelName, corpus);
 
     // Compare embeddings and rank results
     List<Double> similarityScores = new ArrayList<>();
-    corpusEmbeddingList
+    corpusEmbeddings
         .forEach(corpusEmbedding -> similarityScores.add(
-                                                         calculateCosineSimilarity(embeddingList, corpusEmbedding)));
+                                                         calculateCosineSimilarity(embeddings, corpusEmbedding)));
     // Rank and print results
     List<String> results = rankAndPrintResults(corpus, similarityScores);
     // Convert results list to a JSONArray
     return new JSONArray(results);
   }
 
-  private List<String> createCorpusListFromStream(InputStream inputStream, String fileType, String splitOption) throws Exception {
+  private List<String> createCorpusListFromStream(InputStream inputStream, String fileType, String splitOption)
+      throws TikaException, IOException, SAXException {
     List<String> corpus;
     if ("FULL".equalsIgnoreCase(splitOption)) {
       corpus = Collections.singletonList(splitFullDocument(inputStream, fileType));
@@ -177,7 +179,7 @@ public class RequestHelper {
         try (InputStream embeddingResponse = executeAgentforceRequest(corpusBody, modelName, URI_MODELS_API_EMBEDDINGS)) {
           AgentforceEmbeddingResponseDTO embeddingResponseDTO =
               new ObjectMapper().readValue(embeddingResponse, AgentforceEmbeddingResponseDTO.class);
-          corpusEmbeddings.add(embeddingResponseDTO.getEmbeddings().get(0).getEmbedding());
+          corpusEmbeddings.add(embeddingResponseDTO.getEmbeddings().get(0).getEmbeddings());
         }
       }
     }
@@ -198,9 +200,9 @@ public class RequestHelper {
         // Parse the embedding response and add it to allEmbeddings
         AgentforceEmbeddingResponseDTO embeddingResponseDTO =
             new ObjectMapper().readValue(embeddingResponse, AgentforceEmbeddingResponseDTO.class);
-        allEmbeddings.add(embeddingResponseDTO.getEmbeddings().get(0).getEmbedding());
+        allEmbeddings.add(embeddingResponseDTO.getEmbeddings().get(0).getEmbeddings());
       } catch (IOException e) {
-        throw new RuntimeException("Error fetching embeddings", e);
+        throw new ModuleException("Error fetching embeddings", AgentforceErrorType.MODELS_API_ERROR, e);
       }
     }
     return allEmbeddings;
@@ -214,18 +216,7 @@ public class RequestHelper {
     AgentforceEmbeddingResponseDTO embeddingResponseDTO =
         new ObjectMapper().readValue(embeddingResponse, AgentforceEmbeddingResponseDTO.class);
 
-    return embeddingResponseDTO.getEmbeddings().get(0).getEmbedding();
-  }
-
-  private List<String> createCorpusList(InputStream inputStream, String fileType, String splitOption)
-      throws Exception {
-    List<String> corpus;
-    if ("FULL".equalsIgnoreCase(splitOption)) {
-      corpus = Collections.singletonList(splitFullDocument(inputStream, fileType));
-    } else {
-      corpus = Arrays.asList(splitByType(inputStream, fileType, splitOption));
-    }
-    return corpus;
+    return embeddingResponseDTO.getEmbeddings().get(0).getEmbeddings();
   }
 
   private double calculateCosineSimilarity(List<Double> embeddingList, List<Double> corpusEmbedding) {
@@ -294,7 +285,7 @@ public class RequestHelper {
     return content.trim();
   }
 
-  private String splitFullDocument(InputStream inputStream, String fileType) throws Exception {
+  private String splitFullDocument(InputStream inputStream, String fileType) throws TikaException, IOException, SAXException {
     String content = getFileTypeContextFromFile(inputStream, fileType);
     // will match one or more occurrences of either \r\n (Windows line break) or \n (Unix line break).
     content = content.replaceAll("(\\r?\\n)+", "\n");
@@ -315,15 +306,14 @@ public class RequestHelper {
   }
 
   private String[] splitByParagraphs(String text) {
-    //it detects and collapses any sequence of one or more line breaks into a single split point.
+    // it detects and collapses any sequence of one or more line breaks into a single split point.
     return removeEmptyStrings(text.split("\\r?\\n+"));
   }
 
   /*
-  out any empty or whitespace-only strings from the array of paragraphs that results after splitting the content.
-  This is important because when text is split by newlines,
-  you may end up with empty strings if there are extra or multiple newlines between paragraphs,
-  especially when there are sections with only blank lines.
+   * out any empty or whitespace-only strings from the array of paragraphs that results after splitting the content. This is
+   * important because when text is split by newlines, you may end up with empty strings if there are extra or multiple newlines
+   * between paragraphs, especially when there are sections with only blank lines.
    */
   private String[] removeEmptyStrings(String[] array) {
     // Convert array to list

@@ -63,8 +63,8 @@ class AgentforceGenerationOperationsTest {
         .thenThrow(new RuntimeException("Test exception"));
 
     ModuleException exception = assertThrows(ModuleException.class,
-                                             () -> agentforceGenerationOperations.definePromptTemplate(template, instructions,
-                                                                                                       dataset, connectionMock,
+                                             () -> agentforceGenerationOperations.definePromptTemplate(connectionMock, template,
+                                                                                                       instructions, dataset,
                                                                                                        paramDetailsMock));
 
     assertEquals("Error while generating prompt from template Template, instructions Instructions, dataset Dataset",
@@ -81,7 +81,7 @@ class AgentforceGenerationOperationsTest {
 
     ModuleException exception =
         assertThrows(ModuleException.class,
-                     () -> agentforceGenerationOperations.generateText(prompt, connectionMock, paramDetailsMock));
+                     () -> agentforceGenerationOperations.generateText(connectionMock, prompt, paramDetailsMock));
 
     assertEquals(
                  "Error while generating text for prompt Test Prompt",
@@ -101,7 +101,7 @@ class AgentforceGenerationOperationsTest {
         .thenThrow(new RuntimeException("Test exception"));
 
     ModuleException exception = assertThrows(ModuleException.class, () -> agentforceGenerationOperations
-        .generateTextMemory(prompt, memoryPath, memoryName, keepLastMessages, connectionMock, paramDetailsMock));
+        .generateTextMemory(connectionMock, prompt, memoryPath, memoryName, keepLastMessages, paramDetailsMock));
 
     assertEquals(
                  "Error while generating text from memory path src/resources/testdb, memory name vt, for prompt Test",
@@ -118,7 +118,7 @@ class AgentforceGenerationOperationsTest {
 
     ModuleException exception =
         assertThrows(ModuleException.class,
-                     () -> agentforceGenerationOperations.generateChatFromMessages(messages, connectionMock, paramDetailsMock));
+                     () -> agentforceGenerationOperations.generateChatFromMessages(connectionMock, messages, paramDetailsMock));
 
     assertEquals(
                  "Error while generating the chat from messages Test Messages",

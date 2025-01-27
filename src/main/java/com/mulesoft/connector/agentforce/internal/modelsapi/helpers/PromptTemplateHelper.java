@@ -5,6 +5,10 @@ import java.util.Map;
 
 public class PromptTemplateHelper {
 
+  private PromptTemplateHelper() {
+    throw new IllegalStateException("Utility class");
+  }
+
   public static String definePromptTemplate(String template, String instruction, String dataSet) {
     // Create the final template by concatenating strings with line separators
     String finalTemplate = template + System.lineSeparator() +
