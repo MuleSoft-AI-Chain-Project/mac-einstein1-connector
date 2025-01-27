@@ -316,7 +316,6 @@ public class RequestHelper {
 
   private String[] splitByParagraphs(String text) {
     //it detects and collapses any sequence of one or more line breaks into a single split point.
-    //return removeEmptyStrings(text.split("\\r?\\n+"));
     return removeEmptyStrings(text.split("\\r?\\n+"));
   }
 
