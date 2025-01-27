@@ -37,6 +37,7 @@ generated-test-sources/
 automation-credentials.properties
 
 # Configuration files
+/.vscode/
 .vscode/
 .classpath
 .project
@@ -47,3 +48,5 @@ automation-credentials.properties
 *.tmp
 target/
 
+
+/.java-version

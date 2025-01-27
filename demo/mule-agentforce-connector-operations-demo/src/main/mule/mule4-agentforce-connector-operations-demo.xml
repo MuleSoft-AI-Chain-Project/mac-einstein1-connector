@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	  xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	  xmlns:ms-agentforce="http://www.mulesoft.org/schema/mule/ms-agentforce" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ms-agentforce http://www.mulesoft.org/schema/mule/ms-agentforce/current/mule-ms-agentforce.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="a8ef5800-92ae-46fb-9db2-682b713035c6" >
+		<http:listener-connection host="0.0.0.0" port="8082" />
+	</http:listener-config>
+	<ms-agentforce:config name="Anypoint_Agentforce_Config" doc:name="Agentforce Config" doc:id="d2475c8d-45b3-4ec2-928b-a0059a27f996" >
+		<ms-agentforce:oauth-client-credentials-connection >
+			<ms-agentforce:oauth-client-credentials clientId="3MVG9fMtCkV6eLheTOoBl_csmVzN2h6ATBatskRG7SRLQbRQBWNcPmu3gYPlDeYhF9TRwv2ytyiKKafdZ4_V0" clientSecret="46ACD614F93B09C83CAEFC3E5E3E965E82B0FD8A86E3B4C444B9D74A39A234CE" tokenUrl="https://dj0000001pwxkeaq-dev-ed.my.salesforce.com/services/oauth2/token" />
+		</ms-agentforce:oauth-client-credentials-connection>
+	</ms-agentforce:config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="e7b0195b-7318-4e73-8d7e-db6d6dcf3c82" >
+		<file:connection workingDir="${app.home}" />
+	</file:config>
+	<flow name="einstein3Flow" doc:id="58d382e7-b893-46a9-812a-70596a86bcff" >
+		<http:listener doc:name="Listener" doc:id="cb547495-39a8-4fc3-8733-f518ab0511de" config-ref="HTTP_Listener_config" path="/test1" allowedMethods="POST"/>
+		<ms-agentforce:agent-define-prompt-template doc:name="Agent define prompt template" doc:id="81ab8e9a-1620-4271-8b0f-c4fe8c280582" config-ref="Anypoint_Agentforce_Config">
+			<ms-agentforce:template ><![CDATA[#[payload.template]]]></ms-agentforce:template>
+			<ms-agentforce:instructions ><![CDATA[#[payload.instruction]]]></ms-agentforce:instructions>
+			<ms-agentforce:dataset ><![CDATA[#[payload.dataset]]]></ms-agentforce:dataset>
+		</ms-agentforce:agent-define-prompt-template>
+	</flow>
+	<flow name="einstein3Flow1" doc:id="ee101d52-40b9-4584-b16a-e7129e0ae074" >
+		<http:listener doc:name="Listener" doc:id="161e5ec3-f43c-47cc-bab3-bda54e240770" config-ref="HTTP_Listener_config" path="/test2" allowedMethods="POST"/>
+		<ms-agentforce:chat-answer-prompt doc:name="Chat answer prompt" doc:id="2ff970eb-0289-4a20-a672-0b943c7b2c3f" config-ref="Anypoint_Agentforce_Config">
+			<ms-agentforce:prompt ><![CDATA[#[payload.prompt]]]></ms-agentforce:prompt>
+		</ms-agentforce:chat-answer-prompt>
+	</flow>
+	<flow name="einstein3Flow2" doc:id="dd60b6bf-e53d-40f4-9148-02acce50b4ec" >
+		<http:listener doc:name="Listener" doc:id="1a93d492-1c70-4396-9616-8887659715d9" config-ref="HTTP_Listener_config" path="/test3" allowedMethods="POST"/>
+		<ms-agentforce:chat-answer-prompt-with-memory doc:name="Chat answer prompt with memory" doc:id="5d39f3b3-c7fa-4a00-a82e-4894bbf1fd64" config-ref="Anypoint_Agentforce_Config" memoryPath="#[payload.memoryPath]" memoryName="#[payload.memoryName]" keepLastMessages="#[payload.lastMsg]">
+			<ms-agentforce:prompt ><![CDATA[#[payload.prompt]]]></ms-agentforce:prompt>
+		</ms-agentforce:chat-answer-prompt-with-memory>
+	</flow>
+	<flow name="einstein3Flow3" doc:id="db27b63a-96ea-4677-924a-07a4db314539" >
+		<http:listener doc:name="Listener" doc:id="049948d1-2ff0-4903-b423-e902bbba5b92" config-ref="HTTP_Listener_config" path="/test4" allowedMethods="POST"/>
+		<ms-agentforce:chat-generate-from-messages doc:name="Chat generate from messages" doc:id="6d51c427-d640-4753-8338-2621ee110ce7" config-ref="Anypoint_Agentforce_Config">
+			<ms-agentforce:messages ><![CDATA[#[payload.chat]]]></ms-agentforce:messages>
+		</ms-agentforce:chat-generate-from-messages>
+	</flow>
+	<flow name="einstein3Flow4" doc:id="72bb6bec-1196-45cc-8213-05e217ae6235" >
+		<http:listener doc:name="Listener" doc:id="a6dff82e-95e3-47f1-a4eb-af695d5b5996" config-ref="HTTP_Listener_config" path="/test5" />
+		<file:read doc:name="Read" doc:id="8c8302ff-81b5-4a42-b08c-022ed595eead" config-ref="File_Config" path="embeddingaddfiletest/embedtest.pdf" />
+		<ms-agentforce:embedding-adhoc-file-query doc:name="Embedding adhoc file query" doc:id="e82713f1-bf0d-43aa-ba8f-8b3098747017" config-ref="Anypoint_Agentforce_Config" optionType="PARAGRAPH">
+			<ms-agentforce:prompt ><![CDATA[What is Mule 4 ?]]></ms-agentforce:prompt>
+			<ms-agentforce:input-stream ><![CDATA[#[payload]]]></ms-agentforce:input-stream>
+		</ms-agentforce:embedding-adhoc-file-query>
+	</flow>
+	<flow name="einstein3Flow5" doc:id="ef63422c-54fb-43f0-aa62-44ff67abf8ff" >
+		<http:listener doc:name="Listener" doc:id="258acdfe-9096-4484-8e6e-3699a4118c10" config-ref="HTTP_Listener_config" path="/test6" />
+		<file:read doc:name="Read" doc:id="c77ee4c2-6aa5-48a5-a05f-95c5366dbdbe" config-ref="File_Config" path="embeddingaddfiletest/einstein" />
+		<ms-agentforce:embedding-generate-from-file doc:name="Embedding generate from file" doc:id="1f85ad8f-5fac-4471-91b9-461c0aa5ebb5" config-ref="Anypoint_Agentforce_Config" fileType="TEXT"/>
+	</flow>
+	<flow name="einstein3Flow6" doc:id="fddab65d-8f5e-48a2-962d-8db6e1a54094" >
+		<http:listener doc:name="Listener" doc:id="d6489740-d08d-4606-94b9-854cc80c1959" config-ref="HTTP_Listener_config" path="/test7" allowedMethods="POST"/>
+		<ms-agentforce:embedding-generate-from-text doc:name="Embedding generate from text" doc:id="4deb8136-ef22-4ed5-9f6e-2b27db297afb" config-ref="Anypoint_Agentforce_Config">
+			<ms-agentforce:text ><![CDATA[#[payload.text]]]></ms-agentforce:text>
+		</ms-agentforce:embedding-generate-from-text>
+	</flow>
+	<flow name="einstein3Flow7" doc:id="ff35a74d-439d-460a-8839-879cebf08142" >
+		<http:listener doc:name="Listener" doc:id="02c26cdc-110d-40e9-9a17-d9670b3210c8" config-ref="HTTP_Listener_config" path="/test8" />
+		<file:read doc:name="Read" doc:id="5917ac60-cf2a-4ec2-bd5d-dbd2681ca1b1" config-ref="File_Config" path="embeddingaddfiletest/embedtest.pdf"/>
+		<ms-agentforce:rag-adhoc-load-document doc:name="Rag adhoc load document" doc:id="1ba85f2f-54b5-4507-8d0f-e223be41d774" config-ref="Anypoint_Agentforce_Config">
+			<ms-agentforce:prompt ><![CDATA[What is Mule 4 ?]]></ms-agentforce:prompt>
+			<ms-agentforce:input-stream ><![CDATA[#[payload]]]></ms-agentforce:input-stream>
+		</ms-agentforce:rag-adhoc-load-document>
+	</flow>
+	<flow name="einstein3Flow8" doc:id="7d492930-d41a-48e2-8417-4c6c16c0e5e9" >
+		<http:listener doc:name="Listener" doc:id="4535ca7e-352b-4c19-a732-27bc58e53675" config-ref="HTTP_Listener_config" path="/test9" />
+		<file:read doc:name="Read" doc:id="9c2d7d93-07fb-449d-b437-c623360d62ee" config-ref="File_Config" path="tools.config.json" />
+		<ms-agentforce:tools-use-ai-service doc:name="Tools use ai service" doc:id="336b852f-e736-489a-b41a-bcd7ce61296e" config-ref="Anypoint_Agentforce_Config">
+			<ms-agentforce:prompt ><![CDATA[Get all accounts]]></ms-agentforce:prompt>
+			<ms-agentforce:input-stream ><![CDATA[#[payload]]]></ms-agentforce:input-stream>
+		</ms-agentforce:tools-use-ai-service>
+	</flow>
+</mule>

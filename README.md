@@ -1,8 +1,8 @@
-# Mule4 Einstein AI Connector
+# Mule4 Agentforce Connector
 
-## <img src="icon/icon.svg" width="6%" alt="banner"> [MuleSoft AI Chain - Einstein AI Connector](https://mac-project.ai/docs/einstein-ai)
+## <img src="icon/icon.svg" width="6%" alt="banner"> [MuleSoft AI Chain - Agentforce Connector](https://mac-project.ai/docs/einstein-ai)
 
-MuleSoft AI Chain Connector for Salesforce Einstein AI to interact with the models API of the Salesforce platform and benefit from its trust layer and automation capabilities. It allows you to:
+MuleSoft Agentforce Connector for Salesforce Einstein AI to interact with the _models API_ of the Salesforce platform and benefit from its trust layer and automation capabilities. It allows you to:
 - **Leverage the Salesforce Trustlayer**
 - **Ingest files into the Vector Database**
 - **Build Prompt Templates in your workflow**
@@ -10,6 +10,10 @@ MuleSoft AI Chain Connector for Salesforce Einstein AI to interact with the mode
 - **Build Chat Memory capabilities**
 - **Optimized usage in MuleSoft applications**
 
+In addition to the above operations, Agentforce Connector provides a way to interact with the _Bots API_ of the Salesforce platform and benefit from the agent related capabilities. It allows you to:
+- **Start Agent Conversation**
+- **Continue Agent Conversation**
+- **End Agent Conversation**
 
 ### Requirements
 
@@ -23,14 +27,14 @@ To use this connector, add the following dependency to your application's `pom.x
 ```
 	<dependency>
 		<groupId>com.mulesoft.connectors</groupId>
-		<artifactId>mule4-einstein-connector</artifactId>
-		<version>0.20.0</version>
+		<artifactId>mule4-agentforce-connector</artifactId>
+		<version>0.3.0</version>
 		<classifier>mule-plugin</classifier>		
 	</dependency>
 ```
 
 ### Documentation
-- Check out MuleChain Einstein AI Connector Documentation on [mac-project.ai](https://mac-project.ai/docs/einstein-ai)
+- Check out MuleChain Agentforce Connector Documentation on [mac-project.ai](https://mac-project.ai/docs/einstein-ai)
 - Learn from the [Getting Started Playlist on YouTube](https://www.youtube.com/playlist?list=PLnuJGpEBF6ZAV1JfID1SRKN6OmGORvgv6)
 
 ---

@@ -1,0 +1,12 @@
+Salesforce Einstein is an artificial intelligence (AI) technology integrated into Salesforce's platform, designed to provide AI-driven insights, recommendations, and automation across different Salesforce services. Its goal is to help businesses leverage AI to enhance customer relationships, improve decision-making, and automate routine tasks. Key capabilities of Salesforce Einstein include: 
+
+Einstein Analytics: Provides AI-driven insights into sales, service, marketing, and commerce data, helping businesses make more informed decisions. It uses predictive analytics to help forecast outcomes, identify trends, and suggest next steps.
+
+Einstein Discovery: Offers automated data analysis to help businesses uncover hidden patterns and insights. It provides recommendations based on historical data and trends.
+Salesforce Agentforce is a new platform by Salesforce designed to build and customize autonomous AI agents. These agents can support employees and customers 24/7 by performing specialized tasks, providing proactive support, and improving efficiency across various functions like service, sales, marketing, and commerce
+Einstein Bots
+Purpose: Designed to improve customer service by automating routine interactions via chatbots. These bots handle simple, repetitive tasks like answering frequently asked questions, gathering information, or assisting customers with issues before escalating more complex inquiries to human agents
+Functionality:
+Operates within Salesforce Service Cloud.
+Allows businesses to build conversational experiences with little to no coding required.
+Einstein Bots can help deflect cases from customer service agents by handling common issues, such as account balance inquiries or resetting passwords.
