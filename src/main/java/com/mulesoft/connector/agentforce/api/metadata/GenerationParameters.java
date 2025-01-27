@@ -10,12 +10,12 @@ import java.io.Serializable;
 public class GenerationParameters implements Serializable {
 
   private final String finishReason;
-  private final Object refusal;
+  private final String refusal;
   private final int index;
-  private final Object logprobs;
+  private final String logprobs;
 
   @ConstructorProperties({"finshReason", "refusal", "index", "logprobs"})
-  public GenerationParameters(String finishReason, Object refusal, int index, Object logprobs) {
+  public GenerationParameters(String finishReason, String refusal, int index, String logprobs) {
     this.finishReason = finishReason;
     this.refusal = refusal;
     this.index = index;
@@ -26,7 +26,7 @@ public class GenerationParameters implements Serializable {
     return finishReason;
   }
 
-  public Object getRefusal() {
+  public String getRefusal() {
     return refusal;
   }
 
@@ -34,7 +34,7 @@ public class GenerationParameters implements Serializable {
     return index;
   }
 
-  public Object getLogprobs() {
+  public String getLogprobs() {
     return logprobs;
   }
 }

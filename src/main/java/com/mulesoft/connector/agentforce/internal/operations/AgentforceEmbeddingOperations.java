@@ -3,7 +3,7 @@ package com.mulesoft.connector.agentforce.internal.operations;
 import com.mulesoft.connector.agentforce.api.metadata.AgentforceResponseAttributes;
 import com.mulesoft.connector.agentforce.api.metadata.ResponseParameters;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
-import com.mulesoft.connector.agentforce.internal.modelsapi.error.provider.EmbeddingErrorTypeProvider;
+import com.mulesoft.connector.agentforce.internal.error.provider.EmbeddingErrorTypeProvider;
 import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.ResponseHelper;
 import com.mulesoft.connector.agentforce.internal.modelsapi.models.ParamsEmbeddingDocumentDetails;
 import com.mulesoft.connector.agentforce.internal.modelsapi.models.ParamsEmbeddingModelDetails;
@@ -23,7 +23,6 @@ import org.mule.runtime.extension.api.runtime.operation.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 import static com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType.EMBEDDING_OPERATIONS_FAILURE;
@@ -48,10 +47,12 @@ public class AgentforceEmbeddingOperations {
   @Alias("EMBEDDING-generate-from-text")
   @Throws(EmbeddingErrorTypeProvider.class)
   @OutputJsonType(schema = "api/response/AgentForceEmbeddingResponse.json")
-  public Result<InputStream, ResponseParameters> generateEmbeddingFromText(@Content String text,
+  public Result<InputStream, ResponseParameters> generateEmbeddingFromText(
                                                                            @Connection AgentforceConnection connection,
+                                                                           @Content String text,
                                                                            @ParameterGroup(
                                                                                name = "Additional properties") ParamsEmbeddingModelDetails paramDetails) {
+    log.info("Executing generate embedding from text operation.");
     try {
       InputStream responseStream = connection.getRequestHelper().generateEmbeddingFromText(text, paramDetails);
 
@@ -69,8 +70,8 @@ public class AgentforceEmbeddingOperations {
   @Alias("EMBEDDING-generate-from-file")
   @Throws(EmbeddingErrorTypeProvider.class)
   @OutputJsonType(schema = "api/response/AgentForceFileEmbeddingResponse.json")
-  public Result<InputStream, Void> generateEmbeddingFromFile(@Content InputStream inputStream,
-                                                             @Connection AgentforceConnection connection,
+  public Result<InputStream, Void> generateEmbeddingFromFile(@Connection AgentforceConnection connection,
+                                                             @Content InputStream inputStream,
                                                              @ParameterGroup(
                                                                  name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails) {
     log.info("Executing generate embedding from file operation.");
@@ -94,8 +95,8 @@ public class AgentforceEmbeddingOperations {
   @Alias("EMBEDDING-adhoc-file-query")
   @Throws(EmbeddingErrorTypeProvider.class)
   @OutputJsonType(schema = "api/response/AgentForceFileEmbeddingResponse.json")
-  public Result<InputStream, Void> queryEmbeddingOnFiles(@Content String prompt, @Content InputStream inputStream,
-                                                         @Connection AgentforceConnection connection,
+  public Result<InputStream, Void> queryEmbeddingOnFiles(@Connection AgentforceConnection connection, @Content String prompt,
+                                                         @Content InputStream inputStream,
                                                          @ParameterGroup(
                                                              name = "Additional properties") ParamsEmbeddingDocumentDetails paramDetails) {
     log.info("Executing embedding adhoc file query operation.");
@@ -109,8 +110,6 @@ public class AgentforceEmbeddingOperations {
       jsonObject.put("result", response);
       return ResponseHelper.createAgentforceDefaultResponse(jsonObject.toString());
     } catch (Exception e) {
-
-      log.error(format("Exception occurred while executing embedding adhoc file query operation %s", e.getMessage()), e);
       throw new ModuleException("Error while generating the chat, for prompt " + prompt, EMBEDDING_OPERATIONS_FAILURE, e);
     }
   }
@@ -122,9 +121,9 @@ public class AgentforceEmbeddingOperations {
   @Alias("RAG-adhoc-load-document")
   @Throws(EmbeddingErrorTypeProvider.class)
   @OutputJsonType(schema = "api/response/AgentForceOperationResponse.json")
-  public Result<InputStream, AgentforceResponseAttributes> ragOnFiles(@Content String prompt,
+  public Result<InputStream, AgentforceResponseAttributes> ragOnFiles(@Connection AgentforceConnection connection,
+                                                                      @Content String prompt,
                                                                       @Content InputStream inputStream,
-                                                                      @Connection AgentforceConnection connection,
                                                                       @ParameterGroup(
                                                                           name = "Additional properties") RAGParamsModelDetails paramDetails) {
     log.info("Executing rag adhoc load document.");
@@ -137,8 +136,6 @@ public class AgentforceEmbeddingOperations {
 
       return ResponseHelper.createAgentforceFormattedResponse(responseStream);
     } catch (Exception e) {
-
-      log.error(format("Exception occurred while executing rag adhoc load document operation %s", e.getMessage()), e);
       throw new ModuleException("Error while doing rag adhoc load document for prompt " + prompt, RAG_FAILURE, e);
     }
   }
@@ -150,9 +147,9 @@ public class AgentforceEmbeddingOperations {
   @Alias("Tools-use-ai-service")
   @Throws(EmbeddingErrorTypeProvider.class)
   @OutputJsonType(schema = "api/response/AgentForceOperationResponse.json")
-  public Result<InputStream, AgentforceResponseAttributes> executeTools(@Content String prompt,
+  public Result<InputStream, AgentforceResponseAttributes> executeTools(@Connection AgentforceConnection connection,
+                                                                        @Content String prompt,
                                                                         @Content InputStream inputStream,
-                                                                        @Connection AgentforceConnection connection,
                                                                         @ParameterGroup(
                                                                             name = "Additional properties") ParamsModelDetails paramDetails) {
     log.info("Executing AI service tools operation.");
@@ -168,8 +165,6 @@ public class AgentforceEmbeddingOperations {
 
       return ResponseHelper.createAgentforceFormattedResponse(responseStream);
     } catch (Exception e) {
-
-      log.error(format("Exception occurred while executing AI service tools operation %s", e.getMessage()), e);
       throw new ModuleException("Error while executing AI service tools" + ", for prompt "
           + prompt, TOOLS_OPERATION_FAILURE, e);
     }

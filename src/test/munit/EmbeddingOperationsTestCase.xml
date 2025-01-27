@@ -31,7 +31,7 @@
             </ms-agentforce:embedding-generate-from-text>
         </munit:execution>
         <munit:validation>
-            <munit-tools:assert-that is="#[MunitTools::greaterThan(2)]" expression="#[sizeOf(payload.embeddings[0].embedding)]"/>
+            <munit-tools:assert-that is="#[MunitTools::greaterThan(2)]" expression="#[sizeOf(payload.embeddings[0].embeddings)]"/>
         </munit:validation>
     </munit:test>
 
@@ -77,6 +77,7 @@
             <logger message="Test RAGAdhocLoadDocument started" level="INFO"/>
             <ms-agentforce:rag-adhoc-load-document doc:name="RAG Adhoc Load Document"
                                                    modelApiName="sfdc_ai__DefaultOpenAIGPT35Turbo"
+                                                   probability="0.7"
                                                    config-ref="Agentforce_Config">
                 <ms-agentforce:prompt>#['What is Mule 4 ?']</ms-agentforce:prompt>
                 <ms-agentforce:input-stream ><![CDATA[#[payload]]]></ms-agentforce:input-stream>

@@ -1,6 +1,5 @@
 package com.mulesoft.connector.agentforce.internal.modelsapi.helpers.chatmemory;
 
-import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
 import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.RequestHelper;
 import com.mulesoft.connector.agentforce.internal.modelsapi.models.ParamsModelDetails;
 
@@ -20,13 +19,13 @@ public class ChatMemoryHelper {
                                     ParamsModelDetails parameters)
       throws IOException {
 
-    //Chat memory initialization
+    // Chat memory initialization
     ChatMemoryUtil chatMemory = intializeChatMemory(memoryPath, memoryName);
 
-    //Get keepLastMessages
-    List<String> keepLastMessagesList = getKeepLastMessage(chatMemory, keepLastMessages);
-    keepLastMessagesList.add(prompt);
-    String memoryPrompt = formatMemoryPrompt(keepLastMessagesList);
+    // Get last Messages To Keep
+    List<String> lastMessages = getLastMessagesToKeep(chatMemory, keepLastMessages);
+    lastMessages.add(prompt);
+    String memoryPrompt = formatMemoryPrompt(lastMessages);
 
     InputStream response = requestHelper.executeGenerateText(memoryPrompt, parameters);
 
@@ -39,16 +38,16 @@ public class ChatMemoryHelper {
     return new ChatMemoryUtil(memoryPath, memoryName);
   }
 
-  private List<String> getKeepLastMessage(ChatMemoryUtil chatMemory, Integer keepLastMessages) {
+  private List<String> getLastMessagesToKeep(ChatMemoryUtil chatMemory, Integer keepLastMessages) {
 
     // Retrieve all messages in ascending order of messageId
-    List<String> messagesAsc = chatMemory.getAllMessagesByMessageIdAsc();
+    List<String> messages = chatMemory.getAllMessagesByMessageIdAsc();
 
     // Keep only the last index messages
-    if (messagesAsc.size() > keepLastMessages) {
-      messagesAsc = messagesAsc.subList(messagesAsc.size() - keepLastMessages, messagesAsc.size());
+    if (messages.size() > keepLastMessages) {
+      messages = messages.subList(messages.size() - keepLastMessages, messages.size());
     }
-    return messagesAsc;
+    return messages;
   }
 
   private void addMessageToMemory(ChatMemoryUtil chatMemory, String prompt) {

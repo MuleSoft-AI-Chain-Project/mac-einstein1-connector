@@ -6,19 +6,19 @@ import java.util.List;
 public class AgentforceEmbeddingDTO {
 
   private final int index;
-  private final List<Double> embedding;
+  private final List<Double> embeddings;
 
   @ConstructorProperties({"index", "embedding"})
-  public AgentforceEmbeddingDTO(int index, List<Double> embedding) {
+  public AgentforceEmbeddingDTO(int index, List<Double> embeddings) {
     this.index = index;
-    this.embedding = embedding;
+    this.embeddings = embeddings;
   }
 
   public int getIndex() {
     return index;
   }
 
-  public List<Double> getEmbedding() {
-    return embedding;
+  public List<Double> getEmbeddings() {
+    return embeddings;
   }
 }

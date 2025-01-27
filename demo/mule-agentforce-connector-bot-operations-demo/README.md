@@ -1,13 +1,13 @@
-MuleSoft Anypoint Agentforce Connector Demo
+MuleSoft Agentforce Connector Demo
 ====================================
-Anypoint Studio demo for MuleSoft Anypoint Agentforce Connector Bot Operations.
+Anypoint Studio demo for MuleSoft Agentforce Connector Bot Operations.
 
 
 Prerequisites
 ---------------
 
 * Anypoint Studio 7 with Mule ESB 4.6.9 Runtime.
-* Mulesoft Anypoint Agentforce Connector v1.0.0
+* Mulesoft Agentforce Connector v1.0.0
 
 
 How to Run Sample
