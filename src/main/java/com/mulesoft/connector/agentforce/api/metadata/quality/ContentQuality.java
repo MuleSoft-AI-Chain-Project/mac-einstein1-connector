@@ -17,8 +17,10 @@ public class ContentQuality implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof ContentQuality)) return false;
+    if (this == o)
+      return true;
+    if (!(o instanceof ContentQuality))
+      return false;
     ContentQuality that = (ContentQuality) o;
     return Objects.equals(getScanToxicity(), that.getScanToxicity());
   }

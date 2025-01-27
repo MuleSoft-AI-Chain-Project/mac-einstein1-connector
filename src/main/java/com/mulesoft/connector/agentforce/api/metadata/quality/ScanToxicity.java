@@ -27,8 +27,10 @@ public class ScanToxicity implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof ScanToxicity)) return false;
+    if (this == o)
+      return true;
+    if (!(o instanceof ScanToxicity))
+      return false;
     ScanToxicity that = (ScanToxicity) o;
     return isDetected == that.isDetected && Objects.equals(getCategories(), that.getCategories());
   }
