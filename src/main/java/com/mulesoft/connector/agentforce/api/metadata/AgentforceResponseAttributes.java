@@ -3,6 +3,7 @@ package com.mulesoft.connector.agentforce.api.metadata;
 import com.mulesoft.connector.agentforce.api.metadata.quality.ContentQuality;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class AgentforceResponseAttributes implements Serializable {
 
@@ -39,5 +40,24 @@ public class AgentforceResponseAttributes implements Serializable {
 
   public ResponseParameters getResponseParameters() {
     return responseParameters;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (!(o instanceof AgentforceResponseAttributes))
+      return false;
+    AgentforceResponseAttributes that = (AgentforceResponseAttributes) o;
+    return Objects.equals(getResponseId(), that.getResponseId()) && Objects.equals(getGenerationId(), that.getGenerationId())
+        && Objects.equals(getContentQuality(), that.getContentQuality())
+        && Objects.equals(getGenerationParameters(), that.getGenerationParameters())
+        && Objects.equals(getResponseParameters(), that.getResponseParameters());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getResponseId(), getGenerationId(), getContentQuality(), getGenerationParameters(),
+                        getResponseParameters());
   }
 }

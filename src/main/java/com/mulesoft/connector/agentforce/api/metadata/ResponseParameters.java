@@ -7,6 +7,7 @@ import com.mulesoft.connector.agentforce.api.metadata.token.TokenUsage;
 
 import java.beans.ConstructorProperties;
 import java.io.Serializable;
+import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
@@ -39,5 +40,18 @@ public class ResponseParameters implements Serializable {
 
   public String getObject() {
     return object;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof ResponseParameters)) return false;
+    ResponseParameters that = (ResponseParameters) o;
+    return Objects.equals(getTokenUsage(), that.getTokenUsage()) && Objects.equals(getModel(), that.getModel()) && Objects.equals(getSystemFingerprint(), that.getSystemFingerprint()) && Objects.equals(getObject(), that.getObject());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getTokenUsage(), getModel(), getSystemFingerprint(), getObject());
   }
 }

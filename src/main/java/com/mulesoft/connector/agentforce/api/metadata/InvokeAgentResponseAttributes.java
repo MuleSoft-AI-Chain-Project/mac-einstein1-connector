@@ -16,24 +16,12 @@ public class InvokeAgentResponseAttributes implements Serializable {
     return botVersion;
   }
 
-  public void setBotVersion(String botVersion) {
-    this.botVersion = botVersion;
-  }
-
   public List<Message> getMessages() {
     return messages;
   }
 
-  public void setMessages(List<Message> messages) {
-    this.messages = messages;
-  }
-
   public List<Integer> getProcessedSequenceIds() {
     return processedSequenceIds;
-  }
-
-  public void setProcessedSequenceIds(List<Integer> processedSequenceIds) {
-    this.processedSequenceIds = processedSequenceIds;
   }
 
   @JsonIgnoreProperties(ignoreUnknown = true)
