@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import java.beans.ConstructorProperties;
 import java.io.Serializable;
+import java.util.Objects;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class GenerationParameters implements Serializable {
@@ -36,5 +37,18 @@ public class GenerationParameters implements Serializable {
 
   public String getLogprobs() {
     return logprobs;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof GenerationParameters)) return false;
+    GenerationParameters that = (GenerationParameters) o;
+    return getIndex() == that.getIndex() && Objects.equals(getFinishReason(), that.getFinishReason()) && Objects.equals(getRefusal(), that.getRefusal()) && Objects.equals(getLogprobs(), that.getLogprobs());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getFinishReason(), getRefusal(), getIndex(), getLogprobs());
   }
 }

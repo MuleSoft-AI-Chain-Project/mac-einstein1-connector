@@ -1,9 +1,9 @@
 package com.mulesoft.connector.agentforce.internal.extension;
 
 import com.mulesoft.connector.agentforce.internal.connection.provider.CustomOauthClientCredentialsConnectionProvider;
-import com.mulesoft.connector.agentforce.internal.operations.AgentforceBotOperations;
-import com.mulesoft.connector.agentforce.internal.operations.AgentforceGenerationOperations;
-import com.mulesoft.connector.agentforce.internal.operations.AgentforceEmbeddingOperations;
+import com.mulesoft.connector.agentforce.internal.operation.AgentforceBotOperations;
+import com.mulesoft.connector.agentforce.internal.operation.AgentforceGenerationOperations;
+import com.mulesoft.connector.agentforce.internal.operation.AgentforceEmbeddingOperations;
 import com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType;
 import org.mule.runtime.api.meta.Category;
 import org.mule.runtime.extension.api.annotation.Extension;

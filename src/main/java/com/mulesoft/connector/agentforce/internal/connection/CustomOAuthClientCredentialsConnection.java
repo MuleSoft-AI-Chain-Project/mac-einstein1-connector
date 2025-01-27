@@ -1,9 +1,11 @@
 package com.mulesoft.connector.agentforce.internal.connection;
 
 import com.mulesoft.connector.agentforce.internal.botapi.helpers.BotRequestHelper;
+import com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType;
 import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.RequestHelper;
 import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.chatmemory.ChatMemoryHelper;
 import org.mule.runtime.extension.api.connectivity.oauth.ClientCredentialsState;
+import org.mule.runtime.extension.api.exception.ModuleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +47,8 @@ public class CustomOAuthClientCredentialsConnection implements AgentforceConnect
       logger.info("Inside CustomOAuthClientCredentialsConnection validate, salesforceOrg {}", salesforceOrgUrl);
       botRequestHelper.findRuntimeBaseUrl();
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new ModuleException("Unable to validate credentials", AgentforceErrorType.INVALID_CONNECTION, e);
+
     }
   }
 
