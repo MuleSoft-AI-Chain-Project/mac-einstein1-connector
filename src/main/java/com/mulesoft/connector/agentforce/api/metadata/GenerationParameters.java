@@ -41,10 +41,13 @@ public class GenerationParameters implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof GenerationParameters)) return false;
+    if (this == o)
+      return true;
+    if (!(o instanceof GenerationParameters))
+      return false;
     GenerationParameters that = (GenerationParameters) o;
-    return getIndex() == that.getIndex() && Objects.equals(getFinishReason(), that.getFinishReason()) && Objects.equals(getRefusal(), that.getRefusal()) && Objects.equals(getLogprobs(), that.getLogprobs());
+    return getIndex() == that.getIndex() && Objects.equals(getFinishReason(), that.getFinishReason())
+        && Objects.equals(getRefusal(), that.getRefusal()) && Objects.equals(getLogprobs(), that.getLogprobs());
   }
 
   @Override

@@ -26,8 +26,10 @@ public class Categories implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof Categories)) return false;
+    if (this == o)
+      return true;
+    if (!(o instanceof Categories))
+      return false;
     Categories that = (Categories) o;
     return Objects.equals(getCategoryName(), that.getCategoryName()) && Objects.equals(getScore(), that.getScore());
   }

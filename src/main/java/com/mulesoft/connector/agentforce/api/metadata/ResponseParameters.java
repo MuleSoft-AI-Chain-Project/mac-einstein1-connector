@@ -44,10 +44,13 @@ public class ResponseParameters implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof ResponseParameters)) return false;
+    if (this == o)
+      return true;
+    if (!(o instanceof ResponseParameters))
+      return false;
     ResponseParameters that = (ResponseParameters) o;
-    return Objects.equals(getTokenUsage(), that.getTokenUsage()) && Objects.equals(getModel(), that.getModel()) && Objects.equals(getSystemFingerprint(), that.getSystemFingerprint()) && Objects.equals(getObject(), that.getObject());
+    return Objects.equals(getTokenUsage(), that.getTokenUsage()) && Objects.equals(getModel(), that.getModel())
+        && Objects.equals(getSystemFingerprint(), that.getSystemFingerprint()) && Objects.equals(getObject(), that.getObject());
   }
 
   @Override
