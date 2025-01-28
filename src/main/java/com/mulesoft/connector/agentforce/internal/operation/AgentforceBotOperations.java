@@ -17,6 +17,9 @@ import org.mule.runtime.extension.api.annotation.param.Connection;
 import org.mule.runtime.extension.api.annotation.param.Content;
 import org.mule.runtime.extension.api.annotation.param.MediaType;
 import org.mule.runtime.extension.api.annotation.param.ParameterGroup;
+import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
+import org.mule.runtime.extension.api.annotation.param.display.Placement;
+import org.mule.runtime.extension.api.annotation.param.display.Summary;
 import org.mule.runtime.extension.api.exception.ModuleException;
 import org.mule.runtime.extension.api.runtime.operation.Result;
 
@@ -39,7 +42,7 @@ public class AgentforceBotOperations {
   @Throws(BotErrorTypeProvider.class)
   @OutputJsonType(schema = "api/response/StartAgentConversationResponse.json")
   public Result<InputStream, InvokeAgentResponseAttributes> startAgentConversation(@Connection AgentforceConnection connection,
-                                                                                   @ParameterGroup(
+                                                                                   @Placement(order = 1) @ParameterGroup(
                                                                                        name = "Agent") @MetadataKeyId BotAgentParameterGroup parameterGroup) {
 
     log.info("Executing start agent conversation operation.");
@@ -69,6 +72,7 @@ public class AgentforceBotOperations {
   public Result<InputStream, InvokeAgentResponseAttributes> continueConversation(@Connection AgentforceConnection connection,
                                                                                  @Content(primary = true) InputStream message,
                                                                                  @Content String sessionId,
+                                                                                 @Summary("Increase this number for each subsequent message in a session") @DisplayName("Message Sequence Number") int messageSequenceNumber,
                                                                                  @ParameterGroup(
                                                                                      name = "Additional Details") BotMessageParameterGroup messageParameterGroup) {
     log.info("Executing continue agent conversation operation.");
@@ -76,8 +80,7 @@ public class AgentforceBotOperations {
     try {
       AgentConversationResponseDTO responseDTO = connection.getBotRequestHelper().continueSession(message,
                                                                                                   sessionId,
-                                                                                                  messageParameterGroup
-                                                                                                      .getMessageSequenceNumber(),
+                                                                                                  messageSequenceNumber,
                                                                                                   messageParameterGroup
                                                                                                       .getInReplyToMessageId());
       return Result.<InputStream, InvokeAgentResponseAttributes>builder()

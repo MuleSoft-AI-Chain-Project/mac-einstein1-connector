@@ -22,31 +22,16 @@ public class BotRecord {
     return status;
   }
 
-  public void setStatus(String status) {
-    this.status = status;
-  }
 
   public BotDefinition getBotDefinition() {
     return botDefinition;
-  }
-
-  public void setBotDefinition(BotDefinition botDefinition) {
-    this.botDefinition = botDefinition;
   }
 
   public Attributes getAttributes() {
     return attributes;
   }
 
-  public void setAttributes(Attributes attributes) {
-    this.attributes = attributes;
-  }
-
   public String getBotDefinitionId() {
     return botDefinitionId;
-  }
-
-  public void setBotDefinitionId(String botDefinitionId) {
-    this.botDefinitionId = botDefinitionId;
   }
 }

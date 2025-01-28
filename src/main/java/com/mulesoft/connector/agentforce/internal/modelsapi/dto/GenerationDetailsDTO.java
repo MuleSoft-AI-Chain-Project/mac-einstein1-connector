@@ -13,15 +13,7 @@ public class GenerationDetailsDTO {
     return parameters;
   }
 
-  public void setParameters(ResponseParameters parameters) {
-    this.parameters = parameters;
-  }
-
   public List<GenerationsChatFromMessagesDTO> getGenerations() {
     return generations;
-  }
-
-  public void setGenerations(List<GenerationsChatFromMessagesDTO> generations) {
-    this.generations = generations;
   }
 }
