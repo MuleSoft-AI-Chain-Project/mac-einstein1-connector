@@ -27,7 +27,7 @@ http://www.mulesoft.org/schema/mule/ms-agentforce http://www.mulesoft.org/schema
         </munit:validation>
     </munit:test>
 
-    <munit:test name="BotOperation_ConnectivityError" doc:id="a7a7b3c8-bbca-4e75-915f-4c9637c48f6a" expectedErrorType="ms-agentforce:CONNECTIVITY">
+    <munit:test name="BotOperation_ConnectivityError" doc:id="a7a7b3c8-bbca-4e75-915f-4c9637c48f6a" expectedErrorType="MULE:CONNECTIVITY">
         <munit:execution >
             <ms-agentforce:continue-agent-conversation doc:name="Continue agent conversation" doc:id="3040a1b1-e1ed-4832-a406-fa12218250a7" config-ref="Agentforce_Config_Error" messageSequenceNumber="1">
                 <ms-agentforce:message ><![CDATA[Get me customer records from salesforce for user Test]]></ms-agentforce:message>

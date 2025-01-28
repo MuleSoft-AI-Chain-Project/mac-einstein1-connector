@@ -40,11 +40,11 @@
     <parent>
         <groupId>org.mule.extensions</groupId>
         <artifactId>mule-modules-parent</artifactId>
-        <version>1.6.9</version>
+        <version>1.4.4</version>
     </parent>
 
     <properties>
-        <muleJavaEeBomVersion>4.6.9</muleJavaEeBomVersion>
+        <!--<muleJavaEeBomVersion>4.6.9</muleJavaEeBomVersion>-->
         <skipVerifications>false</skipVerifications>
         <json.version>20240303</json.version>
         <formatterConfigPath>formatter.xml</formatterConfigPath>
@@ -60,7 +60,7 @@
         <runtimeProduct>MULE_EE</runtimeProduct>
     </properties>
 
-    <dependencyManagement>
+   <!-- <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.mule</groupId>
@@ -70,7 +70,7 @@
                 <scope>import</scope>
             </dependency>
         </dependencies>
-    </dependencyManagement>
+    </dependencyManagement>-->
 
     <dependencies>
         <dependency>
