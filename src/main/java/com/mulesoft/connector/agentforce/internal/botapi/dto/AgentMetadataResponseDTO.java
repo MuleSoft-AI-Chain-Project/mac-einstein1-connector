@@ -21,23 +21,11 @@ public class AgentMetadataResponseDTO {
     return totalSize;
   }
 
-  public void setTotalSize(int totalSize) {
-    this.totalSize = totalSize;
-  }
-
   public boolean isDone() {
     return done;
   }
 
-  public void setDone(boolean done) {
-    this.done = done;
-  }
-
   public List<BotRecord> getRecords() {
     return records;
-  }
-
-  public void setRecords(List<BotRecord> records) {
-    this.records = records;
   }
 }

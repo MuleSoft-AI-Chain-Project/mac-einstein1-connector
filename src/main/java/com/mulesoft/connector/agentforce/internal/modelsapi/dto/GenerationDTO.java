@@ -16,31 +16,15 @@ public class GenerationDTO {
     return id;
   }
 
-  public void setId(String id) {
-    this.id = id;
-  }
-
   public String getGeneratedText() {
     return generatedText;
-  }
-
-  public void setGeneratedText(String generatedText) {
-    this.generatedText = generatedText;
   }
 
   public ContentQuality getContentQuality() {
     return contentQuality;
   }
 
-  public void setContentQuality(ContentQuality contentQuality) {
-    this.contentQuality = contentQuality;
-  }
-
   public GenerationParameters getParameters() {
     return parameters;
-  }
-
-  public void setParameters(GenerationParameters parameters) {
-    this.parameters = parameters;
   }
 }

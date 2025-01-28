@@ -17,39 +17,19 @@ public class GenerationsChatFromMessagesDTO {
     return id;
   }
 
-  public void setId(String id) {
-    this.id = id;
-  }
-
   public ContentQuality getContentQuality() {
     return contentQuality;
-  }
-
-  public void setContentQuality(ContentQuality contentQuality) {
-    this.contentQuality = contentQuality;
   }
 
   public GenerationParameters getParameters() {
     return parameters;
   }
 
-  public void setParameters(GenerationParameters parameters) {
-    this.parameters = parameters;
-  }
-
   public String getRole() {
     return role;
   }
 
-  public void setRole(String role) {
-    this.role = role;
-  }
-
   public String getContent() {
     return content;
-  }
-
-  public void setContent(String content) {
-    this.content = content;
   }
 }

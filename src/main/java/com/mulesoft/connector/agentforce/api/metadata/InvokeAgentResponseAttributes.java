@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class InvokeAgentResponseAttributes implements Serializable {
@@ -24,6 +25,22 @@ public class InvokeAgentResponseAttributes implements Serializable {
     return processedSequenceIds;
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
+    InvokeAgentResponseAttributes that = (InvokeAgentResponseAttributes) o;
+    return Objects.equals(botVersion, that.botVersion) && Objects.equals(messages, that.messages)
+        && Objects.equals(processedSequenceIds, that.processedSequenceIds);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(botVersion, messages, processedSequenceIds);
+  }
+
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static class Message implements Serializable {
 
@@ -35,24 +52,12 @@ public class InvokeAgentResponseAttributes implements Serializable {
       return id;
     }
 
-    public void setId(String id) {
-      this.id = id;
-    }
-
     public Schedule getSchedule() {
       return schedule;
     }
 
-    public void setSchedule(Schedule schedule) {
-      this.schedule = schedule;
-    }
-
     public String getType() {
       return type;
-    }
-
-    public void setType(String type) {
-      this.type = type;
     }
 
   }
@@ -65,8 +70,5 @@ public class InvokeAgentResponseAttributes implements Serializable {
       return responseDelayMilliseconds;
     }
 
-    public void setResponseDelayMilliseconds(int responseDelayMilliseconds) {
-      this.responseDelayMilliseconds = responseDelayMilliseconds;
-    }
   }
 }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import java.beans.ConstructorProperties;
 import java.io.Serializable;
+import java.util.Objects;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class CompletionTokensDetails implements Serializable {
@@ -37,5 +38,21 @@ public class CompletionTokensDetails implements Serializable {
 
   public int getRejectedPredictionTokens() {
     return rejectedPredictionTokens;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
+    CompletionTokensDetails that = (CompletionTokensDetails) o;
+    return reasoningTokens == that.reasoningTokens && audioTokens == that.audioTokens
+        && acceptedPredictionTokens == that.acceptedPredictionTokens && rejectedPredictionTokens == that.rejectedPredictionTokens;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(reasoningTokens, audioTokens, acceptedPredictionTokens, rejectedPredictionTokens);
   }
 }
