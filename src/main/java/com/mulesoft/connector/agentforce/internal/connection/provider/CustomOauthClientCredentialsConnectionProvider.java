@@ -18,18 +18,21 @@ import org.slf4j.LoggerFactory;
 public class CustomOauthClientCredentialsConnectionProvider implements AgentforceConnectionProvider,
     CachedConnectionProvider<AgentforceConnection> {
 
-  private final static Logger logger = LoggerFactory.getLogger(CustomOauthClientCredentialsConnectionProvider.class);
+  private static final Logger log = LoggerFactory.getLogger(CustomOauthClientCredentialsConnectionProvider.class);
   private ClientCredentialsState clientCredentialsState;
+
   @OAuthCallbackValue(expression = "#[payload.instance_url]")
   private String salesforceOrgUrl;
+
   @OAuthCallbackValue(expression = "#[payload.api_instance_url]")
   private String apiInstanceUrl;
+
   @OAuthCallbackValue(expression = "#[payload.id]")
   private String id;
 
   @Override
   public AgentforceConnection connect() {
-    logger.info("Inside CustomOauthClientCredentialsConnectionProvider connect, salesforceOrg {}, apiInstanceUrl = {}," +
+    log.info("Inside CustomOauthClientCredentialsConnectionProvider connect, salesforceOrg {}, apiInstanceUrl = {}," +
         " id = {} ", salesforceOrgUrl, apiInstanceUrl, id);
     return new CustomOAuthClientCredentialsConnection(salesforceOrgUrl, clientCredentialsState, apiInstanceUrl, id);
   }

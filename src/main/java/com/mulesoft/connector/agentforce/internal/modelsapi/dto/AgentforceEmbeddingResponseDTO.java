@@ -13,15 +13,7 @@ public class AgentforceEmbeddingResponseDTO {
     return embeddings;
   }
 
-  public void setEmbeddings(List<AgentforceEmbeddingDTO> embeddings) {
-    this.embeddings = embeddings;
-  }
-
   public ResponseParameters getParameters() {
     return parameters;
-  }
-
-  public void setParameters(ResponseParameters parameters) {
-    this.parameters = parameters;
   }
 }

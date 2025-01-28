@@ -16,15 +16,8 @@ public class BotDefinition {
     return masterLabel;
   }
 
-  public void setMasterLabel(String masterLabel) {
-    this.masterLabel = masterLabel;
-  }
-
   public Attributes getAttributes() {
     return attributes;
   }
 
-  public void setAttributes(Attributes attributes) {
-    this.attributes = attributes;
-  }
 }
