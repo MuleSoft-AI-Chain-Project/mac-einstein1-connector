@@ -49,7 +49,7 @@ public class RAGParamsModelDetails {
   @Expression(ExpressionSupport.SUPPORTED)
   @Optional
   @DisplayName("Probability")
-  private Number probability;
+  private Number probability = 0.8f;
 
   @Parameter
   @Expression(ExpressionSupport.SUPPORTED)
