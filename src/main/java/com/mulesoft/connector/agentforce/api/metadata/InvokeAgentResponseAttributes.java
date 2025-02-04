@@ -9,66 +9,64 @@ import java.util.Objects;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class InvokeAgentResponseAttributes implements Serializable {
 
-  private String botVersion;
   private List<Message> messages;
-  private List<Integer> processedSequenceIds;
-
-  public String getBotVersion() {
-    return botVersion;
-  }
 
   public List<Message> getMessages() {
     return messages;
-  }
-
-  public List<Integer> getProcessedSequenceIds() {
-    return processedSequenceIds;
   }
 
   @Override
   public boolean equals(Object o) {
     if (this == o)
       return true;
-    if (o == null || getClass() != o.getClass())
+    if (!(o instanceof InvokeAgentResponseAttributes))
       return false;
     InvokeAgentResponseAttributes that = (InvokeAgentResponseAttributes) o;
-    return Objects.equals(botVersion, that.botVersion) && Objects.equals(messages, that.messages)
-        && Objects.equals(processedSequenceIds, that.processedSequenceIds);
+    return Objects.equals(getMessages(), that.getMessages());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(botVersion, messages, processedSequenceIds);
+    return Objects.hash(getMessages());
   }
 
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static class Message implements Serializable {
 
-    private String id;
-    private Schedule schedule;
     private String type;
-
-    public String getId() {
-      return id;
-    }
-
-    public Schedule getSchedule() {
-      return schedule;
-    }
+    private String id;
+    private String feedbackId;
+    private String planId;
+    private boolean isContentSafe;
+    private String message;
+    private String reason;
 
     public String getType() {
       return type;
     }
 
-  }
-
-  public static class Schedule implements Serializable {
-
-    private int responseDelayMilliseconds;
-
-    public int getResponseDelayMilliseconds() {
-      return responseDelayMilliseconds;
+    public String getId() {
+      return id;
     }
 
+    public String getFeedbackId() {
+      return feedbackId;
+    }
+
+    public String getPlanId() {
+      return planId;
+    }
+
+    public boolean isContentSafe() {
+      return isContentSafe;
+    }
+
+    public String getMessage() {
+      return message;
+    }
+
+    public String getReason() {
+      return reason;
+    }
   }
 }

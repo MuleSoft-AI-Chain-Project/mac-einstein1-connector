@@ -186,7 +186,7 @@ public class RequestHelper {
     return corpusEmbeddings;
   }
 
-  private List<List<Double>> getBatchCorpusEmbeddings(String modelName, List<String> corpus) throws IOException {
+  private List<List<Double>> getBatchCorpusEmbeddings(String modelName, List<String> corpus) {
     List<List<Double>> allEmbeddings = new ArrayList<>();
     for (int i = 0; i < corpus.size(); i += 100) {
       // Create the batch from the corpus

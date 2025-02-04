@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 
 import static com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType.CHAT_FAILURE;
-import static java.lang.String.format;
 import static org.mule.runtime.extension.api.annotation.param.MediaType.APPLICATION_JSON;
 
 /**
@@ -33,7 +32,7 @@ public class AgentforceGenerationOperations {
   private static final Logger log = LoggerFactory.getLogger(AgentforceGenerationOperations.class);
 
   /**
-   * Helps defining an AI Agent with a prompt template
+   * Helps in defining an AI Agent with a prompt template
    */
   @MediaType(value = APPLICATION_JSON, strict = false)
   @Alias("AGENT-define-prompt-template")

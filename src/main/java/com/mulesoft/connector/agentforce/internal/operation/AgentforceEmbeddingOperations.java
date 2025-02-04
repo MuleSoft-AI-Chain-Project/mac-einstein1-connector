@@ -29,7 +29,6 @@ import static com.mulesoft.connector.agentforce.internal.error.AgentforceErrorTy
 import static com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType.RAG_FAILURE;
 import static com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType.TOOLS_OPERATION_FAILURE;
 import static com.mulesoft.connector.agentforce.internal.modelsapi.helpers.ConstantUtil.MODELAPI_OPENAI_ADA_002;
-import static java.lang.String.format;
 import static org.mule.runtime.extension.api.annotation.param.MediaType.APPLICATION_JSON;
 
 

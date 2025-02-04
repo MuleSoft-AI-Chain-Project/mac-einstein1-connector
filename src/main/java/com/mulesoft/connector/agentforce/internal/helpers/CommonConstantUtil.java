@@ -14,6 +14,8 @@ public class CommonConstantUtil {
 
   public static final String CONTENT_TYPE_STRING = "Content-Type";
 
+  public static final String ACCEPT_TYPE_STRING = "Accept";
+
   public static final String CONTENT_TYPE_APPLICATION_JSON = "application/json;charset=utf-8";
 
   public static final String AUTHORIZATION = "Authorization";

@@ -6,20 +6,20 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class BotSessionRequestDTO {
 
   private final String externalSessionKey;
-  private final ForceConfigDTO forceConfig;
+  private final InstanceConfigDTO instanceConfig;
 
-  public BotSessionRequestDTO(String externalSessionKey, ForceConfigDTO forceConfig) {
+  public BotSessionRequestDTO(String externalSessionKey, InstanceConfigDTO instanceConfig) {
 
     this.externalSessionKey = externalSessionKey;
-    this.forceConfig = forceConfig;
+    this.instanceConfig = instanceConfig;
   }
 
   public String getExternalSessionKey() {
     return externalSessionKey;
   }
 
-  public ForceConfigDTO getForceConfig() {
-    return forceConfig;
+  public InstanceConfigDTO getInstanceConfig() {
+    return instanceConfig;
   }
 
 }

@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ChatMemoryHelper {
 
-  private RequestHelper requestHelper;
+  private final RequestHelper requestHelper;
 
   public ChatMemoryHelper(RequestHelper requestHelper) {
     this.requestHelper = requestHelper;
@@ -61,7 +61,7 @@ public class ChatMemoryHelper {
     if (message.trim().endsWith("?")) {
       return true;
     }
-    // Check if the message starts with a question word (case insensitive)
+    // Check if the message starts with a question word (case-insensitive)
     String[] questionWords = {"who", "what", "when", "where", "why", "how", "tell", "tell me", "do you",};
     String lowerCaseMessage = message.trim().toLowerCase();
     for (String questionWord : questionWords) {
