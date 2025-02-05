@@ -30,6 +30,13 @@ public class InvokeAgentResponseAttributes implements Serializable {
     return Objects.hash(getMessages());
   }
 
+  @Override
+  public String toString() {
+    return "InvokeAgentResponseAttributes{" +
+        "messages=" + messages +
+        '}';
+  }
+
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static class Message implements Serializable {
 
@@ -67,6 +74,19 @@ public class InvokeAgentResponseAttributes implements Serializable {
 
     public String getReason() {
       return reason;
+    }
+
+    @Override
+    public String toString() {
+      return "Message{" +
+          "type='" + type + '\'' +
+          ", id='" + id + '\'' +
+          ", feedbackId='" + feedbackId + '\'' +
+          ", planId='" + planId + '\'' +
+          ", isContentSafe=" + isContentSafe +
+          ", message='" + message + '\'' +
+          ", reason='" + reason + '\'' +
+          '}';
     }
   }
 }

@@ -1,8 +1,6 @@
 package com.mulesoft.connector.agentforce.internal.connection;
 
 import com.mulesoft.connector.agentforce.internal.botapi.helpers.BotRequestHelper;
-import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.RequestHelper;
-import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.chatmemory.ChatMemoryHelper;
 import com.mulesoft.connectors.commons.template.connection.ConnectorConnection;
 
 /**
@@ -16,10 +14,6 @@ public interface AgentforceConnection extends ConnectorConnection {
   String getApiInstanceUrl();
 
   String getOrgId();
-
-  RequestHelper getRequestHelper();
-
-  ChatMemoryHelper getChatMemoryHelper();
 
   BotRequestHelper getBotRequestHelper();
 

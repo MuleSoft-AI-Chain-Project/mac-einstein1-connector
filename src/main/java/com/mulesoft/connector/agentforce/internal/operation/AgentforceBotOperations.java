@@ -4,8 +4,8 @@ import com.mulesoft.connector.agentforce.api.metadata.InvokeAgentResponseAttribu
 import com.mulesoft.connector.agentforce.internal.botapi.dto.AgentConversationResponseDTO;
 import com.mulesoft.connector.agentforce.internal.error.provider.BotErrorTypeProvider;
 import com.mulesoft.connector.agentforce.internal.botapi.group.BotAgentParameterGroup;
-import com.mulesoft.connector.agentforce.internal.metadata.AgentConversationResponseMetadataResolver;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
+import com.mulesoft.connector.agentforce.internal.metadata.AgentConversationResponseMetadataResolver;
 import org.json.JSONObject;
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.error.Throws;
@@ -24,6 +24,8 @@ import org.mule.runtime.extension.api.runtime.operation.Result;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+
+import org.mule.runtime.extension.api.runtime.process.CompletionCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
