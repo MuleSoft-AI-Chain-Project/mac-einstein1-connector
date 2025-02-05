@@ -45,7 +45,7 @@ public class CustomOAuthClientCredentialsConnection implements AgentforceConnect
   public void validate() {
     try {
       logger.info("Inside CustomOAuthClientCredentialsConnection validate, salesforceOrg {}", salesforceOrgUrl);
-      botRequestHelper.findRuntimeBaseUrl();
+      botRequestHelper.getAgentList();
     } catch (IOException e) {
       throw new ModuleException("Unable to validate credentials", AgentforceErrorType.INVALID_CONNECTION, e);
 

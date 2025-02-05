@@ -3,7 +3,7 @@ package com.mulesoft.connector.agentforce.internal.botapi.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class ForceConfigDTO {
+public class InstanceConfigDTO {
 
   private String endpoint;
 
