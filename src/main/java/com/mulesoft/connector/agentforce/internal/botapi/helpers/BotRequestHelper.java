@@ -183,7 +183,7 @@ public class BotRequestHelper {
       return StreamSupport
           .stream(messagesNode.spliterator(), false)
           .map(x -> getTextValue(x, MESSAGE))
-          .collect(Collectors.joining(". "));
+          .collect(Collectors.joining(" "));
     }
     throw new ModuleException(
                               "Invalid response structure. Expected 'Messages'", AgentforceErrorType.AGENT_API_ERROR);
