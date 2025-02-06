@@ -2,23 +2,23 @@
 
 <mule xmlns="http://www.mulesoft.org/schema/mule/core"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xmlns:ms-agentforce="http://www.mulesoft.org/schema/mule/ms-agentforce"
+      xmlns:ms-einstein="http://www.mulesoft.org/schema/mule/ms-einstein"
       xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
       xsi:schemaLocation="
-        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-       http://www.mulesoft.org/schema/mule/ms-agentforce http://www.mulesoft.org/schema/mule/ms-agentforce/current/mule-ms-agentforce.xsd">
+       http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+       http://www.mulesoft.org/schema/mule/ms-einstein http://www.mulesoft.org/schema/mule/ms-einstein/current/mule-ms-einstein.xsd">
 
     <configuration-properties doc:name="Configuration properties" file="automation-credentials.properties"/>
     
-    <ms-agentforce:config name="Agentforce_Config" doc:name="Agentforce Config" doc:id="e2310b9c-aa50-406c-85ae-8bfa200c009a" >
-        <ms-agentforce:oauth-client-credentials-connection >
-            <ms-agentforce:oauth-client-credentials clientId="${config.client-id}" clientSecret="${config.client-secret}" tokenUrl="${config.salesforce-org}" />
-        </ms-agentforce:oauth-client-credentials-connection>
-    </ms-agentforce:config>
+    <ms-einstein:config name="Agentforce_Config" doc:name="Agentforce Config" doc:id="e2310b9c-aa50-406c-85ae-8bfa200c009a" >
+        <ms-einstein:oauth-client-credentials-connection >
+            <ms-einstein:oauth-client-credentials clientId="${config.client-id}" clientSecret="${config.client-secret}" tokenUrl="${config.salesforce-org}" />
+        </ms-einstein:oauth-client-credentials-connection>
+    </ms-einstein:config>
 
-    <ms-agentforce:config name="Agentforce_Config_Error" doc:name="Agentforce Config Error" doc:id="e2310b9c-aa50-406c-85ae-8bfa200c009a" >
-        <ms-agentforce:oauth-client-credentials-connection >
-            <ms-agentforce:oauth-client-credentials clientId="testId" clientSecret="testSecret" tokenUrl="${config.salesforce-org}" />
-        </ms-agentforce:oauth-client-credentials-connection>
-    </ms-agentforce:config>
+    <ms-einstein:config name="Agentforce_Config_Error" doc:name="Agentforce Config Error" doc:id="e2310b9c-aa50-406c-85ae-8bfa200c009a" >
+        <ms-einstein:oauth-client-credentials-connection >
+            <ms-einstein:oauth-client-credentials clientId="testId" clientSecret="testSecret" tokenUrl="${config.salesforce-org}" />
+        </ms-einstein:oauth-client-credentials-connection>
+    </ms-einstein:config>
 </mule>

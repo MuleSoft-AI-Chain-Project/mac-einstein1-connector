@@ -4,12 +4,12 @@
       xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
       xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
       xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-      xmlns:ms-agentforce="http://www.mulesoft.org/schema/mule/ms-agentforce"
+      xmlns:ms-einstein="http://www.mulesoft.org/schema/mule/ms-einstein"
       xsi:schemaLocation="
         http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
         http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
         http://www.mulesoft.org/schema/mule/munit-tools http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
-        http://www.mulesoft.org/schema/mule/ms-agentforce http://www.mulesoft.org/schema/mule/ms-agentforce/current/mule-ms-agentforce.xsd">
+        http://www.mulesoft.org/schema/mule/ms-einstein http://www.mulesoft.org/schema/mule/ms-einstein/current/mule-ms-einstein.xsd">
 
     <munit:config name="GenerationsOperationTestCase.xml"/>
 
@@ -19,10 +19,10 @@
             <munit:set-event doc:name="Set Event" doc:id="1c45d3f8-1234-5678-9abc-01234def6789">
                 <munit:payload value='#[{"prompt": "How many continents are there in the world, give answer in one word only ?"}]'/>
             </munit:set-event>
-            <ms-agentforce:chat-answer-prompt doc:name="Chat answer prompt" doc:id="5f8c7c79-dffe-4331-a5b4-30375baa66bc"
+            <ms-einstein:chat-answer-prompt doc:name="Chat answer prompt" doc:id="5f8c7c79-dffe-4331-a5b4-30375baa66bc"
                                             config-ref="Agentforce_Config">
-                <ms-agentforce:prompt>#[payload.prompt]</ms-agentforce:prompt>
-            </ms-agentforce:chat-answer-prompt>
+                <ms-einstein:prompt>#[payload.prompt]</ms-einstein:prompt>
+            </ms-einstein:chat-answer-prompt>
         </munit:execution>
         <munit:validation>
             <munit-tools:assert-that expression="#[payload.response]"
@@ -39,11 +39,11 @@
                 <munit:payload
                         value="#[{messages:[{role: 'user', content: 'Can you give me a recipe for classic cherry pie?'}]}]"/>
             </munit:set-event>
-            <ms-agentforce:chat-generate-from-messages doc:name="Chat generate from messages"
+            <ms-einstein:chat-generate-from-messages doc:name="Chat generate from messages"
                                                      doc:id="5f8c7c79-dffe-4331-a5b4-30375baa66bc"
                                                      config-ref="Agentforce_Config">
-                <ms-agentforce:messages>#[write(payload.messages, 'application/json')]</ms-agentforce:messages>
-            </ms-agentforce:chat-generate-from-messages>
+                <ms-einstein:messages>#[write(payload.messages, 'application/json')]</ms-einstein:messages>
+            </ms-einstein:chat-generate-from-messages>
         </munit:execution>
         <munit:validation>
             <munit-tools:assert-that
@@ -79,18 +79,18 @@
         </munit:behavior>
         <munit:execution>
             <logger message="Test AgentDefinePromptTemplate started" level="INFO"/>
-            <ms-agentforce:agent-define-prompt-template doc:name="agent define prompt template"
+            <ms-einstein:agent-define-prompt-template doc:name="agent define prompt template"
                                                       config-ref="Agentforce_Config">
-                <ms-agentforce:template>
+                <ms-einstein:template>
                     #[payload.template]
-                </ms-agentforce:template>
-                <ms-agentforce:instructions>
+                </ms-einstein:template>
+                <ms-einstein:instructions>
                     #[payload.instructions]
-                </ms-agentforce:instructions>
-                <ms-agentforce:dataset>
+                </ms-einstein:instructions>
+                <ms-einstein:dataset>
                     #[payload.dataset]
-                </ms-agentforce:dataset>
-            </ms-agentforce:agent-define-prompt-template>
+                </ms-einstein:dataset>
+            </ms-einstein:agent-define-prompt-template>
         </munit:execution>
         <munit:validation>
             <munit-tools:assert-that
@@ -101,7 +101,7 @@
     </munit:test>
 
     <munit:test name="AgentforceWithError" description="Test to validate error"
-                expectedErrorType="ms-agentforce:CONNECTIVITY">
+                expectedErrorType="ms-einstein:CONNECTIVITY">
         <munit:behavior>
             <munit:set-event doc:name="Set Input" doc:id="01b3a666-0856-440c-a499-c1374896a95b">
                 <munit:payload value="#[output application/json --- {
@@ -113,18 +113,18 @@
         </munit:behavior>
         <munit:execution>
             <logger message="Test AgentforceWithError started" level="INFO"/>
-            <ms-agentforce:agent-define-prompt-template doc:name="agent define prompt template"
+            <ms-einstein:agent-define-prompt-template doc:name="agent define prompt template"
                                                       config-ref="Agentforce_Config_Error">
-                <ms-agentforce:template>
+                <ms-einstein:template>
                     #[payload.template]
-                </ms-agentforce:template>
-                <ms-agentforce:instructions>
+                </ms-einstein:template>
+                <ms-einstein:instructions>
                     #[payload.instructions]
-                </ms-agentforce:instructions>
-                <ms-agentforce:dataset>
+                </ms-einstein:instructions>
+                <ms-einstein:dataset>
                     #[payload.dataset]
-                </ms-agentforce:dataset>
-            </ms-agentforce:agent-define-prompt-template>
+                </ms-einstein:dataset>
+            </ms-einstein:agent-define-prompt-template>
         </munit:execution>
     </munit:test>
 
