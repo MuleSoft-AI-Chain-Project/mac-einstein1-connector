@@ -12,6 +12,7 @@ import com.mulesoft.connector.agentforce.internal.botapi.dto.InstanceConfigDTO;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
 import com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType;
 import org.json.JSONObject;
+import org.mule.runtime.api.metadata.MediaType;
 import org.mule.runtime.api.util.MultiMap;
 import org.mule.runtime.core.api.util.IOUtils;
 import org.mule.runtime.extension.api.connectivity.oauth.AccessTokenExpiredException;
@@ -268,8 +269,8 @@ public class BotRequestHelper {
     return Result.<InputStream, InvokeAgentResponseAttributes>builder()
         .output(toInputStream(jsonObject.toString(), StandardCharsets.UTF_8))
         .attributes(responseDTO.getResponseAttributes())
-        .attributesMediaType(org.mule.runtime.api.metadata.MediaType.APPLICATION_JAVA)
-        .mediaType(org.mule.runtime.api.metadata.MediaType.APPLICATION_JSON)
+        .attributesMediaType(MediaType.APPLICATION_JAVA)
+        .mediaType(MediaType.APPLICATION_JSON)
         .build();
   }
 
@@ -280,8 +281,8 @@ public class BotRequestHelper {
     return Result.<InputStream, InvokeAgentResponseAttributes>builder()
         .output(toInputStream(responseDTO.getText(), StandardCharsets.UTF_8))
         .attributes(responseDTO.getResponseAttributes())
-        .attributesMediaType(org.mule.runtime.api.metadata.MediaType.APPLICATION_JAVA)
-        .mediaType(org.mule.runtime.api.metadata.MediaType.APPLICATION_JSON)
+        .attributesMediaType(MediaType.APPLICATION_JAVA)
+        .mediaType(MediaType.TEXT)
         .build();
   }
 
@@ -291,7 +292,7 @@ public class BotRequestHelper {
 
     return Result.<Void, InvokeAgentResponseAttributes>builder()
         .attributes(responseDTO.getResponseAttributes())
-        .attributesMediaType(org.mule.runtime.api.metadata.MediaType.APPLICATION_JAVA)
+        .attributesMediaType(MediaType.APPLICATION_JAVA)
         .build();
   }
 
