@@ -6,6 +6,7 @@ import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.RequestHelpe
 import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.chatmemory.ChatMemoryHelper;
 import org.mule.runtime.extension.api.connectivity.oauth.ClientCredentialsState;
 import org.mule.runtime.extension.api.exception.ModuleException;
+import org.mule.runtime.http.api.client.HttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,15 +22,16 @@ public class CustomOAuthClientCredentialsConnection implements AgentforceConnect
   private final String orgId;
   private final RequestHelper requestHelper;
   private final ChatMemoryHelper chatMemoryHelper;
-
   private final BotRequestHelper botRequestHelper;
+  private HttpClient httpClient;
 
   public CustomOAuthClientCredentialsConnection(String salesforceOrgUrl, ClientCredentialsState clientCredentialsState,
-                                                String apiInstanceUrl, String orgId) {
+                                                String apiInstanceUrl, String orgId, HttpClient httpClient) {
     this.salesforceOrgUrl = salesforceOrgUrl;
     this.clientCredentialsState = clientCredentialsState;
     this.apiInstanceUrl = apiInstanceUrl;
     this.orgId = parseOrgId(orgId);
+    this.httpClient = httpClient;
     this.requestHelper = new RequestHelper(this);
     this.chatMemoryHelper = new ChatMemoryHelper(requestHelper);
     this.botRequestHelper = new BotRequestHelper(this);
@@ -60,10 +62,6 @@ public class CustomOAuthClientCredentialsConnection implements AgentforceConnect
     return apiInstanceUrl;
   }
 
-  public String getOrgId() {
-    return orgId;
-  }
-
   @Override
   public RequestHelper getRequestHelper() {
     return requestHelper;
@@ -82,6 +80,11 @@ public class CustomOAuthClientCredentialsConnection implements AgentforceConnect
   @Override
   public String getAccessToken() {
     return clientCredentialsState.getAccessToken();
+  }
+
+  @Override
+  public HttpClient getHttpClient() {
+    return httpClient;
   }
 
   private String parseOrgId(String id) {

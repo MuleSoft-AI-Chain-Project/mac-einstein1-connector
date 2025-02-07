@@ -1,5 +1,6 @@
 package com.mulesoft.connector.agentforce.internal.botapi.helpers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mulesoft.connector.agentforce.api.metadata.InvokeAgentResponseAttributes;
@@ -11,16 +12,26 @@ import com.mulesoft.connector.agentforce.internal.botapi.dto.BotSessionRequestDT
 import com.mulesoft.connector.agentforce.internal.botapi.dto.InstanceConfigDTO;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
 import com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType;
+import org.mule.runtime.api.util.MultiMap;
 import org.mule.runtime.core.api.util.IOUtils;
 import org.mule.runtime.extension.api.exception.ModuleException;
+import org.mule.runtime.extension.api.runtime.operation.Result;
+import org.mule.runtime.extension.api.runtime.process.CompletionCallback;
+import org.mule.runtime.http.api.domain.entity.HttpEntity;
+import org.mule.runtime.http.api.domain.entity.InputStreamHttpEntity;
+import org.mule.runtime.http.api.domain.message.request.HttpRequest;
+import org.mule.runtime.http.api.domain.message.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -46,6 +57,7 @@ import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantU
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.createURLConnection;
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.handleHttpResponse;
 import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.writePayloadToConnStream;
+import static org.apache.commons.io.IOUtils.toInputStream;
 
 public class BotRequestHelper {
 
@@ -94,6 +106,39 @@ public class BotRequestHelper {
     return parseResponse(httpConnection);
   }
 
+  public void startSession(String agentId, CompletionCallback<InputStream, InvokeAgentResponseAttributes> callback)
+      throws IOException {
+
+    String startSessionUrl = agentforceConnection.getApiInstanceUrl() + V6_URI_BOT_API_BOTS + URI_BOT_API_AGENTS
+        + agentId + URI_BOT_API_SESSIONS;
+    String externalSessionKey = UUID.randomUUID().toString();
+    String endpoint = agentforceConnection.getSalesforceOrgUrl();
+    BotSessionRequestDTO payload = createStartSessionRequestPayload(externalSessionKey, endpoint);
+
+    log.debug("Agentforce start session details. Request URL: {}, external Session Key:{}," +
+        " endpoint: {}", startSessionUrl, externalSessionKey, endpoint);
+
+    InputStream bodyStream = new ByteArrayInputStream(objectMapper.writeValueAsString(payload)
+        .getBytes(StandardCharsets.UTF_8));
+
+    CompletableFuture<HttpResponse> completableFuture = agentforceConnection.getHttpClient().sendAsync(buildRequest(
+                                                                                                                    startSessionUrl,
+                                                                                                                    agentforceConnection
+                                                                                                                        .getAccessToken(),
+                                                                                                                    HTTP_METHOD_POST,
+                                                                                                                    new InputStreamHttpEntity(bodyStream)));
+
+    log.info("waiting");
+    completableFuture.whenComplete((response, exception) -> {
+      if (exception != null) {
+        callback.error(exception);
+      } else {
+        callback.success(parseResponseForStartSession(response.getEntity().getContent()));
+      }
+    });
+    log.info("completed");
+  }
+
   public AgentConversationResponseDTO continueSession(InputStream message, String sessionId, int messageSequenceNumber)
       throws IOException {
 
@@ -111,6 +156,38 @@ public class BotRequestHelper {
     writePayloadToConnStream(httpConnection, objectMapper.writeValueAsString(payload));
 
     return parseResponse(httpConnection);
+  }
+
+  public void continueSession(InputStream message, String sessionId, int messageSequenceNumber,
+                              CompletionCallback<InputStream, InvokeAgentResponseAttributes> callback)
+      throws IOException {
+
+    String continueSessionUrl =
+        agentforceConnection.getApiInstanceUrl() + V6_URI_BOT_API_BOTS + URI_BOT_API_SESSIONS + sessionId
+            + URI_BOT_API_MESSAGES;
+
+    BotContinueSessionRequestDTO payload =
+        createContinueSessionRequestPayload(IOUtils.toString(message), messageSequenceNumber);
+
+    log.info("Agentforce continue session details. Request URL: {}, Session ID:{}", continueSessionUrl, sessionId);
+
+    InputStream bodyStream = new ByteArrayInputStream(objectMapper.writeValueAsString(payload)
+        .getBytes(StandardCharsets.UTF_8));
+
+    CompletableFuture<HttpResponse> completableFuture = agentforceConnection.getHttpClient().sendAsync(buildRequest(
+                                                                                                                    continueSessionUrl,
+                                                                                                                    agentforceConnection
+                                                                                                                        .getAccessToken(),
+                                                                                                                    HTTP_METHOD_POST,
+                                                                                                                    new InputStreamHttpEntity(bodyStream)));
+
+    completableFuture.whenComplete((response, exception) -> {
+      if (exception != null) {
+        callback.error(exception);
+      } else {
+        callback.success(parseResponseForStartSession(response.getEntity().getContent()));
+      }
+    });
   }
 
   public AgentConversationResponseDTO endSession(String sessionId) throws IOException {
@@ -191,5 +268,71 @@ public class BotRequestHelper {
 
   private static String getTextValue(JsonNode node, String keyName) {
     return node != null && node.get(keyName) != null ? node.get(keyName).asText() : null;
+  }
+
+  private HttpRequest buildRequest(String uri, String accessToken, String httpMethod, HttpEntity httpEntity) {
+    return HttpRequest.builder()
+        .uri(uri)
+        .headers(addConnectionHeaders(accessToken))
+        .entity(httpEntity)
+        .method(httpMethod)
+        .build();
+  }
+
+  private MultiMap<String, String> addConnectionHeaders(String accessToken) {
+    MultiMap<String, String> multiMap = new MultiMap<>();
+    multiMap.put(AUTHORIZATION, "Bearer " + accessToken);
+    multiMap.put(CONTENT_TYPE_STRING, CONTENT_TYPE_APPLICATION_JSON);
+    multiMap.put(ACCEPT_TYPE_STRING, CONTENT_TYPE_APPLICATION_JSON);
+    return multiMap;
+  }
+
+  private Result<InputStream, InvokeAgentResponseAttributes> parseResponseForStartSession(InputStream responseStream) {
+
+    AgentConversationResponseDTO responseDTO = new AgentConversationResponseDTO();
+
+    try {
+      JsonNode rootNode = objectMapper.readTree(responseStream);
+      responseDTO.setResponseAttributes(
+                                        objectMapper.treeToValue(
+                                                                 rootNode, InvokeAgentResponseAttributes.class));
+      responseDTO.setSessionId(getTextValue(rootNode, SESSION_ID));
+      responseDTO.setText(getMessageText(rootNode));
+
+      System.out.println("responseDTO = " + responseDTO);
+
+      return Result.<InputStream, InvokeAgentResponseAttributes>builder()
+          .output(toInputStream(responseDTO.getSessionId(), StandardCharsets.UTF_8))
+          .attributes(responseDTO.getResponseAttributes())
+          .attributesMediaType(org.mule.runtime.api.metadata.MediaType.APPLICATION_JAVA)
+          .mediaType(org.mule.runtime.api.metadata.MediaType.APPLICATION_JSON)
+          .build();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private Result<InputStream, InvokeAgentResponseAttributes> parseResponseForContinueSession(InputStream responseStream) {
+
+    System.out.println("Inside parseResponseForStartSession");
+    AgentConversationResponseDTO responseDTO = new AgentConversationResponseDTO();
+
+    try {
+      JsonNode rootNode = objectMapper.readTree(responseStream);
+      responseDTO.setResponseAttributes(
+                                        objectMapper.treeToValue(
+                                                                 rootNode, InvokeAgentResponseAttributes.class));
+      responseDTO.setSessionId(getTextValue(rootNode, SESSION_ID));
+      responseDTO.setText(getMessageText(rootNode));
+
+      return Result.<InputStream, InvokeAgentResponseAttributes>builder()
+          .output(toInputStream(responseDTO.getText(), StandardCharsets.UTF_8))
+          .attributes(responseDTO.getResponseAttributes())
+          .attributesMediaType(org.mule.runtime.api.metadata.MediaType.APPLICATION_JAVA)
+          .mediaType(org.mule.runtime.api.metadata.MediaType.APPLICATION_JSON)
+          .build();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

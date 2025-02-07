@@ -4,6 +4,7 @@ import com.mulesoft.connector.agentforce.internal.botapi.helpers.BotRequestHelpe
 import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.RequestHelper;
 import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.chatmemory.ChatMemoryHelper;
 import com.mulesoft.connectors.commons.template.connection.ConnectorConnection;
+import org.mule.runtime.http.api.client.HttpClient;
 
 /**
  * This class represents a connection to the external system.
@@ -15,8 +16,6 @@ public interface AgentforceConnection extends ConnectorConnection {
 
   String getApiInstanceUrl();
 
-  String getOrgId();
-
   RequestHelper getRequestHelper();
 
   ChatMemoryHelper getChatMemoryHelper();
@@ -24,4 +23,6 @@ public interface AgentforceConnection extends ConnectorConnection {
   BotRequestHelper getBotRequestHelper();
 
   String getAccessToken();
+
+  HttpClient getHttpClient();
 }
