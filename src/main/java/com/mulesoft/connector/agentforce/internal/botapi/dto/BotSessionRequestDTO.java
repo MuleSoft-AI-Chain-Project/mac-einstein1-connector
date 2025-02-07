@@ -21,5 +21,4 @@ public class BotSessionRequestDTO {
   public InstanceConfigDTO getInstanceConfig() {
     return instanceConfig;
   }
-
 }

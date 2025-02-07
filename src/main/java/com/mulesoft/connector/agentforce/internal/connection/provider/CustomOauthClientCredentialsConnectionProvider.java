@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.CONNECTION_TIME_OUT;
+import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.CONNECTION_TIME_OUT;
 
 @Alias("oauth-client-credentials")
 @DisplayName("OAuth Client Credentials")
@@ -73,7 +73,6 @@ public class CustomOauthClientCredentialsConnectionProvider implements Agentforc
   }
 
   private HttpClientConfiguration.Builder httpClientConfigBuilder() {
-    return new HttpClientConfiguration.Builder()
-        .setConnectionIdleTimeout(CONNECTION_TIME_OUT).setName("http-client");
+    return new HttpClientConfiguration.Builder().setName("http-client");
   }
 }

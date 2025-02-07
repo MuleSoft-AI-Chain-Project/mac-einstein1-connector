@@ -2,8 +2,6 @@ package com.mulesoft.connector.agentforce.internal.connection;
 
 import com.mulesoft.connector.agentforce.internal.botapi.helpers.BotRequestHelper;
 import com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType;
-import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.RequestHelper;
-import com.mulesoft.connector.agentforce.internal.modelsapi.helpers.chatmemory.ChatMemoryHelper;
 import org.mule.runtime.extension.api.connectivity.oauth.ClientCredentialsState;
 import org.mule.runtime.extension.api.exception.ModuleException;
 import org.mule.runtime.http.api.client.HttpClient;
@@ -20,8 +18,6 @@ public class CustomOAuthClientCredentialsConnection implements AgentforceConnect
   private final String salesforceOrgUrl;
   private final String apiInstanceUrl;
   private final String orgId;
-  private final RequestHelper requestHelper;
-  private final ChatMemoryHelper chatMemoryHelper;
   private final BotRequestHelper botRequestHelper;
   private HttpClient httpClient;
 
@@ -32,8 +28,6 @@ public class CustomOAuthClientCredentialsConnection implements AgentforceConnect
     this.apiInstanceUrl = apiInstanceUrl;
     this.orgId = parseOrgId(orgId);
     this.httpClient = httpClient;
-    this.requestHelper = new RequestHelper(this);
-    this.chatMemoryHelper = new ChatMemoryHelper(requestHelper);
     this.botRequestHelper = new BotRequestHelper(this);
   }
 
@@ -62,14 +56,8 @@ public class CustomOAuthClientCredentialsConnection implements AgentforceConnect
     return apiInstanceUrl;
   }
 
-  @Override
-  public RequestHelper getRequestHelper() {
-    return requestHelper;
-  }
-
-  @Override
-  public ChatMemoryHelper getChatMemoryHelper() {
-    return chatMemoryHelper;
+  public String getOrgId() {
+    return orgId;
   }
 
   @Override
