@@ -14,11 +14,4 @@ public class InstanceConfigDTO {
   public void setEndpoint(String endpoint) {
     this.endpoint = endpoint;
   }
-
-  @Override
-  public String toString() {
-    return "InstanceConfigDTO{" +
-        "endpoint='" + endpoint + '\'' +
-        '}';
-  }
 }

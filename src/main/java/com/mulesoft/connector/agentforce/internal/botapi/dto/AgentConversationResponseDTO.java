@@ -49,13 +49,4 @@ public class AgentConversationResponseDTO {
   public int hashCode() {
     return Objects.hash(getResponseAttributes(), getText(), getSessionId());
   }
-
-  @Override
-  public String toString() {
-    return "AgentConversationResponseDTO{" +
-        "responseAttributes=" + responseAttributes +
-        ", text='" + text + '\'' +
-        ", sessionId='" + sessionId + '\'' +
-        '}';
-  }
 }

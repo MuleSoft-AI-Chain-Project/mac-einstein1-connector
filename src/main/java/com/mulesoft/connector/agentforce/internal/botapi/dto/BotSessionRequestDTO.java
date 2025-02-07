@@ -21,12 +21,4 @@ public class BotSessionRequestDTO {
   public InstanceConfigDTO getInstanceConfig() {
     return instanceConfig;
   }
-
-  @Override
-  public String toString() {
-    return "BotSessionRequestDTO{" +
-        "externalSessionKey='" + externalSessionKey + '\'' +
-        ", instanceConfig=" + instanceConfig +
-        '}';
-  }
 }
