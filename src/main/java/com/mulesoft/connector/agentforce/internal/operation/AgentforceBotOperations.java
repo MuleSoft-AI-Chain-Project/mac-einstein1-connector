@@ -47,9 +47,8 @@ public class AgentforceBotOperations {
                                          name = "Agent") @MetadataKeyId BotAgentParameterGroup parameterGroup,
                                      CompletionCallback<InputStream, InvokeAgentResponseAttributes> callback) {
 
-    log.info("Executing start agent conversation operation.");
+    log.info("Executing start agent conversation operation, agent = {}", parameterGroup.getAgent());
 
-    System.out.println("callback = " + callback);
     try {
       connection.getBotRequestHelper().startSession(parameterGroup.getAgent(), callback);
     } catch (Exception e) {
@@ -68,7 +67,7 @@ public class AgentforceBotOperations {
                                    @Summary("Increase this number for each subsequent message in a session") @DisplayName("Message Sequence Number") int messageSequenceNumber,
                                    CompletionCallback<InputStream, InvokeAgentResponseAttributes> callback) {
 
-    log.info("Executing continue agent conversation operation.sessionId ={}", sessionId);
+    log.info("Executing continue agent conversation operation, sessionId = {}", sessionId);
 
     try {
       connection.getBotRequestHelper().continueSession(message, sessionId, messageSequenceNumber, callback);
@@ -85,7 +84,7 @@ public class AgentforceBotOperations {
   public void endConversation(@Connection AgentforceConnection connection,
                               @Content String sessionId, CompletionCallback<Void, InvokeAgentResponseAttributes> callback) {
 
-    log.info("Executing end agent conversation operation. sessionId ={}", sessionId);
+    log.info("Executing end agent conversation operation. sessionId = {}", sessionId);
 
     try {
       connection.getBotRequestHelper().endSession(sessionId, callback);

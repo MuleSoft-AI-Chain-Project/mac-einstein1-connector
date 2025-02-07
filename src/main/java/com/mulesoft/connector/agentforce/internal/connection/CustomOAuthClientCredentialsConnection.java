@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 public class CustomOAuthClientCredentialsConnection implements AgentforceConnection {
 
@@ -42,9 +43,8 @@ public class CustomOAuthClientCredentialsConnection implements AgentforceConnect
     try {
       logger.info("Inside CustomOAuthClientCredentialsConnection validate, salesforceOrg {}", salesforceOrgUrl);
       botRequestHelper.getAgentList();
-    } catch (IOException e) {
+    } catch (IOException | TimeoutException e) {
       throw new ModuleException("Unable to validate credentials", AgentforceErrorType.INVALID_CONNECTION, e);
-
     }
   }
 

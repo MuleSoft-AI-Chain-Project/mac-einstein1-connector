@@ -16,6 +16,7 @@ import org.mule.runtime.extension.api.values.ValueResolvingException;
 
 import java.io.IOException;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -41,7 +42,7 @@ public class AgentListValueProvider implements ValueProvider {
               .withDisplayName(constructDisplayName(agent))
               .build())
           .collect(Collectors.toSet());
-    } catch (IOException e) {
+    } catch (IOException | TimeoutException e) {
       throw new ValueResolvingException(format(AGENT_LIST_ERR_MSG), CONNECTION_FAILURE, e);
     }
   }
