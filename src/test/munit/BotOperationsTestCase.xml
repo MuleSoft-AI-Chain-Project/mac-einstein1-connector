@@ -12,7 +12,6 @@ http://www.mulesoft.org/schema/mule/ms-agentforce http://www.mulesoft.org/schema
 
     <munit:before-test name="TestOperationBefore_Test" doc:id="be3f67e1-e8d7-4d88-963a-81057974c9d7" >
         <ms-agentforce:start-agent-conversation agent="0Xx5b0000008ObjCAE" doc:name="Start agent" doc:id="9b81ccfe-df4d-4e58-bf0a-75eec9fe3679" config-ref="Agentforce_Config" />
-        <logger level="INFO" doc:name="Logger" doc:id="301239c9-3db7-4896-84e8-3febe24636c5" message="#[payload]"/>
         <set-variable value="#[output application/java&#10;---&#10;payload.sessionId]" doc:name="Set Variable" doc:id="a81d4da9-331b-40fc-9cd4-e7930570d780" variableName="sessId" />
         <logger level="INFO" doc:name="Logger" doc:id="301239c9-3db7-4896-84e8-3febe24636c5" message="#[vars.sessId]"/>
     </munit:before-test>
@@ -35,20 +34,17 @@ http://www.mulesoft.org/schema/mule/ms-agentforce http://www.mulesoft.org/schema
                 <ms-agentforce:message ><![CDATA[Get me customer records from salesforce for user Test]]></ms-agentforce:message>
                 <ms-agentforce:session-id ><![CDATA[#[vars.sessId]]]></ms-agentforce:session-id>
             </ms-agentforce:continue-agent-conversation>
-            <logger level="INFO" doc:name="Logger" doc:id="301239c9-3db7-4896-84e8-3febe24636c5" message="#[payload]"/>
         </munit:execution>
         <munit:validation >
             <munit-tools:assert-that doc:name="Assert that" doc:id="d17a18cd-da3a-4064-af44-e4553fd8b95b" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
         </munit:validation>
     </munit:test>
-
     <munit:test name="BotOperation_InvalidSessionId" doc:id="a7a7b3c8-bbca-4e75-915f-4c9637c48f6a" expectedErrorType="ms-agentforce:AGENT_OPERATIONS_FAILURE">
         <munit:execution >
             <ms-agentforce:continue-agent-conversation doc:name="Continue agent conversation" doc:id="3040a1b1-e1ed-4832-a406-fa12218250a7" config-ref="Agentforce_Config" messageSequenceNumber="1">
                 <ms-agentforce:message ><![CDATA[Get me customer records from salesforce for user Test]]></ms-agentforce:message>
                 <ms-agentforce:session-id >"Invalid_SessionId"</ms-agentforce:session-id>
             </ms-agentforce:continue-agent-conversation>
-            <logger level="INFO" doc:name="Logger" doc:id="301239c9-3db7-4896-84e8-3febe24636c5" message="#[payload]"/>
         </munit:execution>
         <munit:validation >
             <munit-tools:assert-that doc:name="Assert that" doc:id="d17a18cd-da3a-4064-af44-e4553fd8b95b" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
