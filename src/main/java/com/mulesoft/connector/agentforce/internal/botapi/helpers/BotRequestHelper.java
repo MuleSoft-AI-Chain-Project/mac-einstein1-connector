@@ -12,13 +12,19 @@ import com.mulesoft.connector.agentforce.internal.botapi.dto.InstanceConfigDTO;
 import com.mulesoft.connector.agentforce.internal.connection.AgentforceConnection;
 import com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType;
 import org.mule.runtime.core.api.util.IOUtils;
+import org.mule.runtime.extension.api.connectivity.oauth.AccessTokenExpiredException;
 import org.mule.runtime.extension.api.exception.ModuleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -36,16 +42,15 @@ import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConst
 import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.URI_BOT_API_SESSIONS;
 import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.V6_URI_BOT_API_BOTS;
 import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.X_SESSION_END_REASON;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.ACCEPT_TYPE_STRING;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.AUTHORIZATION;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.CONTENT_TYPE_APPLICATION_JSON;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.CONTENT_TYPE_STRING;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.HTTP_METHOD_DELETE;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.HTTP_METHOD_GET;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonConstantUtil.HTTP_METHOD_POST;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.createURLConnection;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.handleHttpResponse;
-import static com.mulesoft.connector.agentforce.internal.helpers.CommonRequestHelper.writePayloadToConnStream;
+import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.ACCEPT_TYPE_STRING;
+import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.AUTHORIZATION;
+import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.CONNECTION_TIME_OUT;
+import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.CONTENT_TYPE_APPLICATION_JSON;
+import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.CONTENT_TYPE_STRING;
+import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.HTTP_METHOD_DELETE;
+import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.HTTP_METHOD_GET;
+import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.HTTP_METHOD_POST;
+import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.READ_TIME_OUT;
 
 public class BotRequestHelper {
 
@@ -86,7 +91,7 @@ public class BotRequestHelper {
 
     log.debug("Agentforce start session details. Request URL: {}, external Session Key:{}," +
         " endpoint: {}", startSessionUrl, externalSessionKey, endpoint);
-
+    // System.out.println("payload = " + objectMapper.writeValueAsString(payload));
     HttpURLConnection httpConnection = createURLConnection(startSessionUrl, HTTP_METHOD_POST);
     addConnectionHeaders(httpConnection, agentforceConnection.getAccessToken());
     writePayloadToConnStream(httpConnection, objectMapper.writeValueAsString(payload));
@@ -125,17 +130,13 @@ public class BotRequestHelper {
     return parseResponse(httpConnection);
   }
 
-  private static void addConnectionHeaders(HttpURLConnection conn, String accessToken) {
+  private void addConnectionHeaders(HttpURLConnection conn, String accessToken) {
     conn.setRequestProperty(AUTHORIZATION, "Bearer " + accessToken);
     conn.setRequestProperty(CONTENT_TYPE_STRING, CONTENT_TYPE_APPLICATION_JSON);
     conn.setRequestProperty(ACCEPT_TYPE_STRING, CONTENT_TYPE_APPLICATION_JSON);
   }
 
-  /*
-   * private static void addConnectionHeadersForBotAPI(HttpURLConnection conn, String accessToken) { addConnectionHeaders(conn,
-   * accessToken); conn.setRequestProperty(ACCEPT_TYPE_STRING, CONTENT_TYPE_APPLICATION_JSON); }
-   */
-  private static void addConnectionHeadersForEndSession(HttpURLConnection conn, String accessToken) {
+  private void addConnectionHeadersForEndSession(HttpURLConnection conn, String accessToken) {
     addConnectionHeaders(conn, accessToken);
     conn.setRequestProperty(X_SESSION_END_REASON, END_SESSION_REASON_USERREQUEST);
   }
@@ -173,7 +174,7 @@ public class BotRequestHelper {
                                                                rootNode, InvokeAgentResponseAttributes.class));
     responseDTO.setSessionId(getTextValue(rootNode, SESSION_ID));
     responseDTO.setText(getMessageText(rootNode));
-
+    // System.out.println("responseDTO " + responseDTO);
     return responseDTO;
   }
 
@@ -189,7 +190,64 @@ public class BotRequestHelper {
                               "Invalid response structure. Expected 'Messages'", AgentforceErrorType.AGENT_API_ERROR);
   }
 
-  private static String getTextValue(JsonNode node, String keyName) {
+  private String getTextValue(JsonNode node, String keyName) {
     return node != null && node.get(keyName) != null ? node.get(keyName).asText() : null;
+  }
+
+  private HttpURLConnection createURLConnection(String urlString, String httpMethod) throws IOException {
+    URL url = new URL(urlString);
+    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    conn.setRequestMethod(httpMethod);
+    conn.setConnectTimeout(CONNECTION_TIME_OUT);
+    conn.setReadTimeout(READ_TIME_OUT);
+    conn.setDoOutput(true);
+    return conn;
+  }
+
+  private String readErrorStream(InputStream errorStream) {
+    if (errorStream == null) {
+      return "No error details available.";
+    }
+    try (BufferedReader br = new BufferedReader(new InputStreamReader(errorStream, StandardCharsets.UTF_8))) {
+      StringBuilder errorResponse = new StringBuilder();
+      String line;
+      while ((line = br.readLine()) != null) {
+        errorResponse.append(line.trim());
+      }
+      return errorResponse.toString();
+    } catch (IOException e) {
+      log.debug("Error reading error stream", e);
+      return "Unable to get response from Agentforce. Could not read reading error details as well.";
+    }
+  }
+
+  private InputStream handleHttpResponse(HttpURLConnection httpConnection, AgentforceErrorType errorType)
+      throws IOException {
+    int responseCode = httpConnection.getResponseCode();
+
+    if (responseCode == HttpURLConnection.HTTP_OK) {
+      if (httpConnection.getInputStream() == null) {
+        throw new ModuleException(
+                                  "Error: No response received from Agentforce", errorType);
+      }
+      return httpConnection.getInputStream();
+    } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+      throw new AccessTokenExpiredException();
+    } else {
+      String errorMessage = readErrorStream(httpConnection.getErrorStream());
+      log.info("Error in HTTP request. Response code: {}, message: {}", responseCode, errorMessage);
+      throw new ModuleException(
+                                String.format("Error in HTTP request. ErrorCode: %d ," +
+                                    " ErrorMessage: %s", responseCode, errorMessage),
+                                errorType);
+    }
+  }
+
+  private void writePayloadToConnStream(HttpURLConnection httpConnection, String payload) throws IOException {
+    try (OutputStream os = httpConnection.getOutputStream()) {
+      byte[] input = payload.getBytes(StandardCharsets.UTF_8);
+      os.write(input, 0, input.length);
+      os.flush();
+    }
   }
 }

@@ -2,8 +2,6 @@ package com.mulesoft.connector.agentforce.internal.extension;
 
 import com.mulesoft.connector.agentforce.internal.connection.provider.CustomOauthClientCredentialsConnectionProvider;
 import com.mulesoft.connector.agentforce.internal.operation.AgentforceBotOperations;
-import com.mulesoft.connector.agentforce.internal.operation.AgentforceGenerationOperations;
-import com.mulesoft.connector.agentforce.internal.operation.AgentforceEmbeddingOperations;
 import com.mulesoft.connector.agentforce.internal.error.AgentforceErrorType;
 import org.mule.runtime.api.meta.Category;
 import org.mule.runtime.extension.api.annotation.Extension;
@@ -25,12 +23,9 @@ import static org.mule.sdk.api.meta.JavaVersion.JAVA_8;
 @Xml(prefix = "ms-agentforce")
 @Extension(name = "Agentforce", category = Category.SELECT)
 @ErrorTypes(AgentforceErrorType.class)
-@Operations({AgentforceEmbeddingOperations.class,
-    AgentforceGenerationOperations.class,
-    AgentforceBotOperations.class})
+@Operations({AgentforceBotOperations.class})
 @ConnectionProviders(CustomOauthClientCredentialsConnectionProvider.class)
 @RequiresEnterpriseLicense(allowEvaluationLicense = true)
 @JavaVersionSupport({JAVA_8, JAVA_11, JAVA_17})
 public class AgentforceConnector {
-
 }
