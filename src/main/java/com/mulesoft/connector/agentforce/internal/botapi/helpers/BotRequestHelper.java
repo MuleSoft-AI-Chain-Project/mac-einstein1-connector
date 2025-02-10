@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import org.mule.runtime.api.metadata.MediaType;
 import org.mule.runtime.api.util.MultiMap;
 import org.mule.runtime.core.api.util.IOUtils;
+import org.mule.runtime.extension.api.connectivity.oauth.AccessTokenExpiredException;
 import org.mule.runtime.extension.api.exception.ModuleException;
 import org.mule.runtime.extension.api.runtime.operation.Result;
 import org.mule.runtime.extension.api.runtime.process.CompletionCallback;
@@ -26,14 +27,18 @@ import org.mule.runtime.http.api.domain.message.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -81,8 +86,10 @@ public class BotRequestHelper {
     HttpResponse httpResponse = agentforceConnection.getHttpClient().send(buildRequest(metadataUrl, agentforceConnection
         .getAccessToken(), HTTP_METHOD_GET, null));
 
+    InputStream inputStream = parseHttpResponse(httpResponse);
+
     AgentMetadataResponseDTO agentMetadataResponse =
-        objectMapper.readValue(httpResponse.getEntity().getContent(), AgentMetadataResponseDTO.class);
+        objectMapper.readValue(inputStream, AgentMetadataResponseDTO.class);
 
     return agentMetadataResponse.getRecords();
   }
@@ -99,23 +106,10 @@ public class BotRequestHelper {
     log.debug("Agentforce start session details. Request URL: {}, external Session Key:{}," +
         " endpoint: {}", startSessionUrl, externalSessionKey, endpoint);
 
-    InputStream bodyStream = new ByteArrayInputStream(objectMapper.writeValueAsString(payload)
+    InputStream payloadStream = new ByteArrayInputStream(objectMapper.writeValueAsString(payload)
         .getBytes(StandardCharsets.UTF_8));
 
-    CompletableFuture<HttpResponse> completableFuture = agentforceConnection.getHttpClient().sendAsync(buildRequest(
-                                                                                                                    startSessionUrl,
-                                                                                                                    agentforceConnection
-                                                                                                                        .getAccessToken(),
-                                                                                                                    HTTP_METHOD_POST,
-                                                                                                                    new InputStreamHttpEntity(bodyStream)));
-
-    completableFuture.whenComplete((response, exception) -> {
-      if (exception != null) {
-        callback.error(exception);
-      } else {
-        callback.success(parseResponseForStartSession(response.getEntity().getContent()));
-      }
-    });
+    sendRequest(startSessionUrl, HTTP_METHOD_POST, payloadStream, callback, this::parseResponseForStartSession);
   }
 
   public void continueSession(InputStream message, String sessionId, int messageSequenceNumber,
@@ -131,45 +125,19 @@ public class BotRequestHelper {
 
     log.debug("Agentforce continue session details. Request URL: {}, Session ID:{}", continueSessionUrl, sessionId);
 
-    InputStream bodyStream = new ByteArrayInputStream(objectMapper.writeValueAsString(payload)
+    InputStream payloadStream = new ByteArrayInputStream(objectMapper.writeValueAsString(payload)
         .getBytes(StandardCharsets.UTF_8));
 
-    CompletableFuture<HttpResponse> completableFuture = agentforceConnection.getHttpClient().sendAsync(buildRequest(
-                                                                                                                    continueSessionUrl,
-                                                                                                                    agentforceConnection
-                                                                                                                        .getAccessToken(),
-                                                                                                                    HTTP_METHOD_POST,
-                                                                                                                    new InputStreamHttpEntity(bodyStream)));
-
-    completableFuture.whenComplete((response, exception) -> {
-      if (exception != null) {
-        callback.error(exception);
-      } else {
-        callback.success(parseResponseForContinueSession(response.getEntity().getContent()));
-      }
-    });
+    sendRequest(continueSessionUrl, HTTP_METHOD_POST, payloadStream, callback, this::parseResponseForContinueSession);
   }
 
-  public void endSession(String sessionId, CompletionCallback<Void, InvokeAgentResponseAttributes> callback) throws IOException {
+  public void endSession(String sessionId, CompletionCallback<Void, InvokeAgentResponseAttributes> callback) {
 
     String endSessionUrl = agentforceConnection.getApiInstanceUrl() + V6_URI_BOT_API_BOTS + URI_BOT_API_SESSIONS + sessionId;
 
     log.debug("Agentforce end session details. Request URL: {}, Session ID:{}", endSessionUrl, sessionId);
 
-    CompletableFuture<HttpResponse> completableFuture = agentforceConnection.getHttpClient().sendAsync(buildRequest(
-                                                                                                                    endSessionUrl,
-                                                                                                                    agentforceConnection
-                                                                                                                        .getAccessToken(),
-                                                                                                                    HTTP_METHOD_DELETE,
-                                                                                                                    null));
-
-    completableFuture.whenComplete((response, exception) -> {
-      if (exception != null) {
-        callback.error(exception);
-      } else {
-        callback.success(parseResponseForDeleteSession(response.getEntity().getContent()));
-      }
-    });
+    sendRequest(endSessionUrl, HTTP_METHOD_DELETE, null, callback, this::parseResponseForDeleteSession);
   }
 
   private BotSessionRequestDTO createStartSessionRequestPayload(String externalSessionKey,
@@ -189,32 +157,6 @@ public class BotRequestHelper {
     messageDTO.setType(CONTINUE_SESSION_MESSAGE_TYPE_TEXT);
 
     return new BotContinueSessionRequestDTO(messageDTO);
-  }
-
-  private String getMessageText(JsonNode rootNode) {
-    JsonNode messagesNode = rootNode.get(MESSAGES);
-    if (messagesNode != null && messagesNode.isArray()) {
-      return StreamSupport
-          .stream(messagesNode.spliterator(), false)
-          .map(x -> getTextValue(x, MESSAGE))
-          .collect(Collectors.joining(" "));
-    }
-    throw new ModuleException(
-                              "Invalid response structure. Expected 'Messages'", AgentforceErrorType.AGENT_API_ERROR);
-  }
-
-  private String getTextValue(JsonNode node, String keyName) {
-    return node != null && node.get(keyName) != null ? node.get(keyName).asText() : null;
-  }
-
-  private HttpRequest buildRequest(String uri, String accessToken, String httpMethod, HttpEntity httpEntity) {
-    return HttpRequest.builder()
-        .uri(uri)
-        .headers(HTTP_METHOD_DELETE.equals(httpMethod) ? addConnectionHeadersForDelete(accessToken)
-            : addConnectionHeaders(accessToken))
-        .method(httpMethod)
-        .entity(httpEntity != null ? httpEntity : new EmptyHttpEntity())
-        .build();
   }
 
   private MultiMap<String, String> addConnectionHeaders(String accessToken) {
@@ -281,5 +223,116 @@ public class BotRequestHelper {
       throw new ModuleException("Error in parsing response ", AGENT_OPERATIONS_FAILURE, e);
     }
     return responseDTO;
+  }
+
+  private String readErrorStream(InputStream errorStream) {
+    if (errorStream == null) {
+      return "No error details available.";
+    }
+    try (BufferedReader br = new BufferedReader(new InputStreamReader(errorStream, StandardCharsets.UTF_8))) {
+      StringBuilder errorResponse = new StringBuilder();
+      String line;
+      while ((line = br.readLine()) != null) {
+        errorResponse.append(line.trim());
+      }
+      return errorResponse.toString();
+    } catch (IOException e) {
+      log.debug("Error reading error stream", e);
+      return "Unable to get response from Agentforce. Could not read reading error details as well.";
+    }
+  }
+
+  private <T> void sendRequest(String url, String httpMethod, InputStream payloadStream,
+                               CompletionCallback<T, InvokeAgentResponseAttributes> callback,
+                               Function<InputStream, Result<T, InvokeAgentResponseAttributes>> responseParser) {
+    log.debug("Agentforce request details. Request URL: {}", url);
+
+    CompletableFuture<HttpResponse> completableFuture = agentforceConnection.getHttpClient().sendAsync(
+                                                                                                       buildRequest(url,
+                                                                                                                    agentforceConnection
+                                                                                                                        .getAccessToken(),
+                                                                                                                    httpMethod,
+                                                                                                                    payloadStream != null
+                                                                                                                        ? new InputStreamHttpEntity(payloadStream)
+                                                                                                                        : new EmptyHttpEntity()));
+
+    completableFuture.whenComplete((response, exception) -> handleResponse(response, exception, callback, responseParser));
+  }
+
+  private <T> void handleResponse(HttpResponse response, Throwable exception,
+                                  CompletionCallback<T, InvokeAgentResponseAttributes> callback,
+                                  Function<InputStream, Result<T, InvokeAgentResponseAttributes>> responseParser) {
+    if (exception != null) {
+      callback.error(exception);
+      return;
+    }
+    InputStream contentStream = parseHttpResponse(response, callback);
+    if (contentStream == null) {
+      return;
+    }
+    callback.success(responseParser.apply(contentStream));
+  }
+
+  private InputStream parseHttpResponse(HttpResponse httpResponse) {
+
+    int statusCode = httpResponse.getStatusCode();
+    InputStream contentStream = httpResponse.getEntity().getContent();
+    log.debug("Parsing Http Response, statusCode = {}", statusCode);
+    if (statusCode == HttpURLConnection.HTTP_OK && contentStream != null) {
+      return contentStream;
+    } else if (statusCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+      throw new AccessTokenExpiredException();
+    } else {
+      String errorMessage = readErrorStream(contentStream);
+      log.debug("Error in HTTP request. Response code: {}, message: {}", statusCode, errorMessage);
+      throw new ModuleException(
+                                String.format("Error in HTTP request. ErrorCode: %d, ErrorMessage: %s", statusCode, errorMessage),
+                                AgentforceErrorType.AGENT_OPERATIONS_FAILURE);
+    }
+  }
+
+  private InputStream parseHttpResponse(HttpResponse httpResponse, CompletionCallback callback) {
+
+    int statusCode = httpResponse.getStatusCode();
+    InputStream contentStream = httpResponse.getEntity().getContent();
+    log.debug("Parsing Http Response, statusCode = {}", statusCode);
+    if (statusCode == HttpURLConnection.HTTP_OK && contentStream != null) {
+      return contentStream;
+    } else if (statusCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+      callback.error(new AccessTokenExpiredException());
+    } else {
+      String errorMessage = readErrorStream(contentStream);
+      log.info("Error in HTTP request. Response code: {}, message: {}", statusCode, errorMessage);
+      callback.error(new ModuleException(String.format("Error in HTTP request. ErrorCode: %d, ErrorMessage: %s", statusCode,
+                                                       errorMessage),
+                                         AgentforceErrorType.AGENT_OPERATIONS_FAILURE));
+    }
+    return null;
+  }
+
+  private String getMessageText(JsonNode rootNode) {
+    JsonNode messagesNode = rootNode.get(MESSAGES);
+    if (messagesNode != null && messagesNode.isArray()) {
+      return StreamSupport
+          .stream(messagesNode.spliterator(), false)
+          .map(x -> getTextValue(x, MESSAGE))
+          .collect(Collectors.joining(" "));
+    }
+    throw new ModuleException(
+                              "Invalid response structure. Expected 'Messages'", AgentforceErrorType.AGENT_API_ERROR);
+  }
+
+  private String getTextValue(JsonNode node, String keyName) {
+    return node != null && node.get(keyName) != null ? node.get(keyName).asText() : null;
+  }
+
+  private HttpRequest buildRequest(String url, String accessToken, String httpMethod, HttpEntity httpEntity) {
+    return HttpRequest.builder()
+        .uri(url)
+        .headers(HTTP_METHOD_DELETE.equals(httpMethod) ? addConnectionHeadersForDelete(accessToken)
+            : addConnectionHeaders(accessToken))
+        .method(httpMethod)
+        .entity(httpEntity)
+        .build();
   }
 }

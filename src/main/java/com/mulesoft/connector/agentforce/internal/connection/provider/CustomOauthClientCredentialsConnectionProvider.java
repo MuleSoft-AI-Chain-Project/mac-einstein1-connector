@@ -20,8 +20,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 
-import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.CONNECTION_TIME_OUT;
-
 @Alias("oauth-client-credentials")
 @DisplayName("OAuth Client Credentials")
 @ClientCredentials(tokenUrl = "https://{salesforceorg}/services/oauth2/token")
@@ -46,7 +44,7 @@ public class CustomOauthClientCredentialsConnectionProvider implements Agentforc
   private String id;
 
   @Override
-  public void start() throws MuleException {
+  public void start() {
     HttpClientConfiguration.Builder baseClientConfigBuilder = httpClientConfigBuilder();
     this.httpClient = httpService.getClientFactory().create(baseClientConfigBuilder.build());
     this.httpClient.start();
@@ -66,7 +64,7 @@ public class CustomOauthClientCredentialsConnectionProvider implements Agentforc
   }
 
   @Override
-  public void stop() throws MuleException {
+  public void stop() {
     if (httpClient != null) {
       httpClient.stop();
     }

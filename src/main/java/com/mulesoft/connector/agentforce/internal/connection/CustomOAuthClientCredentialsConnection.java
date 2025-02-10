@@ -20,7 +20,7 @@ public class CustomOAuthClientCredentialsConnection implements AgentforceConnect
   private final String apiInstanceUrl;
   private final String orgId;
   private final BotRequestHelper botRequestHelper;
-  private HttpClient httpClient;
+  private final HttpClient httpClient;
 
   public CustomOAuthClientCredentialsConnection(String salesforceOrgUrl, ClientCredentialsState clientCredentialsState,
                                                 String apiInstanceUrl, String orgId, HttpClient httpClient) {
