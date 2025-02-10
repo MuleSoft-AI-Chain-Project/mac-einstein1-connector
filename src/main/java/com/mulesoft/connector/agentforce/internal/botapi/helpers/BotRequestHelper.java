@@ -276,14 +276,18 @@ public class BotRequestHelper {
   private InputStream parseHttpResponse(HttpResponse httpResponse) {
 
     int statusCode = httpResponse.getStatusCode();
-    InputStream contentStream = httpResponse.getEntity().getContent();
     log.debug("Parsing Http Response, statusCode = {}", statusCode);
-    if (statusCode == HttpURLConnection.HTTP_OK && contentStream != null) {
-      return contentStream;
+
+    if (statusCode == HttpURLConnection.HTTP_OK) {
+      if (httpResponse.getEntity().getContent() == null) {
+        throw new ModuleException(
+                                  "Error: No response received from Einstein", AgentforceErrorType.AGENT_METADATA_FAILURE);
+      }
+      return httpResponse.getEntity().getContent();
     } else if (statusCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
       throw new AccessTokenExpiredException();
     } else {
-      String errorMessage = readErrorStream(contentStream);
+      String errorMessage = readErrorStream(httpResponse.getEntity().getContent());
       log.debug("Error in HTTP request. Response code: {}, message: {}", statusCode, errorMessage);
       throw new ModuleException(
                                 String.format("Error in HTTP request. ErrorCode: %d, ErrorMessage: %s", statusCode, errorMessage),
@@ -294,14 +298,18 @@ public class BotRequestHelper {
   private InputStream parseHttpResponse(HttpResponse httpResponse, CompletionCallback callback) {
 
     int statusCode = httpResponse.getStatusCode();
-    InputStream contentStream = httpResponse.getEntity().getContent();
     log.debug("Parsing Http Response, statusCode = {}", statusCode);
-    if (statusCode == HttpURLConnection.HTTP_OK && contentStream != null) {
-      return contentStream;
+
+    if (statusCode == HttpURLConnection.HTTP_OK) {
+      if (httpResponse.getEntity().getContent() == null) {
+        callback.error(new ModuleException(
+                                           "Error: No response received from Einstein", AGENT_OPERATIONS_FAILURE));
+      }
+      return httpResponse.getEntity().getContent();
     } else if (statusCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
       callback.error(new AccessTokenExpiredException());
     } else {
-      String errorMessage = readErrorStream(contentStream);
+      String errorMessage = readErrorStream(httpResponse.getEntity().getContent());
       log.info("Error in HTTP request. Response code: {}, message: {}", statusCode, errorMessage);
       callback.error(new ModuleException(String.format("Error in HTTP request. ErrorCode: %d, ErrorMessage: %s", statusCode,
                                                        errorMessage),
