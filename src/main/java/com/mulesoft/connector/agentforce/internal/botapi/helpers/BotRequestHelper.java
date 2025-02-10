@@ -99,7 +99,7 @@ public class BotRequestHelper {
       throws IOException {
 
     String startSessionUrl = agentforceConnection.getApiInstanceUrl() + V6_URI_BOT_API_BOTS + URI_BOT_API_AGENTS
-        + agentId + "/sessions";
+        + agentId + URI_BOT_API_SESSIONS;
     String externalSessionKey = UUID.randomUUID().toString();
     String endpoint = agentforceConnection.getSalesforceOrgUrl();
     BotSessionRequestDTO payload = createStartSessionRequestPayload(externalSessionKey, endpoint);
