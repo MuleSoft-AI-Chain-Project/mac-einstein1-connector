@@ -18,16 +18,14 @@ public class CustomOAuthClientCredentialsConnection implements AgentforceConnect
   private final ClientCredentialsState clientCredentialsState;
   private final String salesforceOrgUrl;
   private final String apiInstanceUrl;
-  private final String orgId;
   private final BotRequestHelper botRequestHelper;
   private final HttpClient httpClient;
 
   public CustomOAuthClientCredentialsConnection(String salesforceOrgUrl, ClientCredentialsState clientCredentialsState,
-                                                String apiInstanceUrl, String orgId, HttpClient httpClient) {
+                                                String apiInstanceUrl, HttpClient httpClient) {
     this.salesforceOrgUrl = salesforceOrgUrl;
     this.clientCredentialsState = clientCredentialsState;
     this.apiInstanceUrl = apiInstanceUrl;
-    this.orgId = parseOrgId(orgId);
     this.httpClient = httpClient;
     this.botRequestHelper = new BotRequestHelper(this);
   }
@@ -48,16 +46,14 @@ public class CustomOAuthClientCredentialsConnection implements AgentforceConnect
     }
   }
 
+  @Override
   public String getSalesforceOrgUrl() {
     return salesforceOrgUrl;
   }
 
+  @Override
   public String getApiInstanceUrl() {
     return apiInstanceUrl;
-  }
-
-  public String getOrgId() {
-    return orgId;
   }
 
   @Override
@@ -73,10 +69,5 @@ public class CustomOAuthClientCredentialsConnection implements AgentforceConnect
   @Override
   public HttpClient getHttpClient() {
     return httpClient;
-  }
-
-  private String parseOrgId(String id) {
-    String[] idArr = id.split("/");
-    return idArr[idArr.length - 2];
   }
 }

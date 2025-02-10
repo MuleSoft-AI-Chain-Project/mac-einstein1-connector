@@ -14,8 +14,6 @@ public interface AgentforceConnection extends ConnectorConnection {
 
   String getApiInstanceUrl();
 
-  String getOrgId();
-
   BotRequestHelper getBotRequestHelper();
 
   String getAccessToken();

@@ -47,6 +47,7 @@ import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConst
 import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.MESSAGE;
 import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.MESSAGES;
 import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.SESSION_ID;
+import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.SLASH;
 import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.URI_BOT_API_AGENTS;
 import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.URI_BOT_API_MESSAGES;
 import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.URI_BOT_API_METADATA_AGENTLIST;
@@ -81,7 +82,7 @@ public class BotRequestHelper {
     String metadataUrl = agentforceConnection.getSalesforceOrgUrl()
         + URI_BOT_API_METADATA_SERVICES_V_62 + URI_BOT_API_METADATA_AGENTLIST;
 
-    log.debug("Executing getAgentList request with URL: {} ", metadataUrl);
+    log.info("Executing getAgentList request with URL: {} ", metadataUrl);
 
     HttpResponse httpResponse = agentforceConnection.getHttpClient().send(buildRequest(metadataUrl, agentforceConnection
         .getAccessToken(), HTTP_METHOD_GET, null));
@@ -98,13 +99,14 @@ public class BotRequestHelper {
       throws IOException {
 
     String startSessionUrl = agentforceConnection.getApiInstanceUrl() + V6_URI_BOT_API_BOTS + URI_BOT_API_AGENTS
-        + agentId + URI_BOT_API_SESSIONS;
+        + agentId + "/sessions";
     String externalSessionKey = UUID.randomUUID().toString();
     String endpoint = agentforceConnection.getSalesforceOrgUrl();
     BotSessionRequestDTO payload = createStartSessionRequestPayload(externalSessionKey, endpoint);
 
     log.debug("Agentforce start session details. Request URL: {}, external Session Key:{}," +
-        " endpoint: {}", startSessionUrl, externalSessionKey, endpoint);
+        " endpoint: {}, payload: {}", startSessionUrl, externalSessionKey, endpoint,
+              objectMapper.writeValueAsString(payload));
 
     InputStream payloadStream = new ByteArrayInputStream(objectMapper.writeValueAsString(payload)
         .getBytes(StandardCharsets.UTF_8));
@@ -117,13 +119,13 @@ public class BotRequestHelper {
       throws IOException {
 
     String continueSessionUrl =
-        agentforceConnection.getApiInstanceUrl() + V6_URI_BOT_API_BOTS + URI_BOT_API_SESSIONS + sessionId
+        agentforceConnection.getApiInstanceUrl() + V6_URI_BOT_API_BOTS + URI_BOT_API_SESSIONS + SLASH + sessionId
             + URI_BOT_API_MESSAGES;
 
     BotContinueSessionRequestDTO payload =
         createContinueSessionRequestPayload(IOUtils.toString(message), messageSequenceNumber);
 
-    log.debug("Agentforce continue session details. Request URL: {}, Session ID:{}", continueSessionUrl, sessionId);
+    log.info("Agentforce continue session details. Request URL: {}, Session ID:{}", continueSessionUrl, sessionId);
 
     InputStream payloadStream = new ByteArrayInputStream(objectMapper.writeValueAsString(payload)
         .getBytes(StandardCharsets.UTF_8));
@@ -133,7 +135,8 @@ public class BotRequestHelper {
 
   public void endSession(String sessionId, CompletionCallback<Void, InvokeAgentResponseAttributes> callback) {
 
-    String endSessionUrl = agentforceConnection.getApiInstanceUrl() + V6_URI_BOT_API_BOTS + URI_BOT_API_SESSIONS + sessionId;
+    String endSessionUrl =
+        agentforceConnection.getApiInstanceUrl() + V6_URI_BOT_API_BOTS + URI_BOT_API_SESSIONS + SLASH + sessionId;
 
     log.debug("Agentforce end session details. Request URL: {}, Session ID:{}", endSessionUrl, sessionId);
 

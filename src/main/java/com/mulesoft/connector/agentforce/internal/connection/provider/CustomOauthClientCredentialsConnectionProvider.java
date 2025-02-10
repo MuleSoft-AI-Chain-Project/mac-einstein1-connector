@@ -40,9 +40,6 @@ public class CustomOauthClientCredentialsConnectionProvider implements Agentforc
   @OAuthCallbackValue(expression = "#[payload.api_instance_url]")
   private String apiInstanceUrl;
 
-  @OAuthCallbackValue(expression = "#[payload.id]")
-  private String id;
-
   @Override
   public void start() {
     HttpClientConfiguration.Builder baseClientConfigBuilder = httpClientConfigBuilder();
@@ -54,9 +51,9 @@ public class CustomOauthClientCredentialsConnectionProvider implements Agentforc
 
   @Override
   public AgentforceConnection connect() {
-    log.info("Inside CustomOauthClientCredentialsConnectionProvider connect, salesforceOrg {}, apiInstanceUrl = {}," +
-        " id = {} ", salesforceOrgUrl, apiInstanceUrl, id);
-    return new CustomOAuthClientCredentialsConnection(salesforceOrgUrl, clientCredentialsState, apiInstanceUrl, id, httpClient);
+    log.info("Inside CustomOauthClientCredentialsConnectionProvider connect, salesforceOrg {}, apiInstanceUrl = {}",
+             salesforceOrgUrl, apiInstanceUrl);
+    return new CustomOAuthClientCredentialsConnection(salesforceOrgUrl, clientCredentialsState, apiInstanceUrl, httpClient);
   }
 
   public void setClientCredentialsState(ClientCredentialsState clientCredentialsState) {
