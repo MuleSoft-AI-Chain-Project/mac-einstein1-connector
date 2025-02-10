@@ -11,7 +11,7 @@
         http://www.mulesoft.org/schema/mule/munit-tools http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
         http://www.mulesoft.org/schema/mule/ms-agentforce http://www.mulesoft.org/schema/mule/ms-agentforce/current/mule-ms-agentforce.xsd">
 
-    <munit:config name="BotInvokeAgentOperationTestCase.xml"/>
+    <munit:config name="StartAgentConversationOperationTestCase.xml"/>
 
     <munit:test name="StartAgentTest">
         <munit:execution>
