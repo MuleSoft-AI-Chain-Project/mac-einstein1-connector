@@ -71,9 +71,10 @@ public class AgentforceBotOperations {
     }
   }
 
-  @MediaType(value = APPLICATION_JSON, strict = false)
+  @MediaType(value = TEXT_PLAIN, strict = false)
   @Alias("End-agent-conversation")
   @Throws(BotErrorTypeProvider.class)
+  @OutputResolver(output = AgentConversationResponseMetadataResolver.class)
   public void endConversation(@Connection AgentforceConnection connection,
                               @Content String sessionId,
                               CompletionCallback<InputStream, InvokeAgentResponseAttributes> callback) {
