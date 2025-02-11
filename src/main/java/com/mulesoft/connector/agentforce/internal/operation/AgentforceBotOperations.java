@@ -47,7 +47,7 @@ public class AgentforceBotOperations {
       connection.getBotRequestHelper().startSession(parameterGroup.getAgent(), callback);
     } catch (Exception e) {
       callback.error(new ModuleException("Error while starting agent conversation for agent: " + parameterGroup.getAgent(),
-                                AGENT_OPERATIONS_FAILURE, e));
+                                         AGENT_OPERATIONS_FAILURE, e));
     }
   }
 
@@ -67,15 +67,17 @@ public class AgentforceBotOperations {
       connection.getBotRequestHelper().continueSession(message, sessionId, messageSequenceNumber, callback);
     } catch (Exception e) {
       callback.error(new ModuleException("Error in continue agent conversation for session id: " + sessionId,
-                                AGENT_OPERATIONS_FAILURE, e));
+                                         AGENT_OPERATIONS_FAILURE, e));
     }
   }
 
-  @MediaType(value = APPLICATION_JSON, strict = false)
+  @MediaType(value = TEXT_PLAIN, strict = false)
   @Alias("End-agent-conversation")
   @Throws(BotErrorTypeProvider.class)
+  @OutputResolver(output = AgentConversationResponseMetadataResolver.class)
   public void endConversation(@Connection AgentforceConnection connection,
-                              @Content String sessionId, CompletionCallback<Void, InvokeAgentResponseAttributes> callback) {
+                              @Content String sessionId,
+                              CompletionCallback<InputStream, InvokeAgentResponseAttributes> callback) {
 
     log.info("Executing end agent conversation operation. sessionId = {}", sessionId);
 
@@ -83,7 +85,7 @@ public class AgentforceBotOperations {
       connection.getBotRequestHelper().endSession(sessionId, callback);
     } catch (Exception e) {
       callback.error(new ModuleException("Error in end agent conversation for session id: " + sessionId,
-                                AGENT_OPERATIONS_FAILURE, e));
+                                         AGENT_OPERATIONS_FAILURE, e));
     }
   }
 }

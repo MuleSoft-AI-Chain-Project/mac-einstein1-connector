@@ -46,6 +46,7 @@ import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConst
 import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.END_SESSION_REASON_USERREQUEST;
 import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.MESSAGE;
 import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.MESSAGES;
+import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.SESSION_ENDED;
 import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.SESSION_ID;
 import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.SLASH;
 import static com.mulesoft.connector.agentforce.internal.botapi.helpers.BotConstantUtil.URI_BOT_API_AGENTS;
@@ -133,7 +134,7 @@ public class BotRequestHelper {
     sendRequest(continueSessionUrl, HTTP_METHOD_POST, payloadStream, callback, this::parseResponseForContinueSession);
   }
 
-  public void endSession(String sessionId, CompletionCallback<Void, InvokeAgentResponseAttributes> callback) {
+  public void endSession(String sessionId, CompletionCallback<InputStream, InvokeAgentResponseAttributes> callback) {
 
     String endSessionUrl =
         agentforceConnection.getApiInstanceUrl() + V6_URI_BOT_API_BOTS + URI_BOT_API_SESSIONS + SLASH + sessionId;
@@ -202,13 +203,15 @@ public class BotRequestHelper {
         .build();
   }
 
-  private Result<Void, InvokeAgentResponseAttributes> parseResponseForDeleteSession(InputStream responseStream) {
+  private Result<InputStream, InvokeAgentResponseAttributes> parseResponseForDeleteSession(InputStream responseStream) {
 
     AgentConversationResponseDTO responseDTO = parseResponse(responseStream);
 
-    return Result.<Void, InvokeAgentResponseAttributes>builder()
+    return Result.<InputStream, InvokeAgentResponseAttributes>builder()
+        .output(toInputStream(SESSION_ENDED, StandardCharsets.UTF_8))
         .attributes(responseDTO.getResponseAttributes())
         .attributesMediaType(MediaType.APPLICATION_JAVA)
+        .mediaType(MediaType.TEXT)
         .build();
   }
 
