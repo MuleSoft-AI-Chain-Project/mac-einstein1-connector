@@ -2,6 +2,7 @@ package com.mulesoft.connector.agentforce.internal.connection;
 
 import com.mulesoft.connector.agentforce.internal.botapi.helpers.BotRequestHelper;
 import com.mulesoft.connectors.commons.template.connection.ConnectorConnection;
+import org.mule.runtime.http.api.client.HttpClient;
 
 /**
  * This class represents a connection to the external system.
@@ -13,9 +14,9 @@ public interface AgentforceConnection extends ConnectorConnection {
 
   String getApiInstanceUrl();
 
-  String getOrgId();
-
   BotRequestHelper getBotRequestHelper();
 
   String getAccessToken();
+
+  HttpClient getHttpClient();
 }
