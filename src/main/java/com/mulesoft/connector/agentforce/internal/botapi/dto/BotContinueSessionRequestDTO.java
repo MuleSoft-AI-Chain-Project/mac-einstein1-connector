@@ -20,7 +20,6 @@ public class BotContinueSessionRequestDTO {
 
     private String type;
     private int sequenceId;
-    private String inReplyToMessageId;
     private String text;
 
     public String getType() {
@@ -37,14 +36,6 @@ public class BotContinueSessionRequestDTO {
 
     public void setSequenceId(int sequenceId) {
       this.sequenceId = sequenceId;
-    }
-
-    public String getInReplyToMessageId() {
-      return inReplyToMessageId;
-    }
-
-    public void setInReplyToMessageId(String inReplyToMessageId) {
-      this.inReplyToMessageId = inReplyToMessageId;
     }
 
     public String getText() {
