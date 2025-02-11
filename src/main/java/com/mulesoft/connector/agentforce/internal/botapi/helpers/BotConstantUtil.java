@@ -36,4 +36,5 @@ public class BotConstantUtil {
 
   public static final String SLASH = "/";
 
+  public static final String SESSION_ENDED = "Session Ended";
 }

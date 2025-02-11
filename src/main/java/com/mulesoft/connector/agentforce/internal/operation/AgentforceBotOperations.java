@@ -76,7 +76,8 @@ public class AgentforceBotOperations {
   @Alias("End-agent-conversation")
   @Throws(BotErrorTypeProvider.class)
   public void endConversation(@Connection AgentforceConnection connection,
-                              @Content String sessionId, CompletionCallback<Void, InvokeAgentResponseAttributes> callback) {
+                              @Content String sessionId,
+                              CompletionCallback<InputStream, InvokeAgentResponseAttributes> callback) {
 
     log.info("Executing end agent conversation operation. sessionId = {}", sessionId);
 
