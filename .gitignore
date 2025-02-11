@@ -1,8 +1,29 @@
-# IntelliJ IDEA
-.idea/
-*.iws
-*.iml
-*.ipr
+# Compiled class file
+*.class
+
+# Log file
+*.log
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+replay_pid*
+/.idea/
+/.java-version
 
 # Maven
 target/
@@ -12,6 +33,19 @@ pom.xml.versionsBackup
 pom.xml.next
 release.properties
 dependency-reduced-pom.xml
+
+
+### Mule Connectors ###
+automation-credentials.properties
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# VSCode
+.vscode
 
 # MuleSoft
 .mule/
@@ -24,20 +58,16 @@ exchange-docs/
 
 # OS-specific files
 .DS_Store
+._.DS_Store
+**/.DS_Store
+**/._.DS_Store
 Thumbs.db
-
-# Compiled class files
-*.class
 
 # Generated files
 generated-sources/
 generated-test-sources/
 
-### Mule Connectors ###
-automation-credentials.properties
-
 # Configuration files
-/.vscode/
 .vscode/
 .classpath
 .project
@@ -46,7 +76,7 @@ automation-credentials.properties
 # Miscellaneous
 *.bak
 *.tmp
-target/
+*.sh
 
 
-/.java-version
+
