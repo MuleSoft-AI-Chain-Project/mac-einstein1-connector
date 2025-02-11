@@ -11,7 +11,7 @@ http://www.mulesoft.org/schema/mule/ms-agentforce http://www.mulesoft.org/schema
     <munit:config name="BotOperationsTestCase.xml"/>
 
     <munit:before-test name="TestOperationBefore_Test" doc:id="be3f67e1-e8d7-4d88-963a-81057974c9d7" >
-        <ms-agentforce:start-agent-conversation agent="0XxRZ0000000Vrp0AE" doc:name="Start agent" doc:id="9b81ccfe-df4d-4e58-bf0a-75eec9fe3679" config-ref="Agentforce_Config" />
+        <ms-agentforce:start-agent-conversation agent="${config.bot-id}" doc:name="Start agent" doc:id="9b81ccfe-df4d-4e58-bf0a-75eec9fe3679" config-ref="Agentforce_Config" />
         <set-variable value="#[output application/java&#10;---&#10;payload.sessionId]" doc:name="Set Variable" doc:id="a81d4da9-331b-40fc-9cd4-e7930570d780" variableName="sessId" />
         <logger level="INFO" doc:name="Logger" doc:id="301239c9-3db7-4896-84e8-3febe24636c5" message="#[vars.sessId]"/>
     </munit:before-test>
