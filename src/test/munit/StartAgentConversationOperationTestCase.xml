@@ -11,12 +11,12 @@
         http://www.mulesoft.org/schema/mule/munit-tools http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
         http://www.mulesoft.org/schema/mule/ms-agentforce http://www.mulesoft.org/schema/mule/ms-agentforce/current/mule-ms-agentforce.xsd">
 
-    <munit:config name="BotInvokeAgentOperationTestCase.xml"/>
+    <munit:config name="StartAgentConversationOperationTestCase.xml"/>
 
     <munit:test name="StartAgentTest">
         <munit:execution>
             <logger level="INFO" doc:name="Logger" doc:id="301239c9-3db7-4896-84e8-3febe24636c5" message="Calling StartAgentTest"/>
-            <ms-agentforce:start-agent-conversation doc:name="Start agent" doc:id="cfe4865c-2280-4e0d-8bd2-da6c2e034f4f" config-ref="Agentforce_Config" agent="0XxRZ0000000Vrp0AE"/>
+            <ms-agentforce:start-agent-conversation doc:name="Start agent" doc:id="cfe4865c-2280-4e0d-8bd2-da6c2e034f4f" config-ref="Agentforce_Config" agent="${config.bot-id}"/>
             <logger level="INFO" doc:name="Logger" doc:id="301239c9-3db7-4896-84e8-3febe24636c5" message="#[payload]"/>
         </munit:execution>
         <munit:validation>
