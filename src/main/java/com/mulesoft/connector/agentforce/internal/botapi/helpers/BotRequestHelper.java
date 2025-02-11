@@ -278,6 +278,9 @@ public class BotRequestHelper {
     log.info("Handling Response");
     if (exception != null) {
       log.info("exception = {}", exception.getMessage());
+      log.info("response.getStatusCode() = {}", response.getStatusCode());
+      log.info("response.content = {}", IOUtils.toString(response.getEntity().getContent()));
+
       callback.error(exception);
       return;
     }
