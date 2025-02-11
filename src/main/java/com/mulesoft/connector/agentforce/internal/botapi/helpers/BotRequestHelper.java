@@ -257,7 +257,7 @@ public class BotRequestHelper {
   private <T> void sendRequest(String url, String httpMethod, InputStream payloadStream,
                                CompletionCallback<T, InvokeAgentResponseAttributes> callback,
                                Function<InputStream, Result<T, InvokeAgentResponseAttributes>> responseParser) {
-    log.debug("Agentforce request details. Request URL: {}", url);
+    log.info("Agentforce request details. Request URL: {}", url);
 
     CompletableFuture<HttpResponse> completableFuture = agentforceConnection.getHttpClient().sendAsync(
                                                                                                        buildRequest(url,
@@ -268,18 +268,22 @@ public class BotRequestHelper {
                                                                                                                         ? new InputStreamHttpEntity(payloadStream)
                                                                                                                         : new EmptyHttpEntity()));
 
+    log.info("completableFuture is called");
     completableFuture.whenComplete((response, exception) -> handleResponse(response, exception, callback, responseParser));
   }
 
   private <T> void handleResponse(HttpResponse response, Throwable exception,
                                   CompletionCallback<T, InvokeAgentResponseAttributes> callback,
                                   Function<InputStream, Result<T, InvokeAgentResponseAttributes>> responseParser) {
+    log.info("Handling Response");
     if (exception != null) {
+      log.info("exception = {}", exception.getMessage());
       callback.error(exception);
       return;
     }
     InputStream contentStream = parseHttpResponse(response, callback);
     if (contentStream == null) {
+      log.info("contentStream is null");
       return;
     }
     callback.success(responseParser.apply(contentStream));
@@ -310,15 +314,18 @@ public class BotRequestHelper {
   private InputStream parseHttpResponse(HttpResponse httpResponse, CompletionCallback callback) {
 
     int statusCode = httpResponse.getStatusCode();
-    log.debug("Parsing Http Response, statusCode = {}", statusCode);
+    log.info("Parsing Http Response, statusCode = {}", statusCode);
 
     if (statusCode == HttpURLConnection.HTTP_OK) {
       if (httpResponse.getEntity().getContent() == null) {
+        log.info("httpResponse.getEntity().getContent() is null");
         callback.error(new ModuleException(
                                            "Error: No response received from Einstein", AGENT_OPERATIONS_FAILURE));
       }
+      log.info("Got not null httpResponse.getEntity().getContent()");
       return httpResponse.getEntity().getContent();
     } else if (statusCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+      log.info("Got HTTP_UNAUTHORIZED");
       callback.error(new AccessTokenExpiredException());
     } else {
       String errorMessage = readErrorStream(httpResponse.getEntity().getContent());
@@ -347,6 +354,7 @@ public class BotRequestHelper {
   }
 
   private HttpRequest buildRequest(String url, String accessToken, String httpMethod, HttpEntity httpEntity) {
+    log.info("Inside buildRequest httpMethod = {}", httpMethod);
     return HttpRequest.builder()
         .uri(url)
         .headers(HTTP_METHOD_DELETE.equals(httpMethod) ? addConnectionHeadersForDelete(accessToken)
