@@ -17,6 +17,7 @@
         <munit:execution>
             <logger level="INFO" doc:name="Logger" doc:id="301239c9-3db7-4896-84e8-3febe24636c5" message="Calling StartAgentTest"/>
             <ms-agentforce:start-agent-conversation doc:name="Start agent" doc:id="cfe4865c-2280-4e0d-8bd2-da6c2e034f4f" config-ref="Agentforce_Config" agent="${config.bot-id}"/>
+            <logger level="INFO" doc:name="Logger" doc:id="301239c9-3db7-4896-84e8-3febe24636c5" message="Generated session id"/>
             <logger level="INFO" doc:name="Logger" doc:id="301239c9-3db7-4896-84e8-3febe24636c5" message="#[payload]"/>
         </munit:execution>
         <munit:validation>

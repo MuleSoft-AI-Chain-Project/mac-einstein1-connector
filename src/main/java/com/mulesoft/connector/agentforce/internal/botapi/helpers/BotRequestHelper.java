@@ -105,9 +105,9 @@ public class BotRequestHelper {
     String endpoint = agentforceConnection.getSalesforceOrgUrl();
     BotSessionRequestDTO payload = createStartSessionRequestPayload(externalSessionKey, endpoint);
 
-    log.debug("Agentforce start session details. Request URL: {}, external Session Key:{}," +
+    log.info("Agentforce start session details. Request URL: {}, external Session Key:{}," +
         " endpoint: {}, payload: {}", startSessionUrl, externalSessionKey, endpoint,
-              objectMapper.writeValueAsString(payload));
+             objectMapper.writeValueAsString(payload));
 
     InputStream payloadStream = new ByteArrayInputStream(objectMapper.writeValueAsString(payload)
         .getBytes(StandardCharsets.UTF_8));
@@ -179,7 +179,9 @@ public class BotRequestHelper {
 
   private Result<InputStream, InvokeAgentResponseAttributes> parseResponseForStartSession(InputStream responseStream) {
 
+    log.info("Parsing start session response");
     AgentConversationResponseDTO responseDTO = parseResponse(responseStream);
+    log.info("Session id = {}", responseDTO.getSessionId());
 
     JSONObject jsonObject = new JSONObject();
     jsonObject.put("sessionId", responseDTO.getSessionId());
@@ -193,7 +195,11 @@ public class BotRequestHelper {
 
   private Result<InputStream, InvokeAgentResponseAttributes> parseResponseForContinueSession(InputStream responseStream) {
 
+    log.info("Parsing continue session response");
+
     AgentConversationResponseDTO responseDTO = parseResponse(responseStream);
+
+    log.info("Text = {}", responseDTO.getText());
 
     return Result.<InputStream, InvokeAgentResponseAttributes>builder()
         .output(toInputStream(responseDTO.getText(), StandardCharsets.UTF_8))
