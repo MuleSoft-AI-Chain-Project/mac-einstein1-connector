@@ -274,7 +274,7 @@ public class BotRequestHelper {
                                   CompletionCallback<T, InvokeAgentResponseAttributes> callback,
                                   Function<InputStream, Result<T, InvokeAgentResponseAttributes>> responseParser) {
     if (exception != null) {
-      log.error("exception", exception);
+      log.debug("Exception occurred while invoking bot api", exception);
       callback.error(exception);
       return;
     }
