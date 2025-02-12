@@ -86,7 +86,7 @@ public class BotRequestHelper {
     log.info("Executing getAgentList request with URL: {} ", metadataUrl);
 
     HttpResponse httpResponse = agentforceConnection.getHttpClient().send(buildRequest(metadataUrl, agentforceConnection
-        .getAccessToken(), HTTP_METHOD_GET, null));
+        .getAccessToken(), HTTP_METHOD_GET, new EmptyHttpEntity()));
 
     InputStream inputStream = parseHttpResponse(httpResponse);
 
