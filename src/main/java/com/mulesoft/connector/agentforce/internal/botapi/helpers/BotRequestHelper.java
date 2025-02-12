@@ -105,9 +105,9 @@ public class BotRequestHelper {
     String endpoint = agentforceConnection.getSalesforceOrgUrl();
     BotSessionRequestDTO payload = createStartSessionRequestPayload(externalSessionKey, endpoint);
 
-    log.info("Agentforce start session details. Request URL: {}, external Session Key:{}," +
+    log.debug("Agentforce start session details. Request URL: {}, external Session Key:{}," +
         " endpoint: {}, payload: {}", startSessionUrl, externalSessionKey, endpoint,
-             objectMapper.writeValueAsString(payload));
+              objectMapper.writeValueAsString(payload));
 
     InputStream payloadStream = new ByteArrayInputStream(objectMapper.writeValueAsString(payload)
         .getBytes(StandardCharsets.UTF_8));
@@ -168,7 +168,6 @@ public class BotRequestHelper {
     multiMap.put(AUTHORIZATION, "Bearer " + accessToken);
     multiMap.put(CONTENT_TYPE_STRING, CONTENT_TYPE_APPLICATION_JSON);
     multiMap.put(ACCEPT_TYPE_STRING, CONTENT_TYPE_APPLICATION_JSON);
-    log.info("header = {}", multiMap);
     return multiMap;
   }
 
@@ -182,7 +181,6 @@ public class BotRequestHelper {
 
     log.info("Parsing start session response");
     AgentConversationResponseDTO responseDTO = parseResponse(responseStream);
-    log.info("Session id = {}", responseDTO.getSessionId());
 
     JSONObject jsonObject = new JSONObject();
     jsonObject.put("sessionId", responseDTO.getSessionId());
@@ -200,8 +198,6 @@ public class BotRequestHelper {
 
     AgentConversationResponseDTO responseDTO = parseResponse(responseStream);
 
-    log.info("Text = {}", responseDTO.getText());
-
     return Result.<InputStream, InvokeAgentResponseAttributes>builder()
         .output(toInputStream(responseDTO.getText(), StandardCharsets.UTF_8))
         .attributes(responseDTO.getResponseAttributes())
@@ -211,6 +207,8 @@ public class BotRequestHelper {
   }
 
   private Result<InputStream, InvokeAgentResponseAttributes> parseResponseForDeleteSession(InputStream responseStream) {
+
+    log.info("Parsing delete session response");
 
     AgentConversationResponseDTO responseDTO = parseResponse(responseStream);
 
@@ -258,7 +256,7 @@ public class BotRequestHelper {
   private <T> void sendRequest(String url, String httpMethod, InputStream payloadStream,
                                CompletionCallback<T, InvokeAgentResponseAttributes> callback,
                                Function<InputStream, Result<T, InvokeAgentResponseAttributes>> responseParser) {
-    log.info("Agentforce request details. Request URL: {}", url);
+    log.debug("Agentforce request details. Request URL: {}", url);
 
     CompletableFuture<HttpResponse> completableFuture = agentforceConnection.getHttpClient().sendAsync(
                                                                                                        buildRequest(url,
@@ -269,16 +267,13 @@ public class BotRequestHelper {
                                                                                                                         ? new InputStreamHttpEntity(payloadStream)
                                                                                                                         : new EmptyHttpEntity()));
 
-    log.info("completableFuture is called");
     completableFuture.whenComplete((response, exception) -> handleResponse(response, exception, callback, responseParser));
   }
 
   private <T> void handleResponse(HttpResponse response, Throwable exception,
                                   CompletionCallback<T, InvokeAgentResponseAttributes> callback,
                                   Function<InputStream, Result<T, InvokeAgentResponseAttributes>> responseParser) {
-    log.info("Handling Response");
     if (exception != null) {
-      log.info("exception = {}", exception.getMessage());
       log.error("exception", exception);
       callback.error(exception);
       return;
@@ -294,7 +289,7 @@ public class BotRequestHelper {
   private InputStream parseHttpResponse(HttpResponse httpResponse) {
 
     int statusCode = httpResponse.getStatusCode();
-    log.debug("Parsing Http Response, statusCode = {}", statusCode);
+    log.info("Parsing Http Response, statusCode = {}", statusCode);
 
     if (statusCode == HttpURLConnection.HTTP_OK) {
       if (httpResponse.getEntity().getContent() == null) {

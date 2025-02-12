@@ -46,7 +46,6 @@ public class AgentforceBotOperations {
     try {
       connection.getBotRequestHelper().startSession(parameterGroup.getAgent(), callback);
     } catch (Exception e) {
-      log.info(e.getMessage());
       callback.error(new ModuleException("Error while starting agent conversation for agent: " + parameterGroup.getAgent(),
                                          AGENT_OPERATIONS_FAILURE, e));
     }
@@ -67,7 +66,6 @@ public class AgentforceBotOperations {
     try {
       connection.getBotRequestHelper().continueSession(message, sessionId, messageSequenceNumber, callback);
     } catch (Exception e) {
-      log.info(e.getMessage());
       callback.error(new ModuleException("Error in continue agent conversation for session id: " + sessionId,
                                          AGENT_OPERATIONS_FAILURE, e));
     }
@@ -86,7 +84,6 @@ public class AgentforceBotOperations {
     try {
       connection.getBotRequestHelper().endSession(sessionId, callback);
     } catch (Exception e) {
-      log.info(e.getMessage());
       callback.error(new ModuleException("Error in end agent conversation for session id: " + sessionId,
                                          AGENT_OPERATIONS_FAILURE, e));
     }
