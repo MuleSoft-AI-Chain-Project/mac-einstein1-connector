@@ -168,6 +168,7 @@ public class BotRequestHelper {
     multiMap.put(AUTHORIZATION, "Bearer " + accessToken);
     multiMap.put(CONTENT_TYPE_STRING, CONTENT_TYPE_APPLICATION_JSON);
     multiMap.put(ACCEPT_TYPE_STRING, CONTENT_TYPE_APPLICATION_JSON);
+    log.info("header = {}", multiMap);
     return multiMap;
   }
 
@@ -279,8 +280,6 @@ public class BotRequestHelper {
     if (exception != null) {
       log.info("exception = {}", exception.getMessage());
       log.info("response.getStatusCode() = {}", response.getStatusCode());
-      log.info("response.content = {}", IOUtils.toString(response.getEntity().getContent()));
-
       callback.error(exception);
       return;
     }
