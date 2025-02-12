@@ -315,14 +315,11 @@ public class BotRequestHelper {
 
     if (statusCode == HttpURLConnection.HTTP_OK) {
       if (httpResponse.getEntity().getContent() == null) {
-        log.info("httpResponse.getEntity().getContent() is null");
         callback.error(new ModuleException(
                                            "Error: No response received from Einstein", AGENT_OPERATIONS_FAILURE));
       }
-      log.info("Got not null httpResponse.getEntity().getContent()");
       return httpResponse.getEntity().getContent();
     } else if (statusCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
-      log.info("Got HTTP_UNAUTHORIZED");
       callback.error(new AccessTokenExpiredException());
     } else {
       String errorMessage = readErrorStream(httpResponse.getEntity().getContent());
@@ -351,7 +348,6 @@ public class BotRequestHelper {
   }
 
   private HttpRequest buildRequest(String url, String accessToken, String httpMethod, HttpEntity httpEntity) {
-    log.info("Inside buildRequest httpMethod = {}", httpMethod);
     return HttpRequest.builder()
         .uri(url)
         .headers(HTTP_METHOD_DELETE.equals(httpMethod) ? addConnectionHeadersForDelete(accessToken)
