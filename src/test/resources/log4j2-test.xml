@@ -23,7 +23,7 @@
         <!-- Mule logger -->
         <AsyncLogger name="org.mule.runtime.core.internal.processor.LoggerMessageProcessor" level="INFO"/>
 
-        <AsyncRoot level="TRACE">
+        <AsyncRoot level="DEBUG">
             <AppenderRef ref="Console"/>
         </AsyncRoot>
     </Loggers>
