@@ -179,6 +179,7 @@ public class BotRequestHelper {
 
   private Result<InputStream, InvokeAgentResponseAttributes> parseResponseForStartSession(InputStream responseStream) {
 
+    log.info("Parsing start session response");
     AgentConversationResponseDTO responseDTO = parseResponse(responseStream);
 
     JSONObject jsonObject = new JSONObject();
@@ -193,6 +194,8 @@ public class BotRequestHelper {
 
   private Result<InputStream, InvokeAgentResponseAttributes> parseResponseForContinueSession(InputStream responseStream) {
 
+    log.info("Parsing continue session response");
+
     AgentConversationResponseDTO responseDTO = parseResponse(responseStream);
 
     return Result.<InputStream, InvokeAgentResponseAttributes>builder()
@@ -204,6 +207,8 @@ public class BotRequestHelper {
   }
 
   private Result<InputStream, InvokeAgentResponseAttributes> parseResponseForDeleteSession(InputStream responseStream) {
+
+    log.info("Parsing delete session response");
 
     AgentConversationResponseDTO responseDTO = parseResponse(responseStream);
 
@@ -269,11 +274,13 @@ public class BotRequestHelper {
                                   CompletionCallback<T, InvokeAgentResponseAttributes> callback,
                                   Function<InputStream, Result<T, InvokeAgentResponseAttributes>> responseParser) {
     if (exception != null) {
+      log.debug("Exception occurred while invoking bot api", exception);
       callback.error(exception);
       return;
     }
     InputStream contentStream = parseHttpResponse(response, callback);
     if (contentStream == null) {
+      log.info("contentStream is null");
       return;
     }
     callback.success(responseParser.apply(contentStream));
@@ -282,7 +289,7 @@ public class BotRequestHelper {
   private InputStream parseHttpResponse(HttpResponse httpResponse) {
 
     int statusCode = httpResponse.getStatusCode();
-    log.debug("Parsing Http Response, statusCode = {}", statusCode);
+    log.info("Parsing Http Response, statusCode = {}", statusCode);
 
     if (statusCode == HttpURLConnection.HTTP_OK) {
       if (httpResponse.getEntity().getContent() == null) {
@@ -304,7 +311,7 @@ public class BotRequestHelper {
   private InputStream parseHttpResponse(HttpResponse httpResponse, CompletionCallback callback) {
 
     int statusCode = httpResponse.getStatusCode();
-    log.debug("Parsing Http Response, statusCode = {}", statusCode);
+    log.info("Parsing Http Response, statusCode = {}", statusCode);
 
     if (statusCode == HttpURLConnection.HTTP_OK) {
       if (httpResponse.getEntity().getContent() == null) {
